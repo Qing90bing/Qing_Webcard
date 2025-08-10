@@ -6,12 +6,21 @@
     <title>Qing90bing 的个人主页</title>
     <!-- 引入Tailwind CSS框架 -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入SimpleBar.js美化滚动条 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.css" />
+    <script src="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js"></script>
     <!-- 引入Google Fonts字体，使其更具现代感 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* 自定义样式 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* 防止出现双滚动条 */
+        }
         body {
             /* 使用Inter字体作为主要英文字体，Noto Sans SC作为中文字体 */
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
@@ -44,119 +53,146 @@
 
         /* 时间显示部分的字体可以更特殊一些 */
         #time-display {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', sans-serif; /* 使用Inter字体，更美观 */
             font-weight: 700;
             text-shadow: 0 0 10px rgba(137, 207, 240, 0.5); /* 给时间添加辉光效果 */
+            font-variant-numeric: tabular-nums; /* 确保数字等宽，解决跳动问题 */
+        }
+
+        /* 自定义SimpleBar滚动条样式 */
+        .simplebar-scrollbar:before {
+            background-color: rgba(137, 207, 240, 0.6);
+            border-radius: 4px;
+        }
+        .simplebar-track.simplebar-vertical {
+            width: 8px;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-8 sm:p-16 lg:p-24">
+<body>
 
-    <!-- 主内容容器，使用Grid布局来组织各个模块 -->
-    <main class="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+    <div data-simplebar style="height: 100vh;">
+        <div class="flex items-center justify-center min-h-screen px-8 sm:px-16 lg:px-24">
+            <!-- 主内容容器，使用Grid布局来组织各个模块 -->
+            <main class="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full max-w-6xl lg:items-start">
 
-        <!-- ====================================================================== -->
-        <!-- 左侧列 -->
-        <!-- ====================================================================== -->
-        <div class="lg:col-span-1 space-y-6">
+                <!-- ====================================================================== -->
+                <!-- 左侧列 -->
+                <!-- ====================================================================== -->
+                <div class="lg:col-span-1 space-y-6 flex flex-col">
+                    
+                    <!-- 【可修改】Logo和标题 -->
+                    <div class="glass-card flex items-center justify-center p-6 gap-4">
             
-            <!-- 【可修改】Logo和标题 -->
-            <div class="glass-card flex items-center justify-center p-6 gap-4">
- 
-                <!-- ↓↓↓ 【在这里修改你的名字】 ↓↓↓ -->
-                <h1 class="text-3xl font-bold text-white">Qing90bing</h1>
-                <!-- ↑↑↑ 名字代码结束 ↑↑↑ -->
+                        <!-- ↓↓↓ 【在这里修改你的名字】 ↓↓↓ -->
+                        <h1 class="text-3xl font-bold text-white">Qing90bing</h1>
+                        <!-- ↑↑↑ 名字代码结束 ↑↑↑ -->
 
-            </div>
-            
-            <!-- 【可修改】个人简介和联系方式 -->
-            <div class="glass-card p-8 flex flex-col justify-between">
-                <div>
-                    <blockquote class="border-l-4 border-sky-400 pl-4 italic">
-                        <!-- 【在这里修改你的座右铭或简介】 -->
-                        <p class="text-lg">Hello, World!</p>
-                        <p class="text-gray-300 mt-1">一个建立于21世纪的小站，存活于互联网的边缘</p>
-                    </blockquote>
-                </div>
-                <div class="mt-8">
-                    <p class="text-sm text-gray-400 mb-4">与我联系:</p>
-                    <div class="flex items-center gap-5">
-                        <!-- 【在这里修改你的社交链接】把 href="#" 中的 # 替换成你的链接地址 -->
-                        <!-- GitHub -->
-                        <a href="https://github.com/Qing90bing" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="GitHub">
-                            <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                        </a>
-                        <!-- 邮箱 -->
-                        <a href="mailto:1879495519@qq.com" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="Email">
-                            <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Email</title><path fill="currentColor" d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>
-                        </a>
+                    </div>
+
+                    <!-- ====================================================================== -->
+                    <!-- 新增：日历倒计时卡片 -->
+                    <!-- ====================================================================== -->
+                    <div class="glass-card p-6">
+                        <h2 class="text-xl font-semibold text-white mb-3 text-center">
+                            日历倒计时
+                        </h2>
+                        <div id="countdown-display" class="text-center text-lg text-sky-300 leading-relaxed">
+                            正在计算...
+                        </div>
+                    </div>
+                    
+                    <!-- 【可修改】个人简介和联系方式 -->
+                    <div class="glass-card p-6 flex flex-col justify-between flex-grow">
+                        <!-- 【修改点】移除 blockquote 和蓝色线条，使用艺术引号 -->
+                        <div class="relative px-4 py-2">
+                            <span class="absolute top-0 left-0 text-6xl text-white/20 font-serif -translate-y-4 -translate-x-2 select-none">“</span>
+                            <!-- 【在这里修改你的座右铭或简介】 -->
+                            <p class="text-lg">Hello, World!</p>
+                            <p class="text-gray-300 mt-1">一个建立于21世纪的小站，存活于互联网的边缘</p>
+                            <span class="absolute bottom-0 right-0 text-6xl text-white/20 font-serif translate-y-6 translate-x-2 select-none">”</span>
+                        </div>
+                        <div class="mt-8">
+                            <p class="text-sm text-gray-400 mb-4">与我联系:</p>
+                            <div class="flex items-center gap-5">
+                                <!-- 【在这里修改你的社交链接】把 href="#" 中的 # 替换成你的链接地址 -->
+                                <!-- GitHub -->
+                                <a href="https://github.com/Qing90bing" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="GitHub">
+                                    <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                                </a>
+                                <!-- 邮箱 -->
+                                <a href="mailto:1879495519@qq.com" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="Email">
+                                    <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Email</title><path fill="currentColor" d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <!-- ====================================================================== -->
+                <!-- 右侧列 -->
+                <!-- ====================================================================== -->
+                <div class="lg:col-span-3 space-y-6">
+                    
+                    <!-- 右侧顶部容器 (时钟 + 引用) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- 时间和天气信息 (这部分是自动更新的，一般不需要修改) -->
+                        <div class="glass-card p-6 flex flex-col justify-center items-center">
+                            <div id="date-display" class="text-lg text-gray-300"></div>
+                            <div id="time-display" class="text-6xl text-white my-1"></div>
+                            <div id="greeting" class="text-sm text-gray-400"></div>
+                        </div>
+                        <!-- 【可修改】哲理引用 -->
+                        <div class="glass-card p-6 flex flex-col justify-center">
+                            <!-- 【在这里修改引用的文字】 -->
+                            <p class="text-center text-gray-200">物质与意识的辩证关系：物质决定意识，意识反作用于物质。</p>
+                            <p class="text-right text-sm text-gray-400 mt-2">-「唯物主义哲学」</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 【可修改】网站列表 -->
+                    <div class="glass-card p-6">
+                        <h2 class="text-xl font-semibold text-white mb-4">
+                            <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            网站列表
+                        </h2>
+                        <!-- 【在这里修改你的常用网站链接】 -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <!-- 示例链接1: 博客 -->
+                            <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+
+                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <span class="font-medium">博客</span>
+                            </a>
+                            <!-- 示例链接2: 网盘 -->
+                            <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+
+                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                                <span class="font-medium">网盘</span>
+                            </a>
+                            <!-- 示例链接3: 音乐 -->
+                            <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
+                                <span class="font-medium">音乐</span>
+                            </a>
+                            <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                <span class="font-medium">起始页</span>
+                            </a>
+                            <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                                <span class="font-medium">网址集</span>
+                            </a>
+                            <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                <span class="font-medium">今日热榜</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-
-        <!-- ====================================================================== -->
-        <!-- 右侧列 -->
-        <!-- ====================================================================== -->
-        <div class="lg:col-span-3 space-y-6">
-            
-            <!-- 右侧顶部容器 (时钟 + 引用) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- 时间和天气信息 (这部分是自动更新的，一般不需要修改) -->
-                <div class="glass-card p-6 flex flex-col justify-center items-center">
-                    <div id="date-display" class="text-lg text-gray-300"></div>
-                    <div id="time-display" class="text-6xl text-white my-1"></div>
-                    <div class="text-sm text-gray-400">天气数据获取失败</div>
-                </div>
-                <!-- 【可修改】哲理引用 -->
-                <div class="glass-card p-6 flex flex-col justify-center">
-                    <!-- 【在这里修改引用的文字】 -->
-                    <p class="text-center text-gray-200">物质与意识的辩证关系：物质决定意识，意识反作用于物质。</p>
-                    <p class="text-right text-sm text-gray-400 mt-2">-「唯物主义哲学」</p>
-                </div>
-            </div>
-            
-            <!-- 【可修改】网站列表 -->
-            <div class="glass-card p-6">
-                <h2 class="text-xl font-semibold text-white mb-4">
-                    <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                    网站列表
-                </h2>
-                <!-- 【在这里修改你的常用网站链接】 -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    <!-- 示例链接1: 博客 -->
-                    <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-
-                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span class="font-medium">博客</span>
-                    </a>
-                    <!-- 示例链接2: 网盘 -->
-                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-
-                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                        <span class="font-medium">网盘</span>
-                    </a>
-                    <!-- 示例链接3: 音乐 -->
-                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
-                        <span class="font-medium">音乐</span>
-                    </a>
-                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                        <span class="font-medium">起始页</span>
-                    </a>
-                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
-                        <span class="font-medium">网址集</span>
-                    </a>
-                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                        <span class="font-medium">今日热榜</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script>
         // --- 设置随机背景图片 ---
@@ -202,17 +238,115 @@
             const weekday = weekdays[now.getDay()];
             dateDisplay.textContent = `${year}年${month}月${day}日 ${weekday}`;
         }
+
+        // --- 问候语功能 ---
+        // 【修改点】加强问候语功能，使其随机化
+        function updateGreeting() {
+            const greetingEl = document.getElementById('greeting');
+            const hour = new Date().getHours();
+            let greetings = [];
+
+            if (hour >= 5 && hour < 12) {
+                greetings = [
+                    '早上好，愿你有个美好的一天！🌞', 
+                    '新的一天，新的开始！', 
+                    '早安，今天也要元气满满哦！',
+                    '清晨的阳光，为你带来一整天的好心情。',
+                    '一日之计在于晨，加油！'
+                ];
+            } else if (hour >= 12 && hour < 18) {
+                greetings = [
+                    '下午好，继续加油！☕️', 
+                    '午后时光，愿你安好。', 
+                    '工作辛苦了，喝杯茶休息一下吧！',
+                    '午后的阳光温暖而慵懒，适合小憩片刻。',
+                    '为梦想奋斗的你，辛苦了！'
+                ];
+            } else if (hour >= 18 && hour < 22) {
+                greetings = [
+                    '晚上好，放松一下吧！�', 
+                    '结束了一天的忙碌，享受此刻的宁静。', 
+                    '今晚的夜色真美，不是吗？',
+                    '华灯初上，愿你卸下一身疲惫。',
+                    '享受属于自己的晚间时光吧。'
+                ];
+            } else {
+                greetings = [
+                    '夜深了，注意休息哦！⭐️', 
+                    '晚安，祝你有个好梦。', 
+                    '早点睡吧，明天又是新的一天。',
+                    '星星都睡了，你也要早点休息。',
+                    '放下手机，与周公相会吧。'
+                ];
+            }
+            
+            // 从问候语数组中随机选择一个
+            const greetingText = greetings[Math.floor(Math.random() * greetings.length)];
+            greetingEl.textContent = greetingText;
+        }
+
+        // --- 日历倒计时功能 ---
+        function updateCountdown() {
+            const countdownDisplay = document.getElementById('countdown-display');
+            
+            // ===============================================================
+            // 【在这里修改或添加你的倒计时事件】
+            // 格式: { name: '事件名称', date: 'YYYY-MM-DD' }
+            // 请确保日期格式正确，例如 '2025-10-01'
+            // ===============================================================
+            const holidays = [
+                { name: '国庆节', date: '2025-10-01' },
+                { name: '中秋节', date: '2025-10-06' },
+                { name: '元旦', date: '2026-01-01' },
+                { name: '春节', date: '2026-02-17' },
+                { name: '劳动节', date: '2026-05-01' },
+                // 你可以继续在这里添加更多未来的事件
+            ];
+
+            const now = new Date();
+            // 将时间设置为当天的零点，以便准确计算天数差异
+            now.setHours(0, 0, 0, 0); 
+
+            // 找到所有未来的节日
+            const upcomingHolidays = holidays.filter(holiday => {
+                const holidayDate = new Date(holiday.date);
+                return holidayDate >= now;
+            });
+
+            // 如果有未来的节日
+            if (upcomingHolidays.length > 0) {
+                // 第一个就是最近的节日
+                const nextHoliday = upcomingHolidays[0];
+                const holidayDate = new Date(nextHoliday.date);
+                
+                // 计算时间差（毫秒），然后转换为天数
+                const diffTime = holidayDate - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                // 【修改点】更新倒计时显示格式，调整数字和“天”字的大小
+                countdownDisplay.innerHTML = `<span class="text-white">距离</span><br><strong class="text-xl text-white">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`;
+            } else {
+                countdownDisplay.textContent = '所有节日都已过完啦！';
+            }
+        }
         
         // --- 页面加载时执行的函数 ---
-        
-        // 立即执行一次时钟更新，避免页面加载时出现空白
-        updateTime();
-        // 每秒更新一次时间
-        setInterval(updateTime, 1000);
-        
-        // 页面加载完成后设置背景图片
-        document.addEventListener('DOMContentLoaded', setRandomBackground);
+        document.addEventListener('DOMContentLoaded', () => {
+            // 设置背景
+            setRandomBackground();
+
+            // 立即执行一次所有更新，避免页面加载时出现空白
+            updateTime();
+            updateGreeting();
+            updateCountdown();
+
+            // 设置定时器
+            setInterval(updateTime, 1000); // 时钟每秒更新
+            setInterval(updateGreeting, 1800000); // 问候语每30分钟更新
+            setInterval(updateCountdown, 3600000); // 倒计时每小时更新一次即可
+        });
 
     </script>
 </body>
 </html>
+�
