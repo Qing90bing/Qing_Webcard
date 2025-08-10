@@ -3,19 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的名片</title>
+    <title>Qing90bing 的个人主页</title>
+    <!-- 引入Tailwind CSS框架 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Google Fonts字体，使其更具现代感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; }
-        .card { background-color: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; }
-        h1 { margin: 0; }
-        p { color: #555; }
+        /* 自定义样式 */
+        body {
+            /* 使用Inter字体作为主要英文字体，Noto Sans SC作为中文字体 */
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            /* 背景颜色作为图片加载前的占位符 */
+            background-color: #0d1a26;
+            /* 背景图片样式 */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* 固定背景，滚动时不移动 */
+            color: #e0e0e0;
+            /* 为背景切换添加平滑过渡效果 */
+            transition: background-image 0.8s ease-in-out;
+        }
+
+        /* 定义卡片样式，实现玻璃拟态效果 */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.5); /* 半透明背景 */
+            backdrop-filter: blur(12px); /* 背景模糊，核心效果 */
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 1rem; /* 圆角大小 */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* 细微边框增加质感 */
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 时间显示部分的字体可以更特殊一些 */
+        #time-display {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(137, 207, 240, 0.5); /* 给时间添加辉光效果 */
+        }
     </style>
 </head>
-<body>
-    <div class="card">
-        <h1>Qing90bing</h1>
-        <p>测试</p>
-        <p>联系方式: 1879495519@qq.com</p>
-    </div>
+<body class="flex items-center justify-center min-h-screen p-8 sm:p-16 lg:p-24">
+
+    <!-- 主内容容器，使用Grid布局来组织各个模块 -->
+    <main class="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+
+        <!-- ====================================================================== -->
+        <!-- 左侧列 -->
+        <!-- ====================================================================== -->
+        <div class="lg:col-span-1 space-y-6">
+            
+            <!-- 【可修改】Logo和标题 -->
+            <div class="glass-card flex items-center justify-center p-6 gap-4">
+ 
+                <!-- ↓↓↓ 【在这里修改你的名字】 ↓↓↓ -->
+                <h1 class="text-3xl font-bold text-white">Qing90bing</h1>
+                <!-- ↑↑↑ 名字代码结束 ↑↑↑ -->
+
+            </div>
+            
+            <!-- 【可修改】个人简介和联系方式 -->
+            <div class="glass-card p-8 flex flex-col justify-between">
+                <div>
+                    <blockquote class="border-l-4 border-sky-400 pl-4 italic">
+                        <!-- 【在这里修改你的座右铭或简介】 -->
+                        <p class="text-lg">Hello, World!</p>
+                        <p class="text-gray-300 mt-1">一个建立于21世纪的小站，存活于互联网的边缘</p>
+                    </blockquote>
+                </div>
+                <div class="mt-8">
+                    <p class="text-sm text-gray-400 mb-4">与我联系:</p>
+                    <div class="flex items-center gap-5">
+                        <!-- 【在这里修改你的社交链接】把 href="#" 中的 # 替换成你的链接地址 -->
+                        <!-- GitHub -->
+                        <a href="https://github.com/Qing90bing" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="GitHub">
+                            <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        </a>
+                        <!-- 邮箱 -->
+                        <a href="mailto:1879495519@qq.com" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="Email">
+                            <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Email</title><path fill="currentColor" d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====================================================================== -->
+        <!-- 右侧列 -->
+        <!-- ====================================================================== -->
+        <div class="lg:col-span-3 space-y-6">
+            
+            <!-- 右侧顶部容器 (时钟 + 引用) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 时间和天气信息 (这部分是自动更新的，一般不需要修改) -->
+                <div class="glass-card p-6 flex flex-col justify-center items-center">
+                    <div id="date-display" class="text-lg text-gray-300"></div>
+                    <div id="time-display" class="text-6xl text-white my-1"></div>
+                    <div class="text-sm text-gray-400">天气数据获取失败</div>
+                </div>
+                <!-- 【可修改】哲理引用 -->
+                <div class="glass-card p-6 flex flex-col justify-center">
+                    <!-- 【在这里修改引用的文字】 -->
+                    <p class="text-center text-gray-200">物质与意识的辩证关系：物质决定意识，意识反作用于物质。</p>
+                    <p class="text-right text-sm text-gray-400 mt-2">-「唯物主义哲学」</p>
+                </div>
+            </div>
+            
+            <!-- 【可修改】网站列表 -->
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">
+                    <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    网站列表
+                </h2>
+                <!-- 【在这里修改你的常用网站链接】 -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <!-- 示例链接1: 博客 -->
+                    <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+
+                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span class="font-medium">博客</span>
+                    </a>
+                    <!-- 示例链接2: 网盘 -->
+                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+
+                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                        <span class="font-medium">网盘</span>
+                    </a>
+                    <!-- 示例链接3: 音乐 -->
+                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
+                        <span class="font-medium">音乐</span>
+                    </a>
+                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        <span class="font-medium">起始页</span>
+                    </a>
+                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                        <span class="font-medium">网址集</span>
+                    </a>
+                    <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                        <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        <span class="font-medium">今日热榜</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- 设置随机背景图片 ---
+        function setRandomBackground() {
+            // ===============================================================
+            // 【在这里修改你的背景图片列表】
+            // 1. 把你的图片上传到网上，获取图片的公开链接。
+            // 2. 将链接地址粘贴到下面的 ' ' 引号之间。
+            // 3. 每个链接用逗号 , 隔开。可以添加任意多张图片。
+            // ===============================================================
+            const myImages = [
+                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1920&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=1920&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1920&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=1920&auto=format&fit=crop'
+            ];
+            
+            // 下面的代码是随机选择并设置背景的逻辑，一般不需要修改。
+            const randomIndex = Math.floor(Math.random() * myImages.length);
+            const randomImageUrl = myImages[randomIndex];
+            document.body.style.backgroundImage = `url('${randomImageUrl}')`;
+        }
+        
+        // --- 动态时钟功能的JavaScript代码 (这部分是自动的，一般不需要修改) ---
+        const timeDisplay = document.getElementById('time-display');
+        const dateDisplay = document.getElementById('date-display');
+
+        function updateTime() {
+            const now = new Date();
+            
+            // 格式化时间 HH:MM:SS
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+
+            // 格式化日期 YYYY年MM月DD日 星期X
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const weekday = weekdays[now.getDay()];
+            dateDisplay.textContent = `${year}年${month}月${day}日 ${weekday}`;
+        }
+        
+        // --- 页面加载时执行的函数 ---
+        
+        // 立即执行一次时钟更新，避免页面加载时出现空白
+        updateTime();
+        // 每秒更新一次时间
+        setInterval(updateTime, 1000);
+        
+        // 页面加载完成后设置背景图片
+        document.addEventListener('DOMContentLoaded', setRandomBackground);
+
+    </script>
 </body>
 </html>
