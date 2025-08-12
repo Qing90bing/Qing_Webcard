@@ -22,27 +22,32 @@
             overflow: hidden; /* 防止出现双滚动条 */
         }
         body {
-            /* 使用Inter字体作为主要英文字体，Noto Sans SC作为中文字体 */
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
-            /* 背景颜色作为图片加载前的占位符 */
             background-color: #0d1a26;
-            /* 背景图片样式 */
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-attachment: fixed; /* 固定背景，滚动时不移动 */
             color: #e0e0e0;
-            /* 为背景切换添加平滑过渡效果 */
-            transition: background-image 0.8s ease-in-out;
         }
 
-        /* 定义卡片样式，实现玻璃拟态效果 */
+        /* 背景图片容器 */
+        #bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
         .glass-card {
-            background: rgba(30, 41, 59, 0.5); /* 半透明背景 */
-            backdrop-filter: blur(12px); /* 背景模糊，核心效果 */
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-radius: 1rem; /* 圆角大小 */
-            border: 1px solid rgba(255, 255, 255, 0.1); /* 细微边框增加质感 */
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
         
@@ -51,15 +56,16 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* 时间显示部分的字体可以更特殊一些 */
+        #time-display, .runtime-number {
+            font-variant-numeric: tabular-nums;
+        }
+        
         #time-display {
-            font-family: 'Inter', sans-serif; /* 使用Inter字体，更美观 */
+            font-family: 'Inter', sans-serif;
             font-weight: 700;
-            text-shadow: 0 0 10px rgba(137, 207, 240, 0.5); /* 给时间添加辉光效果 */
-            font-variant-numeric: tabular-nums; /* 确保数字等宽，解决跳动问题 */
+            text-shadow: 0 0 10px rgba(137, 207, 240, 0.5);
         }
 
-        /* 自定义SimpleBar滚动条样式 */
         .simplebar-scrollbar:before {
             background-color: rgba(137, 207, 240, 0.6);
             border-radius: 4px;
@@ -67,13 +73,34 @@
         .simplebar-track.simplebar-vertical {
             width: 8px;
         }
+
+        /* Q弹动画 (减小效果) */
+        @keyframes bounce-in {
+            0% { transform: scale(0.98); }
+            60% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .bounce-in {
+            animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 进度条样式 */
+        .progress-bar {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-bar-inner {
+            background-color: #38bdf8; /* sky-500 */
+            border-radius: 9999px;
+            transition: width 0.5s ease-out;
+        }
     </style>
 </head>
 <body>
-
+    <div id="bg-container"></div>
     <div data-simplebar style="height: 100vh;">
         <div class="flex items-center justify-center min-h-screen px-8 sm:px-16 lg:px-24">
-            <!-- 主内容容器，使用Grid布局来组织各个模块 -->
             <main class="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full max-w-6xl lg:items-start">
 
                 <!-- ====================================================================== -->
@@ -81,33 +108,19 @@
                 <!-- ====================================================================== -->
                 <div class="lg:col-span-1 space-y-6 flex flex-col">
                     
-                    <!-- 【可修改】Logo和标题 -->
                     <div class="glass-card flex items-center justify-center p-6 gap-4">
-            
-                        <!-- ↓↓↓ 【在这里修改你的名字】 ↓↓↓ -->
                         <h1 class="text-3xl font-bold text-white">Qing90bing</h1>
-                        <!-- ↑↑↑ 名字代码结束 ↑↑↑ -->
-
                     </div>
 
-                    <!-- ====================================================================== -->
-                    <!-- 新增：日历倒计时卡片 -->
-                    <!-- ====================================================================== -->
                     <div class="glass-card p-6">
-                        <h2 class="text-xl font-semibold text-white mb-3 text-center">
-                            日历倒计时
-                        </h2>
-                        <div id="countdown-display" class="text-center text-lg text-sky-300 leading-relaxed">
-                            正在计算...
-                        </div>
+                        <h2 class="text-xl font-semibold text-white mb-3 text-center">日历倒计时</h2>
+                        <div id="countdown-display" class="text-center text-lg text-sky-300 leading-relaxed">正在计算...</div>
                     </div>
                     
                     <!-- 【可修改】个人简介和联系方式 -->
-                    <div class="glass-card p-6 flex flex-col justify-between flex-grow">
-                        <!-- 【修改点】移除 blockquote 和蓝色线条，使用艺术引号 -->
+                    <div id="profile-card" class="glass-card p-6 flex flex-col justify-between flex-grow cursor-pointer">
                         <div class="relative px-4 py-2">
                             <span class="absolute top-0 left-0 text-6xl text-white/20 font-serif -translate-y-4 -translate-x-2 select-none">“</span>
-                            <!-- 【在这里修改你的座右铭或简介】 -->
                             <p class="text-lg">Hello, World!</p>
                             <p class="text-gray-300 mt-1">一个建立于21世纪的小站，存活于互联网的边缘</p>
                             <span class="absolute bottom-0 right-0 text-6xl text-white/20 font-serif translate-y-6 translate-x-2 select-none">”</span>
@@ -115,12 +128,9 @@
                         <div class="mt-8">
                             <p class="text-sm text-gray-400 mb-4">与我联系:</p>
                             <div class="flex items-center gap-5">
-                                <!-- 【在这里修改你的社交链接】把 href="#" 中的 # 替换成你的链接地址 -->
-                                <!-- GitHub -->
                                 <a href="https://github.com/Qing90bing" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="GitHub">
                                     <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
                                 </a>
-                                <!-- 邮箱 -->
                                 <a href="mailto:1879495519@qq.com" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="Email">
                                     <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Email</title><path fill="currentColor" d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>
                                 </a>
@@ -132,50 +142,38 @@
                 <!-- ====================================================================== -->
                 <!-- 右侧列 -->
                 <!-- ====================================================================== -->
-                <div class="lg:col-span-3 space-y-6">
-                    
-                    <!-- 右侧顶部容器 (时钟 + 引用) -->
+                <div id="right-column" class="lg:col-span-3 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- 时间和天气信息 (这部分是自动更新的，一般不需要修改) -->
                         <div class="glass-card p-6 flex flex-col justify-center items-center">
                             <div id="date-display" class="text-lg text-gray-300"></div>
                             <div id="time-display" class="text-6xl text-white my-1"></div>
                             <div id="greeting" class="text-sm text-gray-400"></div>
                         </div>
-                        <!-- 【可修改】哲理引用 -->
-                        <div class="glass-card p-6 flex flex-col justify-center">
-                            <!-- 【在这里修改引用的文字】 -->
-                            <p class="text-center text-gray-200">物质与意识的辩证关系：物质决定意识，意识反作用于物质。</p>
-                            <p class="text-right text-sm text-gray-400 mt-2">-「唯物主义哲学」</p>
+                        <div id="hitokoto-card" class="glass-card p-6 flex flex-col justify-center cursor-pointer min-h-[120px] md:min-h-full">
+                            <p id="hitokoto-text" class="text-center text-gray-200 transition-opacity duration-500 ease-in-out">正在加载一言...</p>
+                            <p id="hitokoto-from" class="text-right text-sm text-gray-400 mt-2 transition-opacity duration-500 ease-in-out"></p>
                         </div>
                     </div>
                     
-                    <!-- 【可修改】网站列表 -->
                     <div class="glass-card p-6">
                         <h2 class="text-xl font-semibold text-white mb-4">
                             <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                             网站列表
                         </h2>
-                        <!-- 【在这里修改你的常用网站链接】 -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <!-- 示例链接1: 博客 -->
                             <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-
                                 <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 <span class="font-medium">博客</span>
                             </a>
-                            <!-- 示例链接2: 网盘 -->
                             <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-
                                 <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
                                 <span class="font-medium">网盘</span>
                             </a>
-                            <!-- 示例链接3: 音乐 -->
                             <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
                                 <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
                                 <span class="font-medium">音乐</span>
                             </a>
-                            <a href="#" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
+                            <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
                                 <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                                 <span class="font-medium">起始页</span>
                             </a>
@@ -190,163 +188,313 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ====================================================================== -->
+                <!-- 新增：时光胶囊卡片 (默认隐藏) -->
+                <!-- ====================================================================== -->
+                <div id="time-capsule-card" class="lg:col-span-3 glass-card p-6 hidden">
+                    <!-- 卡片头部：标题和控制按钮 -->
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-white">时光胶囊</h2>
+                        <div class="flex items-center gap-3">
+                            <button title="设置" class="text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </button>
+                            <button id="close-time-capsule" title="关闭" class="text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 进度条内容 -->
+                    <div class="space-y-5">
+                        <!-- 今日 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm font-medium text-gray-300">
+                                <span>今日已过 <span id="day-passed">0</span> 小时</span>
+                                <span>剩余 <span id="day-left">24</span> 小时</span>
+                            </div>
+                            <div class="progress-bar h-5 flex items-center justify-center relative">
+                                <div id="day-progress" class="progress-bar-inner absolute top-0 left-0 h-full" style="width: 0%;"></div>
+                                <span id="day-percent" class="relative z-10 text-xs font-bold text-white">0%</span>
+                            </div>
+                        </div>
+                        <!-- 本周 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm font-medium text-gray-300">
+                                <span>本周已过 <span id="week-passed">0</span> 天</span>
+                                <span>剩余 <span id="week-left">7</span> 天</span>
+                            </div>
+                            <div class="progress-bar h-5 flex items-center justify-center relative">
+                                <div id="week-progress" class="progress-bar-inner absolute top-0 left-0 h-full" style="width: 0%;"></div>
+                                <span id="week-percent" class="relative z-10 text-xs font-bold text-white">0%</span>
+                            </div>
+                        </div>
+                        <!-- 本月 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm font-medium text-gray-300">
+                                <span>本月已过 <span id="month-passed">0</span> 天</span>
+                                <span>剩余 <span id="month-left">30</span> 天</span>
+                            </div>
+                            <div class="progress-bar h-5 flex items-center justify-center relative">
+                                <div id="month-progress" class="progress-bar-inner absolute top-0 left-0 h-full" style="width: 0%;"></div>
+                                <span id="month-percent" class="relative z-10 text-xs font-bold text-white">0%</span>
+                            </div>
+                        </div>
+                        <!-- 今年 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm font-medium text-gray-300">
+                                <span>今年已过 <span id="year-passed">0</span> 天</span>
+                                <span>剩余 <span id="year-left">365</span> 天</span>
+                            </div>
+                            <div class="progress-bar h-5 flex items-center justify-center relative">
+                                <div id="year-progress" class="progress-bar-inner absolute top-0 left-0 h-full" style="width: 0%;"></div>
+                                <span id="year-percent" class="relative z-10 text-xs font-bold text-white">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 网站运行时间 -->
+                    <div class="mt-6 text-center text-gray-300">
+                        <p id="site-runtime-display">正在计算...</p>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
 
     <script>
+        // --- DOM 元素获取 ---
+        const profileCard = document.getElementById('profile-card');
+        const rightColumn = document.getElementById('right-column');
+        const timeCapsuleCard = document.getElementById('time-capsule-card');
+        const closeTimeCapsuleBtn = document.getElementById('close-time-capsule');
+        const bgContainer = document.getElementById('bg-container');
+
         // --- 设置随机背景图片 ---
         function setRandomBackground() {
-            // ===============================================================
-            // 【在这里修改你的背景图片列表】
-            // 1. 把你的图片上传到网上，获取图片的公开链接。
-            // 2. 将链接地址粘贴到下面的 ' ' 引号之间。
-            // 3. 每个链接用逗号 , 隔开。可以添加任意多张图片。
-            // ===============================================================
             const myImages = [
-                    'https://s21.ax1x.com/2025/08/10/pVdEmM6.jpg',
-                    'https://s21.ax1x.com/2025/08/10/pVdEnsK.jpg',
-                    'https://s21.ax1x.com/2025/08/10/pVdEuqO.jpg',
-                    'https://s21.ax1x.com/2025/08/10/pVdEQde.jpg',
-                    'https://s21.ax1x.com/2025/08/10/pVdEMZD.jpg'
+                'https://s21.ax1x.com/2025/08/10/pVdEmM6.jpg',
+                'https://s21.ax1x.com/2025/08/10/pVdEnsK.jpg',
+                'https://s21.ax1x.com/2025/08/10/pVdEuqO.jpg',
+                'https://s21.ax1x.com/2025/08/10/pVdEQde.jpg',
+                'https://s21.ax1x.com/2025/08/10/pVdEMZD.jpg'
             ];
+            const randomImageUrl = myImages[Math.floor(Math.random() * myImages.length)];
             
-            // 下面的代码是随机选择并设置背景的逻辑，一般不需要修改。
-            const randomIndex = Math.floor(Math.random() * myImages.length);
-            const randomImageUrl = myImages[randomIndex];
-            document.body.style.backgroundImage = `url('${randomImageUrl}')`;
+            // 预加载图片
+            const img = new Image();
+            img.src = randomImageUrl;
+            img.onload = () => {
+                // 加载完成后再设置背景并淡入
+                bgContainer.style.backgroundImage = `url('${randomImageUrl}')`;
+                bgContainer.style.opacity = 1;
+            };
         }
         
-        // --- 动态时钟功能的JavaScript代码 (这部分是自动的，一般不需要修改) ---
-        const timeDisplay = document.getElementById('time-display');
-        const dateDisplay = document.getElementById('date-display');
-
+        // --- 动态时钟功能 ---
         function updateTime() {
+            const timeDisplay = document.getElementById('time-display');
+            const dateDisplay = document.getElementById('date-display');
             const now = new Date();
-            
-            // 格式化时间 HH:MM:SS
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
-
-            // 格式化日期 YYYY年MM月DD日 星期X
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
+            timeDisplay.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
             const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-            const weekday = weekdays[now.getDay()];
-            dateDisplay.textContent = `${year}年${month}月${day}日 ${weekday}`;
+            dateDisplay.textContent = `${now.getFullYear()}年${String(now.getMonth() + 1).padStart(2, '0')}月${String(now.getDate()).padStart(2, '0')}日 ${weekdays[now.getDay()]}`;
         }
 
         // --- 问候语功能 ---
-        // 【修改点】加强问候语功能，使其随机化
         function updateGreeting() {
             const greetingEl = document.getElementById('greeting');
             const hour = new Date().getHours();
             let greetings = [];
-
-            if (hour >= 5 && hour < 12) {
-                greetings = [
-                    '早上好，愿你有个美好的一天！🌞', 
-                    '新的一天，新的开始！', 
-                    '早安，今天也要元气满满哦！',
-                    '清晨的阳光，为你带来一整天的好心情。',
-                    '一日之计在于晨，加油！'
-                ];
-            } else if (hour >= 12 && hour < 18) {
-                greetings = [
-                    '下午好，继续加油！☕️', 
-                    '午后时光，愿你安好。', 
-                    '工作辛苦了，喝杯茶休息一下吧！',
-                    '午后的阳光温暖而慵懒，适合小憩片刻。',
-                    '为梦想奋斗的你，辛苦了！'
-                ];
-            } else if (hour >= 18 && hour < 22) {
-                greetings = [
-                    '晚上好，放松一下吧！�', 
-                    '结束了一天的忙碌，享受此刻的宁静。', 
-                    '今晚的夜色真美，不是吗？',
-                    '华灯初上，愿你卸下一身疲惫。',
-                    '享受属于自己的晚间时光吧。'
-                ];
-            } else {
-                greetings = [
-                    '夜深了，注意休息哦！⭐️', 
-                    '晚安，祝你有个好梦。', 
-                    '早点睡吧，明天又是新的一天。',
-                    '星星都睡了，你也要早点休息。',
-                    '放下手机，与周公相会吧。'
-                ];
-            }
-            
-            // 从问候语数组中随机选择一个
-            const greetingText = greetings[Math.floor(Math.random() * greetings.length)];
-            greetingEl.textContent = greetingText;
+            if (hour >= 5 && hour < 12) greetings = ['早上好，愿你有个美好的一天！🌞', '新的一天，新的开始！', '早安，今天也要元气满满哦！'];
+            else if (hour >= 12 && hour < 18) greetings = ['下午好，继续加油！☕️', '午后时光，愿你安好。', '工作辛苦了，喝杯茶休息一下吧！'];
+            else if (hour >= 18 && hour < 22) greetings = ['晚上好，放松一下吧！🎑', '结束了一天的忙碌，享受此刻的宁静。', '今晚的夜色真美，不是吗？'];
+            else greetings = ['夜深了，注意休息哦！⭐️', '晚安，祝你有个好梦。', '早点睡吧，明天又是新的一天。'];
+            greetingEl.textContent = greetings[Math.floor(Math.random() * greetings.length)];
         }
 
-        // --- 日历倒计时功能 ---
-        function updateCountdown() {
-            const countdownDisplay = document.getElementById('countdown-display');
+        // --- 智能日历倒计时功能 ---
+        const lunarInfo = [0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2, 0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977, 0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970, 0x06566, 0x0d4a0, 0x0ea50, 0x06e95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950, 0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557, 0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5d0, 0x14573, 0x052d0, 0x0a9a8, 0x0e950, 0x06aa0, 0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0, 0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b5a0, 0x195a6, 0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570, 0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x055c0, 0x0ab60, 0x096d5, 0x092e0, 0x0c960, 0x0d954, 0x0d4a0, 0x0da50, 0x07552, 0x056a0, 0x0abb7, 0x025d0, 0x092d0, 0x0cab5, 0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930, 0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530, 0x05aa0, 0x076a3, 0x096d0, 0x04bd7, 0x04ad0, 0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45, 0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0];
+        const solarTerm = ["小寒", "大寒", "立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至"];
+        const sTermInfo = [0, 21208, 42467, 63836, 85337, 107014, 128867, 150921, 173149, 195551, 218072, 240693, 263343, 285989, 308563, 331033, 353350, 375494, 397447, 419210, 440795, 462224, 483532, 504758];
+        const sFtv = ["0101 元旦", "0214 情人节", "0308 妇女节", "0312 植树节", "0401 愚人节", "0501 劳动节", "0504 青年节", "0601 儿童节", "0701 建党节", "0801 建军节", "0815 日本投降日", "0903 抗战胜利纪念日", "0910 教师节", "1001 国庆节", "1213 国家公祭日", "1225 圣诞节"];
+        const lFtv = ["0101 春节", "0115 元宵节", "0505 端午节", "0707 七夕", "0815 中秋节", "0909 重阳节", "1208 腊八节"];
+        function lYearDays(y) { let i, sum = 348; for (i = 0x8000; i > 0x8; i >>= 1) sum += (lunarInfo[y - 1900] & i) ? 1 : 0; return (sum + leapDays(y)); }
+        function leapDays(y) { if (leapMonth(y)) return ((lunarInfo[y - 1900] & 0x10000) ? 30 : 29); else return (0); }
+        function leapMonth(y) { return (lunarInfo[y - 1900] & 0xf); }
+        function monthDays(y, m) { return ((lunarInfo[y - 1900] & (0x10000 >> m)) ? 30 : 29); }
+        function Dianaday(objDate) { var i, leap = 0, temp = 0; var baseDate = new Date(1900, 0, 31); var offset = (objDate - baseDate) / 86400000; this.dayCyl = offset + 40; this.monCyl = 14; for (i = 1900; i < 2050 && offset > 0; i++) { temp = lYearDays(i); offset -= temp; this.monCyl += 12; } if (offset < 0) { offset += temp; i--; this.monCyl -= 12; } this.year = i; this.yearCyl = i - 1864; leap = leapMonth(i); this.isLeap = false; for (i = 1; i < 13 && offset > 0; i++) { if (leap > 0 && i == (leap + 1) && this.isLeap == false) { --i; this.isLeap = true; temp = leapDays(this.year); } else { temp = monthDays(this.year, i); } if (this.isLeap == true && i == (leap + 1)) this.isLeap = false; offset -= temp; if (this.isLeap == false) this.monCyl++; } if (offset == 0 && leap > 0 && i == leap + 1) if (this.isLeap) { this.isLeap = false; } else { this.isLeap = true; --i; --this.monCyl; } if (offset < 0) { offset += temp; --i; --this.monCyl; } this.month = i; this.day = offset + 1; }
+        function updateCountdown() { const countdownDisplay = document.getElementById('countdown-display'); const now = new Date(); const currentYear = now.getFullYear(); const today = new Date(now); today.setHours(0, 0, 0, 0); let upcomingEvents = []; function getSolarDateForLunar(targetYear, lunarMonth, lunarDay) { for (let i = 0; i < 366; i++) { const checkDate = new Date(targetYear, 0, 1); checkDate.setDate(checkDate.getDate() + i); if (checkDate.getFullYear() !== targetYear) break; const lunarDateInfo = new Dianaday(checkDate); if (lunarDateInfo.month === lunarMonth && lunarDateInfo.day === lunarDay && !lunarDateInfo.isLeap) { return checkDate; } } return null; } sFtv.forEach(holiday => { const month = parseInt(holiday.substr(0, 2)); const day = parseInt(holiday.substr(2, 2)); const name = holiday.substr(5); let holidayDate = new Date(currentYear, month - 1, day); if (holidayDate < today) { holidayDate = new Date(currentYear + 1, month - 1, day); } upcomingEvents.push({ name: name, date: holidayDate }); }); const allLunarHolidays = [...lFtv, "1230 除夕"]; allLunarHolidays.forEach(holiday => { let lMonth = parseInt(holiday.substr(0, 2)); let lDay = parseInt(holiday.substr(2, 2)); const name = holiday.substr(5); if (name === '除夕') { let cnyDate = getSolarDateForLunar(currentYear, 1, 1); if (!cnyDate || new Date(cnyDate) < today) { cnyDate = getSolarDateForLunar(currentYear + 1, 1, 1); } if(cnyDate) { let eveDate = new Date(cnyDate); eveDate.setDate(eveDate.getDate() - 1); upcomingEvents.push({ name: '除夕', date: eveDate }); } } else { let holidayDate = getSolarDateForLunar(currentYear, lMonth, lDay); if (!holidayDate || holidayDate < today) { holidayDate = getSolarDateForLunar(currentYear + 1, lMonth, lDay); } if (holidayDate) { upcomingEvents.push({ name: name, date: holidayDate }); } } }); for (let i = 0; i < solarTerm.length; i++) { const termName = solarTerm[i]; const offDate = new Date((31556925974.7 * (currentYear - 1900) + sTermInfo[i] * 60000) + Date.UTC(1900, 0, 6, 2, 5)); let termDate = new Date(offDate.getFullYear(), offDate.getMonth(), offDate.getUTCDate()); if (termDate < today) { const nextYearOffDate = new Date((31556925974.7 * (currentYear + 1 - 1900) + sTermInfo[i] * 60000) + Date.UTC(1900, 0, 6, 2, 5)); termDate = new Date(nextYearOffDate.getFullYear(), nextYearOffDate.getMonth(), nextYearOffDate.getUTCDate()); } upcomingEvents.push({ name: termName, date: termDate }); } const mayFirst = new Date(currentYear, 4, 1); const mothersDayDate = 1 + (7 - mayFirst.getDay() + 7) % 7 + 7; let mothersDay = new Date(currentYear, 4, mothersDayDate); if (mothersDay < today) { const nextYearMayFirst = new Date(currentYear + 1, 4, 1); mothersDay = new Date(currentYear + 1, 4, 1 + (7 - nextYearMayFirst.getDay() + 7) % 7 + 7); } upcomingEvents.push({ name: '母亲节', date: mothersDay }); const juneFirst = new Date(currentYear, 5, 1); const fathersDayDate = 1 + (7 - juneFirst.getDay() + 7) % 7 + 14; let fathersDay = new Date(currentYear, 5, fathersDayDate); if (fathersDay < today) { const nextYearJuneFirst = new Date(currentYear + 1, 5, 1); fathersDay = new Date(currentYear + 1, 5, 1 + (7 - nextYearJuneFirst.getDay() + 7) % 7 + 14); } upcomingEvents.push({ name: '父亲节', date: fathersDay }); const novFirst = new Date(currentYear, 10, 1); const thanksgivingDayDate = 1 + (4 - novFirst.getDay() + 7) % 7 + 21; let thanksgivingDay = new Date(currentYear, 10, thanksgivingDayDate); if (thanksgivingDay < today) { const nextYearNovFirst = new Date(currentYear + 1, 10, 1); thanksgivingDay = new Date(currentYear + 1, 10, 1 + (4 - nextYearNovFirst.getDay() + 7) % 7 + 21); } upcomingEvents.push({ name: '感恩节', date: thanksgivingDay }); const futureEvents = upcomingEvents.filter(event => event.date >= today); if (futureEvents.length > 0) { futureEvents.sort((a, b) => a.date - b.date); const nextHoliday = futureEvents[0]; const diffTime = nextHoliday.date - today; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); countdownDisplay.innerHTML = `<span class="text-white">距离</span><br><strong class="text-xl text-white">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`; } else { countdownDisplay.textContent = '所有节日都已计算完毕！'; } }
+
+        // --- Hitokoto 一言 功能 ---
+        let isUpdatingQuote = false;
+        async function fetchHitokoto() {
+            if (isUpdatingQuote) return;
+            isUpdatingQuote = true;
+
+            const hitokotoText = document.getElementById('hitokoto-text');
+            const hitokotoFrom = document.getElementById('hitokoto-from');
             
-            // ===============================================================
-            // 【在这里修改或添加你的倒计时事件】
-            // 格式: { name: '事件名称', date: 'YYYY-MM-DD' }
-            // 请确保日期格式正确，例如 '2025-10-01'
-            // ===============================================================
-            const holidays = [
-                { name: '国庆节', date: '2025-10-01' },
-                { name: '中秋节', date: '2025-10-06' },
-                { name: '元旦', date: '2026-01-01' },
-                { name: '春节', date: '2026-02-17' },
-                { name: '劳动节', date: '2026-05-01' },
-                // 你可以继续在这里添加更多未来的事件
-            ];
+            hitokotoText.classList.add('opacity-0');
+            hitokotoFrom.classList.add('opacity-0');
 
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const response = await fetch('https://v1.hitokoto.cn/?encode=json');
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const data = await response.json();
+                hitokotoText.textContent = data.hitokoto;
+                hitokotoFrom.textContent = `— 「${data.from || '未知来源'}」`;
+            } catch (error) {
+                console.error("获取一言失败:", error);
+                hitokotoText.textContent = '获取一言失败，请稍后再试。';
+                hitokotoFrom.textContent = '';
+            } finally {
+                hitokotoText.classList.remove('opacity-0');
+                hitokotoFrom.classList.remove('opacity-0');
+                setTimeout(() => { isUpdatingQuote = false; }, 600);
+            }
+        }
+
+        // ======================================================================
+        // --- 新增：时光胶囊功能 ---
+        // ======================================================================
+        function updateTimeCapsule() {
             const now = new Date();
-            // 将时间设置为当天的零点，以便准确计算天数差异
-            now.setHours(0, 0, 0, 0); 
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const dayOfMonth = now.getDate();
+            const dayOfWeek = now.getDay(); // 0 for Sunday, 1 for Monday, etc.
+            const hour = now.getHours();
 
-            // 找到所有未来的节日
-            const upcomingHolidays = holidays.filter(holiday => {
-                const holidayDate = new Date(holiday.date);
-                return holidayDate >= now;
+            // 1. 今日进度
+            const dayPassed = hour;
+            const dayLeft = 24 - dayPassed;
+            const dayPercent = (dayPassed / 24) * 100;
+            document.getElementById('day-passed').textContent = dayPassed;
+            document.getElementById('day-left').textContent = dayLeft;
+            document.getElementById('day-percent').textContent = `${dayPercent.toFixed(1)}%`;
+            document.getElementById('day-progress').style.width = `${dayPercent}%`;
+
+            // 2. 本周进度 (周一为第一天)
+            const weekPassed = dayOfWeek === 0 ? 7 : dayOfWeek;
+            const weekLeft = 7 - weekPassed;
+            const weekPercent = (weekPassed / 7) * 100;
+            document.getElementById('week-passed').textContent = weekPassed;
+            document.getElementById('week-left').textContent = weekLeft;
+            document.getElementById('week-percent').textContent = `${weekPercent.toFixed(1)}%`;
+            document.getElementById('week-progress').style.width = `${weekPercent}%`;
+
+            // 3. 本月进度
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthPassed = dayOfMonth;
+            const monthLeft = daysInMonth - monthPassed;
+            const monthPercent = (monthPassed / daysInMonth) * 100;
+            document.getElementById('month-passed').textContent = monthPassed;
+            document.getElementById('month-left').textContent = monthLeft;
+            document.getElementById('month-percent').textContent = `${monthPercent.toFixed(1)}%`;
+            document.getElementById('month-progress').style.width = `${monthPercent}%`;
+
+            // 4. 今年进度
+            const startOfYear = new Date(year, 0, 1);
+            const endOfYear = new Date(year, 11, 31);
+            const totalDaysInYear = (endOfYear - startOfYear) / (1000 * 60 * 60 * 24) + 1;
+            const yearPassed = Math.ceil((now - startOfYear) / (1000 * 60 * 60 * 24));
+            const yearLeft = totalDaysInYear - yearPassed;
+            const yearPercent = (yearPassed / totalDaysInYear) * 100;
+            document.getElementById('year-passed').textContent = yearPassed;
+            document.getElementById('year-left').textContent = yearLeft;
+            document.getElementById('year-percent').textContent = `${yearPercent.toFixed(1)}%`;
+            document.getElementById('year-progress').style.width = `${yearPercent}%`;
+        }
+
+        // --- 新增：网站运行时间 ---
+        function updateSiteRuntime() {
+            const startTime = new Date('2025-07-30T18:30:00');
+            const now = new Date();
+            const diff = now - startTime;
+
+            const displayElement = document.getElementById('site-runtime-display');
+            if (!displayElement) return;
+
+            if (diff < 0) {
+                displayElement.textContent = '小破站尚未启航...';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            displayElement.innerHTML = `小破站已经在风雨中度过了 <span class="text-white font-semibold runtime-number">${days}</span> 天 <span class="text-white font-semibold runtime-number">${hours}</span> 小时 <span class="text-white font-semibold runtime-number">${minutes}</span> 分 <span class="text-white font-semibold runtime-number">${seconds}</span> 秒`;
+        }
+
+        // --- 交互事件监听 ---
+        function setupEventListeners() {
+            // Helper function to animate cards in the right column
+            const animateRightColumnIn = () => {
+                const cardsToAnimate = rightColumn.querySelectorAll('.glass-card');
+                cardsToAnimate.forEach(card => {
+                    card.classList.add('bounce-in');
+                    card.addEventListener('animationend', (e) => {
+                        e.currentTarget.classList.remove('bounce-in');
+                    }, { once: true });
+                });
+            };
+
+            // 点击简介卡片，切换时光胶囊的显示/隐藏
+            profileCard.addEventListener('click', () => {
+                const isTimeCapsuleHidden = timeCapsuleCard.classList.contains('hidden');
+
+                if (isTimeCapsuleHidden) {
+                    // 显示时光胶囊
+                    rightColumn.classList.add('hidden');
+                    timeCapsuleCard.classList.remove('hidden');
+                    timeCapsuleCard.classList.add('bounce-in');
+                    updateTimeCapsule();
+                    timeCapsuleCard.addEventListener('animationend', () => {
+                         timeCapsuleCard.classList.remove('bounce-in');
+                    }, { once: true });
+                } else {
+                    // 隐藏时光胶囊
+                    timeCapsuleCard.classList.add('hidden');
+                    rightColumn.classList.remove('hidden');
+                    animateRightColumnIn();
+                }
             });
 
-            // 如果有未来的节日
-            if (upcomingHolidays.length > 0) {
-                // 第一个就是最近的节日
-                const nextHoliday = upcomingHolidays[0];
-                const holidayDate = new Date(nextHoliday.date);
-                
-                // 计算时间差（毫秒），然后转换为天数
-                const diffTime = holidayDate - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            // 点击关闭按钮，返回常规视图
+            closeTimeCapsuleBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 防止事件冒泡触发profileCard的点击事件
+                timeCapsuleCard.classList.add('hidden');
+                rightColumn.classList.remove('hidden');
+                animateRightColumnIn();
+            });
 
-                // 【修改点】更新倒计时显示格式，调整数字和“天”字的大小
-                countdownDisplay.innerHTML = `<span class="text-white">距离</span><br><strong class="text-xl text-white">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`;
-            } else {
-                countdownDisplay.textContent = '所有节日都已过完啦！';
-            }
+            // 点击一言卡片刷新
+            const hitokotoCard = document.getElementById('hitokoto-card');
+            hitokotoCard.addEventListener('click', fetchHitokoto);
         }
-        
+
         // --- 页面加载时执行的函数 ---
         document.addEventListener('DOMContentLoaded', () => {
-            // 设置背景
             setRandomBackground();
-
-            // 立即执行一次所有更新，避免页面加载时出现空白
             updateTime();
             updateGreeting();
             updateCountdown();
+            fetchHitokoto();
+            setupEventListeners();
+            updateTimeCapsule(); 
+            updateSiteRuntime();
 
-            // 设置定时器
-            setInterval(updateTime, 1000); // 时钟每秒更新
-            setInterval(updateGreeting, 1800000); // 问候语每30分钟更新
-            setInterval(updateCountdown, 3600000); // 倒计时每小时更新一次即可
+            setInterval(updateTime, 1000);
+            setInterval(updateSiteRuntime, 1000);
+            setInterval(updateGreeting, 1800000); // 30分钟
+            setInterval(updateCountdown, 3600000); 
+            setInterval(updateTimeCapsule, 60000); 
         });
 
     </script>
 </body>
 </html>
-�
