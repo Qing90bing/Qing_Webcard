@@ -202,7 +202,7 @@
                 </div>
 
                 <!-- Time Capsule Card -->
-                <div id="time-capsule-card" class="lg:col-span-3 glass-card p-5 hidden">
+                <div id="time-capsule-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-semibold text-white">时光胶囊</h2>
                         <button id="close-time-capsule" title="关闭" class="text-gray-400 hover:text-white transition-colors">
@@ -793,6 +793,8 @@
 
             // 切换到时光胶囊
             profileCard.addEventListener('click', () => {
+                const rightColumnHeight = rightColumn.offsetHeight;
+                timeCapsuleCard.style.minHeight = `${rightColumnHeight}px`;
                 rightColumn.classList.add('hidden');
                 holidayListCard.classList.add('hidden');
                 timeCapsuleCard.classList.remove('hidden');
@@ -810,6 +812,8 @@
 
             // 切换到节日列表
             countdownCard.addEventListener('click', () => {
+                const rightColumnHeight = rightColumn.offsetHeight;
+                holidayListCard.style.minHeight = `${rightColumnHeight}px`;
                 rightColumn.classList.add('hidden');
                 timeCapsuleCard.classList.add('hidden');
                 holidayListCard.classList.remove('hidden');
