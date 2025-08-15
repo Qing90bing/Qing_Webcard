@@ -276,6 +276,7 @@
         const rightColumn = document.getElementById('right-column');
         const timeCapsuleCard = document.getElementById('time-capsule-card');
         const holidayListCard = document.getElementById('holiday-list-card');
+        let rightColumnInitialHeight = 0;
 
         // --- 设置随机背景图片 ---
         function setRandomBackground() {
@@ -793,8 +794,7 @@
 
             // 切换到时光胶囊
             profileCard.addEventListener('click', () => {
-                const rightColumnHeight = rightColumn.offsetHeight;
-                timeCapsuleCard.style.minHeight = `${rightColumnHeight}px`;
+                timeCapsuleCard.style.minHeight = `${rightColumnInitialHeight}px`;
                 rightColumn.classList.add('hidden');
                 holidayListCard.classList.add('hidden');
                 timeCapsuleCard.classList.remove('hidden');
@@ -812,8 +812,7 @@
 
             // 切换到节日列表
             countdownCard.addEventListener('click', () => {
-                const rightColumnHeight = rightColumn.offsetHeight;
-                holidayListCard.style.minHeight = `${rightColumnHeight}px`;
+                holidayListCard.style.minHeight = `${rightColumnInitialHeight}px`;
                 rightColumn.classList.add('hidden');
                 timeCapsuleCard.classList.add('hidden');
                 holidayListCard.classList.remove('hidden');
@@ -852,7 +851,11 @@
             updateGreeting();
             updateCountdown();
             fetchHitokoto();
-            setupEventListeners();
+            // 确保布局稳定后再获取高度
+            setTimeout(() => {
+                rightColumnInitialHeight = rightColumn.offsetHeight;
+                setupEventListeners();
+            }, 100);
             updateSiteRuntime();
             updateTimeCapsule();
             
