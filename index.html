@@ -183,14 +183,14 @@
 
                 <!-- Holiday List Card -->
                 <div id="holiday-list-card" class="lg:col-span-3 glass-card p-5 hidden">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-white">节日倒数列表</h2>
+                    <div class="relative flex justify-center items-center mb-4">
+                        <h2 class="absolute left-0 text-xl font-semibold text-white">节日倒数列表</h2>
                         <div class="flex items-center gap-4 text-lg">
                             <button id="prev-year" title="上一年" class="px-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors">&lt;</button>
                             <span id="holiday-list-year" class="font-bold text-white w-16 text-center"></span>
                             <button id="next-year" title="下一年" class="px-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors">&gt;</button>
                         </div>
-                        <button id="close-holiday-list" title="关闭" class="text-gray-400 hover:text-white transition-colors">
+                        <button id="close-holiday-list" title="关闭" class="absolute right-0 text-gray-400 hover:text-white transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
@@ -838,11 +838,18 @@
 
             // 切换到时光胶囊
             profileCard.addEventListener('click', () => {
-                rightColumn.classList.add('hidden');
-                holidayListCard.classList.add('hidden');
-                timeCapsuleCard.classList.remove('hidden');
-                timeCapsuleCard.classList.add('bounce-in');
-                updateTimeCapsule();
+                // If the time capsule is already visible, hide it and show the main column.
+                if (!timeCapsuleCard.classList.contains('hidden')) {
+                    timeCapsuleCard.classList.add('hidden');
+                    rightColumn.classList.remove('hidden');
+                    animateRightColumnIn();
+                } else { // Otherwise, show it.
+                    rightColumn.classList.add('hidden');
+                    holidayListCard.classList.add('hidden');
+                    timeCapsuleCard.classList.remove('hidden');
+                    timeCapsuleCard.classList.add('bounce-in');
+                    updateTimeCapsule();
+                }
             });
 
             // 关闭时光胶囊
@@ -855,13 +862,20 @@
 
             // 切换到节日列表
             countdownCard.addEventListener('click', () => {
-                rightColumn.classList.add('hidden');
-                timeCapsuleCard.classList.add('hidden');
-                holidayListCard.classList.remove('hidden');
-                holidayListCard.classList.add('bounce-in');
-                holidayListDisplayedYear = new Date().getFullYear();
-                displayHolidayList(holidayListDisplayedYear);
-                new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
+                // If the holiday list is already visible, hide it and show the main column.
+                if (!holidayListCard.classList.contains('hidden')) {
+                    holidayListCard.classList.add('hidden');
+                    rightColumn.classList.remove('hidden');
+                    animateRightColumnIn();
+                } else { // Otherwise, show it.
+                    rightColumn.classList.add('hidden');
+                    timeCapsuleCard.classList.add('hidden');
+                    holidayListCard.classList.remove('hidden');
+                    holidayListCard.classList.add('bounce-in');
+                    holidayListDisplayedYear = new Date().getFullYear();
+                    displayHolidayList(holidayListDisplayedYear);
+                    new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
+                }
             });
 
             // 关闭节日列表
