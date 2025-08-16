@@ -103,6 +103,10 @@
         #holiday-list-container, #holiday-list-year {
             transition: opacity 0.15s ease-in-out;
         }
+
+        #back-to-today-btn {
+            display: none; /* Initially hidden */
+        }
     </style>
 </head>
 <body>
@@ -198,9 +202,12 @@
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
-                        <button id="close-holiday-list" title="关闭" class="absolute right-0 text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
+                        <div class="absolute right-0 flex items-center gap-3">
+                            <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full bg-sky-500/70 hover:bg-sky-500 transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-lg">今</button>
+                            <button id="close-holiday-list" title="关闭" class="text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
                     </div>
                     <div id="holiday-list-container-wrapper" class="overflow-y-auto" style="max-height: 65vh;">
                        <div id="holiday-list-container" class="space-y-4">
@@ -276,7 +283,7 @@
         const sFtv = ["0101 元旦", "0110 警察节", "0214 情人节", "0308 妇女节", "0312 植树节", "0315 消费者日", "0401 愚人节", "0501 劳动节", "0504 青年节", "0512 护士节", "0601 儿童节", "0701 建党节", "0801 建军节", "0815 日本投降日", "0903 抗战胜利纪念日", "0910 教师节", "0918 九一八事变", "1001 国庆节", "1213 国家公祭日", "1224 平安夜", "1225 圣诞节"];
         const lFtv = ["0101 春节", "0115 元宵节", "0202 龙抬头", "0505 端午节", "0707 七夕", "0715 中元节", "0815 中秋节", "0909 重阳节", "1208 腊八节", "1223 北方小年", "1224 南方小年"];
         let holidayListDisplayedYear = new Date().getFullYear();
-        let userHasScrolled = false;
+        let hasManuallyScrolled = false;
 
         // --- DOM 元素获取 ---
         const bgContainer = document.getElementById('bg-container');
@@ -739,6 +746,8 @@
                     }
                 }
                 container.innerHTML = html;
+                // [NEW] Update button visibility after content is rendered
+                setTimeout(updateTodayButtonVisibility, 50);
             };
 
             if (isAnimated) {
@@ -751,6 +760,76 @@
                 }, 150);
             } else {
                 updateContent();
+            }
+        }
+
+        // [NEW] Core function to scroll to the target festival
+        const scrollToTargetFestival = (isAnimated = true) => {
+            // Use a timeout to ensure the DOM has updated, e.g., after a year change
+            setTimeout(() => {
+                const container = document.getElementById('holiday-list-container');
+                if (!container) return;
+
+                let targetElement = container.querySelector('.highlight-holiday');
+
+                // If no highlighted holiday in the current view (e.g., all passed for the year)
+                if (!targetElement) {
+                    // As per user request, find the last festival of the displayed year
+                    const allHolidays = container.querySelectorAll('.flex.justify-between.items-center');
+                    if (allHolidays.length > 0) {
+                        targetElement = allHolidays[allHolidays.length - 1];
+                    }
+                }
+
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: isAnimated ? 'smooth' : 'auto',
+                        block: 'center'
+                    });
+                }
+            }, 160); // Must be slightly longer than the list update animation (150ms)
+        };
+
+        // [NEW] Logic for the "Today" button's visibility
+        let todayButtonObserver;
+        function updateTodayButtonVisibility() {
+            const backToTodayBtn = document.getElementById('back-to-today-btn');
+            const currentYear = new Date().getFullYear();
+
+            if (todayButtonObserver) {
+                todayButtonObserver.disconnect();
+            }
+
+            if (holidayListDisplayedYear !== currentYear) {
+                backToTodayBtn.style.display = 'flex'; // Always show for other years
+                return;
+            }
+
+            // Logic for the current year
+            const container = document.getElementById('holiday-list-container');
+            let targetElement = container.querySelector('.highlight-holiday');
+
+            if (!targetElement) {
+                const allHolidays = container.querySelectorAll('.flex.justify-between.items-center');
+                if (allHolidays.length > 0) {
+                    targetElement = allHolidays[allHolidays.length - 1];
+                }
+            }
+
+            if (targetElement) {
+                const scrollWrapper = document.getElementById('holiday-list-container-wrapper');
+                todayButtonObserver = new IntersectionObserver((entries) => {
+                    const [entry] = entries;
+                    // Show button if target is NOT visible
+                    backToTodayBtn.style.display = entry.isIntersecting ? 'none' : 'flex';
+                }, {
+                    root: scrollWrapper,
+                    threshold: 0.5 // 50% of the element is visible
+                });
+                todayButtonObserver.observe(targetElement);
+            } else {
+                // No target element found, hide the button
+                backToTodayBtn.style.display = 'none';
             }
         }
 
@@ -895,6 +974,7 @@
                     rightColumn.classList.remove('hidden');
                     animateRightColumnIn();
                 } else {
+                    hasManuallyScrolled = false; // Reset scroll flag
                     rightColumn.classList.add('hidden');
                     timeCapsuleCard.classList.add('hidden');
                     holidayListCard.classList.remove('hidden');
@@ -904,17 +984,12 @@
                     
                     const simpleBarInstance = new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
                     simpleBarInstance.getScrollElement().addEventListener('scroll', () => {
-                        userHasScrolled = true;
+                        hasManuallyScrolled = true;
                     }, { once: true });
 
+                    // Initial scroll is always immediate
                     setTimeout(() => {
-                        const highlightedElement = holidayListCard.querySelector('.highlight-holiday');
-                        if (highlightedElement) {
-                            highlightedElement.scrollIntoView({
-                                behavior: userHasScrolled ? 'smooth' : 'auto',
-                                block: 'center'
-                            });
-                        }
+                        scrollToTargetFestival(false);
                     }, 50);
                 }
             });
@@ -927,14 +1002,36 @@
                 animateRightColumnIn();
             });
 
+            // "回到今天"按钮逻辑
+            document.getElementById('back-to-today-btn').addEventListener('click', () => {
+                const currentYear = new Date().getFullYear();
+                if (holidayListDisplayedYear !== currentYear) {
+                    holidayListDisplayedYear = currentYear;
+                    displayHolidayList(holidayListDisplayedYear, true);
+                }
+                scrollToTargetFestival(true); // Always smooth scroll on click
+            });
+
             // 节日列表年份切换
-            document.getElementById('prev-year').addEventListener('click', () => {
-                holidayListDisplayedYear--;
+            const handleYearChange = (newYear) => {
+                const yearBeforeChange = holidayListDisplayedYear;
+                const currentSystemYear = new Date().getFullYear();
+                
+                holidayListDisplayedYear = newYear;
                 displayHolidayList(holidayListDisplayedYear, true);
+
+                // Check for smart scroll condition
+                if (hasManuallyScrolled && holidayListDisplayedYear === currentSystemYear && yearBeforeChange !== currentSystemYear) {
+                    scrollToTargetFestival(true);
+                    hasManuallyScrolled = false; // Reset flag after use
+                }
+            };
+
+            document.getElementById('prev-year').addEventListener('click', () => {
+                handleYearChange(holidayListDisplayedYear - 1);
             });
             document.getElementById('next-year').addEventListener('click', () => {
-                holidayListDisplayedYear++;
-                displayHolidayList(holidayListDisplayedYear, true);
+                handleYearChange(holidayListDisplayedYear + 1);
             });
 
             // 点击一言卡片刷新
