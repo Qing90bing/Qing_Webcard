@@ -105,7 +105,19 @@
         }
 
         #back-to-today-btn {
-            display: none; /* Initially hidden */
+            display: flex;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transform: scale(0.9);
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s;
+        }
+        #back-to-today-btn.visible {
+            opacity: 1;
+            transform: scale(1);
+            visibility: visible;
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -203,7 +215,7 @@
                             </button>
                         </div>
                         <div class="absolute right-0 flex items-center gap-3">
-                            <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full bg-sky-500/70 hover:bg-sky-500 transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-lg">今</button>
+                            <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full bg-sky-500/70 hover:bg-sky-500 transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
                             <button id="close-holiday-list" title="关闭" class="text-gray-400 hover:text-white transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
@@ -763,6 +775,51 @@
             }
         }
 
+        // [NEW] Custom smooth scroll implementation for speed control
+        function customSmoothScrollTo(targetElement, options) {
+            const { duration = 300, block = 'center' } = options;
+            // SimpleBar creates a specific wrapper for the scrollable content.
+            const scrollContainer = document.getElementById('holiday-list-container-wrapper').querySelector('.simplebar-content-wrapper');
+
+            if (!scrollContainer || !targetElement) return;
+
+            let targetY;
+            if (block === 'center') {
+                targetY = targetElement.offsetTop + (targetElement.offsetHeight / 2) - (scrollContainer.offsetHeight / 2);
+            } else if (block === 'start') {
+                targetY = targetElement.offsetTop;
+            } else { // 'end'
+                targetY = targetElement.offsetTop + targetElement.offsetHeight - scrollContainer.offsetHeight;
+            }
+            
+            // Ensure targetY is within scrollable bounds
+            targetY = Math.max(0, Math.min(targetY, scrollContainer.scrollHeight - scrollContainer.clientHeight));
+
+            const startY = scrollContainer.scrollTop;
+            const distance = targetY - startY;
+            let startTime = null;
+
+            // easeInOutCubic easing function for a slightly smoother start/end
+            function ease(t, b, c, d) {
+                t /= d / 2;
+                if (t < 1) return c / 2 * t * t * t + b;
+                t -= 2;
+                return c / 2 * (t * t * t + 2) + b;
+            }
+
+            function animation(currentTime) {
+                if (startTime === null) startTime = currentTime;
+                const timeElapsed = currentTime - startTime;
+                const run = ease(timeElapsed, startY, distance, duration);
+                scrollContainer.scrollTop = run;
+                if (timeElapsed < duration) {
+                    requestAnimationFrame(animation);
+                }
+            }
+
+            requestAnimationFrame(animation);
+        }
+
         // [NEW] Core function to scroll to the target festival
         const scrollToTargetFestival = (isAnimated = true) => {
             // Use a timeout to ensure the DOM has updated, e.g., after a year change
@@ -782,10 +839,11 @@
                 }
 
                 if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: isAnimated ? 'smooth' : 'auto',
-                        block: 'center'
-                    });
+                    if (isAnimated) {
+                        customSmoothScrollTo(targetElement, { duration: 300, block: 'center' });
+                    } else {
+                        targetElement.scrollIntoView({ behavior: 'auto', block: 'center' });
+                    }
                 }
             }, 160); // Must be slightly longer than the list update animation (150ms)
         };
@@ -801,7 +859,7 @@
             }
 
             if (holidayListDisplayedYear !== currentYear) {
-                backToTodayBtn.style.display = 'flex'; // Always show for other years
+                backToTodayBtn.classList.add('visible'); // Always show for other years
                 return;
             }
 
@@ -821,7 +879,11 @@
                 todayButtonObserver = new IntersectionObserver((entries) => {
                     const [entry] = entries;
                     // Show button if target is NOT visible
-                    backToTodayBtn.style.display = entry.isIntersecting ? 'none' : 'flex';
+                    if (entry.isIntersecting) {
+                        backToTodayBtn.classList.remove('visible');
+                    } else {
+                        backToTodayBtn.classList.add('visible');
+                    }
                 }, {
                     root: scrollWrapper,
                     threshold: 0.5 // 50% of the element is visible
@@ -829,7 +891,7 @@
                 todayButtonObserver.observe(targetElement);
             } else {
                 // No target element found, hide the button
-                backToTodayBtn.style.display = 'none';
+                backToTodayBtn.classList.remove('visible');
             }
         }
 
