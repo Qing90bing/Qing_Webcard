@@ -1042,16 +1042,16 @@
                     holidayListCard.classList.remove('hidden');
                     holidayListCard.classList.add('bounce-in');
                     holidayListDisplayedYear = new Date().getFullYear();
-                    displayHolidayList(holidayListDisplayedYear, false);
+                    displayHolidayList(holidayListDisplayedYear, true);
                     
                     const simpleBarInstance = new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
                     simpleBarInstance.getScrollElement().addEventListener('scroll', () => {
                         hasManuallyScrolled = true;
                     }, { once: true });
 
-                    // Initial scroll is always immediate
+                    // Initial scroll is now animated
                     setTimeout(() => {
-                        scrollToTargetFestival(false);
+                        scrollToTargetFestival(true);
                     }, 50);
                 }
             });
