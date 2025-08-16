@@ -99,6 +99,10 @@
             background-color: rgba(56, 189, 248, 0.15);
             border-left: 3px solid #38bdf8;
         }
+
+        #holiday-list-container, #holiday-list-year {
+            transition: opacity 0.15s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -186,9 +190,13 @@
                     <div class="relative flex justify-center items-center mb-4">
                         <h2 class="absolute left-0 text-xl font-semibold text-white">节日倒数列表</h2>
                         <div class="flex items-center gap-4 text-lg">
-                            <button id="prev-year" title="上一年" class="px-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors">&lt;</button>
+                            <button id="prev-year" title="上一年" class="p-1 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all active:scale-95">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
                             <span id="holiday-list-year" class="font-bold text-white w-16 text-center"></span>
-                            <button id="next-year" title="下一年" class="px-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors">&gt;</button>
+                            <button id="next-year" title="下一年" class="p-1 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all active:scale-95">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
                         </div>
                         <button id="close-holiday-list" title="关闭" class="absolute right-0 text-gray-400 hover:text-white transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -268,6 +276,7 @@
         const sFtv = ["0101 元旦", "0110 警察节", "0214 情人节", "0308 妇女节", "0312 植树节", "0315 消费者日", "0401 愚人节", "0501 劳动节", "0504 青年节", "0512 护士节", "0601 儿童节", "0701 建党节", "0801 建军节", "0815 日本投降日", "0903 抗战胜利纪念日", "0910 教师节", "0918 九一八事变", "1001 国庆节", "1213 国家公祭日", "1224 平安夜", "1225 圣诞节"];
         const lFtv = ["0101 春节", "0115 元宵节", "0202 龙抬头", "0505 端午节", "0707 七夕", "0715 中元节", "0815 中秋节", "0909 重阳节", "1208 腊八节", "1223 北方小年", "1224 南方小年"];
         let holidayListDisplayedYear = new Date().getFullYear();
+        let userHasScrolled = false;
 
         // --- DOM 元素获取 ---
         const bgContainer = document.getElementById('bg-container');
@@ -661,6 +670,8 @@
 
                 if (diffDays === 0) {
                     countdownDisplay.innerHTML = `<span class="text-lg text-white">今天</span><br><strong class="text-3xl font-bold text-sky-300">${nextHoliday.name}</strong>`;
+                } else if (diffDays === 1) {
+                    countdownDisplay.innerHTML = `<span class="text-lg text-white">明天</span><br><strong class="text-3xl font-bold text-sky-300">${nextHoliday.name}</strong>`;
                 } else {
                     countdownDisplay.innerHTML = `<span class="text-white">距离</span><br><strong class="text-xl text-white">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`;
                 }
@@ -670,60 +681,77 @@
         }
 
         // --- 节日列表视图更新 ---
-        function displayHolidayList(year) {
+        function displayHolidayList(year, isAnimated = false) {
             const container = document.getElementById('holiday-list-container');
             const yearDisplay = document.getElementById('holiday-list-year');
-            yearDisplay.textContent = year;
+
+            const updateContent = () => {
+                yearDisplay.textContent = year;
             
-            const allHolidays = getAllHolidaysForYear(year);
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const allHolidays = getAllHolidaysForYear(year);
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-            const firstUpcoming = [...getAllHolidaysForYear(now.getFullYear()), ...getAllHolidaysForYear(now.getFullYear() + 1)]
-                .filter(e => e.date >= today)[0];
+                const firstUpcoming = [...getAllHolidaysForYear(now.getFullYear()), ...getAllHolidaysForYear(now.getFullYear() + 1)]
+                    .filter(e => e.date >= today)[0];
 
-            const holidaysByMonth = allHolidays.reduce((acc, holiday) => {
-                const month = holiday.date.getMonth();
-                if (!acc[month]) acc[month] = [];
-                acc[month].push(holiday);
-                return acc;
-            }, {});
+                const holidaysByMonth = allHolidays.reduce((acc, holiday) => {
+                    const month = holiday.date.getMonth();
+                    if (!acc[month]) acc[month] = [];
+                    acc[month].push(holiday);
+                    return acc;
+                }, {});
 
-            let html = '';
-            for (let month = 0; month < 12; month++) {
-                if (holidaysByMonth[month]) {
-                    html += `<div class="mb-3"><h3 class="text-lg font-semibold text-white/80 border-b border-white/10 pb-1 mb-2">${month + 1}月</h3>`;
-                    holidaysByMonth[month].forEach(holiday => {
-                        const diffTime = holiday.date - today;
-                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                        let statusText = '';
-                        if (holiday.date.getFullYear() < now.getFullYear() || (holiday.date.getFullYear() === now.getFullYear() && diffDays < -1)) {
-                            statusText = `<span class="text-gray-500">已过</span>`;
-                        } else if (diffDays === -1) {
-                            statusText = `<span class="text-yellow-400">昨天</span>`;
-                        } else if (diffDays === 0) {
-                            statusText = `<span class="text-green-400 font-bold">今天</span>`;
-                        } else {
-                            statusText = `<span class="text-sky-300">${diffDays} 天</span>`;
-                        }
-                        
-                        const isHighlighted = firstUpcoming && firstUpcoming.name === holiday.name && firstUpcoming.date.getTime() === holiday.date.getTime();
-                        const highlightClass = isHighlighted ? 'highlight-holiday' : '';
+                let html = '';
+                for (let month = 0; month < 12; month++) {
+                    if (holidaysByMonth[month]) {
+                        html += `<div class="mb-3"><h3 class="text-lg font-semibold text-white/80 border-b border-white/10 pb-1 mb-2">${month + 1}月</h3>`;
+                        holidaysByMonth[month].forEach(holiday => {
+                            const diffTime = holiday.date - today;
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                            let statusText = '';
+                            if (holiday.date.getFullYear() < now.getFullYear() || (holiday.date.getFullYear() === now.getFullYear() && diffDays < -1)) {
+                                statusText = `<span class="text-gray-500">已过</span>`;
+                            } else if (diffDays === -1) {
+                                statusText = `<span class="text-yellow-400">昨天</span>`;
+                            } else if (diffDays === 0) {
+                                statusText = `<span class="text-green-400 font-bold">今天</span>`;
+                            } else if (diffDays === 1) {
+                                statusText = `<span class="text-blue-400 font-bold">明天</span>`;
+                            } else {
+                                statusText = `<span class="text-sky-300">${diffDays} 天</span>`;
+                            }
+                            
+                            const isHighlighted = firstUpcoming && firstUpcoming.name === holiday.name && firstUpcoming.date.getTime() === holiday.date.getTime();
+                            const highlightClass = isHighlighted ? 'highlight-holiday' : '';
 
-                        html += `
-                            <div class="flex justify-between items-center p-2 rounded-lg ${highlightClass}">
-                                <div>
-                                    <span class="text-white">${holiday.name}</span>
-                                    <span class="text-xs text-gray-400 ml-2">${String(holiday.date.getMonth() + 1).padStart(2, '0')}-${String(holiday.date.getDate()).padStart(2, '0')}</span>
+                            html += `
+                                <div class="flex justify-between items-center p-2 rounded-lg ${highlightClass}">
+                                    <div>
+                                        <span class="text-white">${holiday.name}</span>
+                                        <span class="text-xs text-gray-400 ml-2">${String(holiday.date.getMonth() + 1).padStart(2, '0')}-${String(holiday.date.getDate()).padStart(2, '0')}</span>
+                                    </div>
+                                    ${statusText}
                                 </div>
-                                ${statusText}
-                            </div>
-                        `;
-                    });
-                    html += `</div>`;
+                            `;
+                        });
+                        html += `</div>`;
+                    }
                 }
+                container.innerHTML = html;
+            };
+
+            if (isAnimated) {
+                container.style.opacity = 0;
+                yearDisplay.style.opacity = 0;
+                setTimeout(() => {
+                    updateContent();
+                    container.style.opacity = 1;
+                    yearDisplay.style.opacity = 1;
+                }, 150);
+            } else {
+                updateContent();
             }
-            container.innerHTML = html;
         }
 
         // --- Hitokoto 一言 功能 ---
@@ -862,19 +890,32 @@
 
             // 切换到节日列表
             countdownCard.addEventListener('click', () => {
-                // If the holiday list is already visible, hide it and show the main column.
                 if (!holidayListCard.classList.contains('hidden')) {
                     holidayListCard.classList.add('hidden');
                     rightColumn.classList.remove('hidden');
                     animateRightColumnIn();
-                } else { // Otherwise, show it.
+                } else {
                     rightColumn.classList.add('hidden');
                     timeCapsuleCard.classList.add('hidden');
                     holidayListCard.classList.remove('hidden');
                     holidayListCard.classList.add('bounce-in');
                     holidayListDisplayedYear = new Date().getFullYear();
-                    displayHolidayList(holidayListDisplayedYear);
-                    new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
+                    displayHolidayList(holidayListDisplayedYear, false);
+                    
+                    const simpleBarInstance = new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
+                    simpleBarInstance.getScrollElement().addEventListener('scroll', () => {
+                        userHasScrolled = true;
+                    }, { once: true });
+
+                    setTimeout(() => {
+                        const highlightedElement = holidayListCard.querySelector('.highlight-holiday');
+                        if (highlightedElement) {
+                            highlightedElement.scrollIntoView({
+                                behavior: userHasScrolled ? 'smooth' : 'auto',
+                                block: 'center'
+                            });
+                        }
+                    }, 50);
                 }
             });
 
@@ -889,11 +930,11 @@
             // 节日列表年份切换
             document.getElementById('prev-year').addEventListener('click', () => {
                 holidayListDisplayedYear--;
-                displayHolidayList(holidayListDisplayedYear);
+                displayHolidayList(holidayListDisplayedYear, true);
             });
             document.getElementById('next-year').addEventListener('click', () => {
                 holidayListDisplayedYear++;
-                displayHolidayList(holidayListDisplayedYear);
+                displayHolidayList(holidayListDisplayedYear, true);
             });
 
             // 点击一言卡片刷新
