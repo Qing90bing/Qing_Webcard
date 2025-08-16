@@ -202,7 +202,7 @@
                 </div>
 
                 <!-- Holiday List Card -->
-                <div id="holiday-list-card" class="lg:col-span-3 glass-card p-5 hidden">
+                <div id="holiday-list-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
                     <div class="relative flex justify-center items-center mb-4">
                         <h2 class="absolute left-0 text-xl font-semibold text-white">节日倒数列表</h2>
                         <div class="flex items-center gap-4 text-lg">
@@ -221,10 +221,12 @@
                             </button>
                         </div>
                     </div>
-                    <div id="holiday-list-container-wrapper" class="overflow-y-auto" style="max-height: 65vh;">
-                       <div id="holiday-list-container" class="space-y-4">
-                           <!-- Holiday list will be dynamically inserted here -->
-                       </div>
+                    <div class="relative flex-1 min-h-0">
+                        <div id="holiday-list-container-wrapper" class="absolute inset-0">
+                           <div id="holiday-list-container" class="space-y-4">
+                               <!-- Holiday list will be dynamically inserted here -->
+                           </div>
+                        </div>
                     </div>
                 </div>
 
