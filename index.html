@@ -126,11 +126,28 @@
             visibility: visible;
             pointer-events: auto;
         }
+
+        #main-wrapper {
+            height: 100vh;
+        }
+
+        @media (max-width: 1023px) {
+            html, body {
+                height: auto;
+                overflow-y: auto;
+            }
+            #main-wrapper {
+                height: auto;
+            }
+            #holiday-list-card {
+                height: 75vh;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="bg-container"></div>
-    <div data-simplebar style="height: 100vh;">
+    <div id="main-wrapper">
         <div class="flex items-center justify-center min-h-screen px-8 sm:px-16 lg:px-24">
             <main class="grid grid-cols-1 lg:grid-cols-4 gap-5 w-full max-w-6xl">
 
