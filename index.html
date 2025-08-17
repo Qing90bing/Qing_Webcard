@@ -104,6 +104,13 @@
             transition: opacity 0.15s ease-in-out;
         }
 
+        #holiday-list-container-wrapper {
+            --fade-top-size: 40px;
+            --fade-bottom-size: 40px;
+            -webkit-mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+            mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+        }
+
         #back-to-today-btn {
             display: flex;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1047,6 +1054,35 @@
                     displayHolidayList(holidayListDisplayedYear, true);
                     
                     const simpleBarInstance = new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
+                    
+                    // --- START OF DYNAMIC MASK CODE ---
+                    const scrollElement = simpleBarInstance.getScrollElement();
+                    const maskContainer = document.getElementById('holiday-list-container-wrapper');
+                    const maxFadeSize = 40; // in pixels
+
+                    const updateMask = () => {
+                        const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+                        
+                        const tolerance = 1;
+                        if (scrollHeight <= clientHeight + tolerance) {
+                            maskContainer.style.setProperty('--fade-top-size', '0px');
+                            maskContainer.style.setProperty('--fade-bottom-size', '0px');
+                            return;
+                        }
+
+                        const scrollBottom = scrollHeight - clientHeight - scrollTop;
+                        const topFade = Math.min(scrollTop, maxFadeSize);
+                        const bottomFade = Math.min(scrollBottom, maxFadeSize);
+
+                        maskContainer.style.setProperty('--fade-top-size', `${topFade}px`);
+                        maskContainer.style.setProperty('--fade-bottom-size', `${bottomFade}px`);
+                    };
+
+                    scrollElement.addEventListener('scroll', updateMask);
+                    // Call once after a short delay to ensure layout is calculated correctly
+                    setTimeout(updateMask, 50);
+                    // --- END OF DYNAMIC MASK CODE ---
+
                     simpleBarInstance.getScrollElement().addEventListener('scroll', () => {
                         hasManuallyScrolled = true;
                     }, { once: true });
