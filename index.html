@@ -101,10 +101,10 @@
         }
 
         #holiday-list-container {
-            transition: opacity 0.15s ease-in-out;
+            transition: opacity 0.1s ease-in-out;
         }
         #holiday-list-year {
-            transition: opacity 0.15s ease-in-out, color 0.2s ease-in-out;
+            transition: opacity 0.1s ease-in-out, color 0.2s ease-in-out;
         }
 
         #holiday-list-container-wrapper {
@@ -159,11 +159,11 @@
     }
 
     .animate-fade-in {
-        animation: fade-in-anim 0.2s ease-out forwards;
+        animation: fade-in-anim 0.1s ease-out forwards;
     }
 
     .animate-fade-out {
-        animation: fade-out-anim 0.2s ease-in forwards;
+        animation: fade-out-anim 0.1s ease-in forwards;
     }
     
     /* Shake animation for error feedback */
@@ -292,10 +292,12 @@
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
-                        <!-- Error Message -->
+                        <!-- Error Message for input validation -->
                         <div id="year-input-error" class="hidden absolute -bottom-6 text-red-400 text-sm font-bold"></div>
                     </div>
                     <div class="relative flex-1 min-h-0">
+                        <!-- Warning is now absolutely positioned inside this container -->
+                        <div id="year-range-warning" class="absolute top-0 left-0 right-0 z-10 hidden flex items-center justify-center text-amber-400 text-sm font-semibold"></div>
                         <div id="holiday-list-container-wrapper" class="absolute inset-0">
                            <div id="holiday-list-container" class="space-y-4">
                                <!-- Holiday list will be dynamically inserted here -->
@@ -391,6 +393,7 @@
         const confirmYearBtn = document.getElementById('confirm-year-btn');
         const cancelYearBtn = document.getElementById('cancel-year-btn');
         const yearInputError = document.getElementById('year-input-error');
+        const yearRangeWarning = document.getElementById('year-range-warning');
 
         // --- 设置随机背景图片 ---
         function setRandomBackground() {
@@ -855,7 +858,7 @@
                     updateContent();
                     container.style.opacity = 1;
                     yearDisplay.style.opacity = 1;
-                }, 150);
+                }, 100);
             } else {
                 updateContent();
             }
@@ -1134,6 +1137,7 @@
                     holidayListCard.classList.add('bounce-in');
                     holidayListDisplayedYear = new Date().getFullYear();
                     displayHolidayList(holidayListDisplayedYear, true);
+                    updateWarningMessage(holidayListDisplayedYear);
                     
                     // Only initialize SimpleBar and listeners once to prevent bugs
                     if (!holidayListSimpleBar) {
@@ -1187,11 +1191,31 @@
             document.getElementById('back-to-today-btn').addEventListener('click', () => {
                 const currentYear = new Date().getFullYear();
                 if (holidayListDisplayedYear !== currentYear) {
-                    holidayListDisplayedYear = currentYear;
-                    displayHolidayList(holidayListDisplayedYear, true);
+                    handleYearChange(currentYear);
                 }
-                scrollToTargetFestival(true); // Always smooth scroll on click
+                scrollToTargetFestival(true);
             });
+
+            // [NEW] Warning message logic
+            const updateWarningMessage = (year) => {
+                const yearWarning = document.getElementById('year-range-warning');
+                if (year < 1900 || year > 2049) {
+                    yearWarning.innerHTML = `<svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg><span>${year}年的农历节日可能不准确</span>`;
+                    if (yearWarning.classList.contains('hidden')) {
+                        yearWarning.classList.remove('hidden', 'animate-fade-out');
+                        yearWarning.classList.add('animate-fade-in');
+                        setTimeout(() => yearWarning.classList.remove('animate-fade-in'), 100);
+                    }
+                } else {
+                    if (!yearWarning.classList.contains('hidden')) {
+                        yearWarning.classList.add('animate-fade-out');
+                        setTimeout(() => {
+                            yearWarning.classList.add('hidden');
+                            yearWarning.classList.remove('animate-fade-out');
+                        }, 100);
+                    }
+                }
+            };
 
             // 节日列表年份切换
             const handleYearChange = (newYear) => {
@@ -1200,6 +1224,7 @@
                 
                 holidayListDisplayedYear = newYear;
                 displayHolidayList(holidayListDisplayedYear, true);
+                updateWarningMessage(newYear); // Centralized call to handle warning
 
                 // Check for smart scroll condition
                 if (hasManuallyScrolled && holidayListDisplayedYear === currentSystemYear && yearBeforeChange !== currentSystemYear) {
@@ -1222,7 +1247,6 @@
                     yearDisplayControls.classList.add('hidden');
                     yearDisplayControls.classList.remove('animate-fade-out');
 
-                    // Show edit controls after fade-out completes
                     yearEditControls.classList.remove('hidden');
                     yearEditControls.classList.add('animate-fade-in');
                     yearInput.value = holidayListDisplayedYear;
@@ -1231,12 +1255,11 @@
 
                     setTimeout(() => {
                         yearEditControls.classList.remove('animate-fade-in');
-                    }, 200);
-                }, 200); // Wait for fade-out to finish
+                    }, 100);
+                }, 100);
             };
 
             const exitEditMode = () => {
-                // Always hide error message and reset input style on exit
                 yearInput.classList.remove('invalid');
                 yearInputError.classList.add('hidden');
 
@@ -1245,22 +1268,22 @@
                     yearEditControls.classList.add('hidden');
                     yearEditControls.classList.remove('animate-fade-out');
 
-                    // Show display controls after fade-out completes
                     yearDisplayControls.classList.remove('hidden');
                     yearDisplayControls.classList.add('animate-fade-in');
                     setTimeout(() => {
                         yearDisplayControls.classList.remove('animate-fade-in');
-                    }, 200);
-                }, 200);
+                    }, 100);
+                }, 100);
             };
 
             const submitNewYear = () => {
                 const newYear = parseInt(yearInput.value, 10);
-                if (!isNaN(newYear) && newYear >= 1900 && newYear < 2050) {
+                // Relaxed validation as per user request.
+                if (!isNaN(newYear) && newYear > 0 && newYear < 9999) {
                     handleYearChange(newYear);
                     exitEditMode();
                 } else {
-                    yearInputError.textContent = '支持年份: 1900-2049';
+                    yearInputError.textContent = '请输入有效的4位年份';
                     yearInputError.classList.remove('hidden');
                     yearInput.classList.add('invalid');
                     setTimeout(() => {
