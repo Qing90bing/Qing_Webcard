@@ -100,8 +100,11 @@
             border-left: 3px solid #38bdf8;
         }
 
-        #holiday-list-container, #holiday-list-year {
+        #holiday-list-container {
             transition: opacity 0.15s ease-in-out;
+        }
+        #holiday-list-year {
+            transition: opacity 0.15s ease-in-out, color 0.2s ease-in-out;
         }
 
         #holiday-list-container-wrapper {
@@ -142,6 +145,38 @@
         #holiday-list-card {
             height: 50vh;
         }
+    }
+
+    /* Animations for Year Input */
+    @keyframes fade-in-anim {
+        from { opacity: 0; transform: scale(0.98); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes fade-out-anim {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0; transform: scale(0.98); }
+    }
+
+    .animate-fade-in {
+        animation: fade-in-anim 0.2s ease-out forwards;
+    }
+
+    .animate-fade-out {
+        animation: fade-out-anim 0.2s ease-in forwards;
+    }
+    
+    /* Shake animation for error feedback */
+    @keyframes shake-anim {
+      10%, 90% { transform: translateX(-1px); }
+      20%, 80% { transform: translateX(2px); }
+      30%, 50%, 70% { transform: translateX(-3px); }
+      40%, 60% { transform: translateX(3px); }
+    }
+
+    #year-input.invalid {
+        border-color: #f87171 !important; /* Tailwind red-400 */
+        animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
     }
     </style>
 </head>
@@ -227,7 +262,7 @@
 
                 <!-- Holiday List Card -->
                 <div id="holiday-list-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center mb-2">
                         <h2 class="text-xl font-semibold text-white">节日倒数列表</h2>
                         <div class="flex items-center gap-3">
                             <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full bg-sky-500/70 hover:bg-sky-500 transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
@@ -236,16 +271,29 @@
                             </button>
                         </div>
                     </div>
-                    <div class="flex justify-center items-center">
-                        <div class="flex items-center gap-4 text-lg">
+                    <div class="flex justify-center items-center mb-4 h-8 relative">
+                        <!-- Display Mode -->
+                        <div id="year-display-controls" class="flex items-center gap-4 text-lg">
                             <button id="prev-year" title="上一年" class="p-1 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all active:scale-95">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
-                            <span id="holiday-list-year" class="font-bold text-white w-16 text-center"></span>
+                            <span id="holiday-list-year" class="font-bold text-white w-16 text-center cursor-pointer hover:text-sky-300 transition-colors"></span>
                             <button id="next-year" title="下一年" class="p-1 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all active:scale-95">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
+                        <!-- Edit Mode -->
+                        <div id="year-edit-controls" class="hidden flex items-center gap-2 text-lg">
+                            <input type="text" id="year-input" class="bg-slate-900/50 text-white font-bold w-20 text-center rounded-md border border-slate-600 focus:border-sky-500 focus:ring-0 px-1 py-0.5 text-lg" style="outline: none;">
+                            <button id="confirm-year-btn" title="确认" class="p-1 rounded-full text-green-400 hover:bg-white/10 transition-all active:scale-95">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </button>
+                            <button id="cancel-year-btn" title="取消" class="p-1 rounded-full text-red-400 hover:bg-white/10 transition-all active:scale-95">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <!-- Error Message -->
+                        <div id="year-input-error" class="hidden absolute -bottom-6 text-red-400 text-sm font-bold"></div>
                     </div>
                     <div class="relative flex-1 min-h-0">
                         <div id="holiday-list-container-wrapper" class="absolute inset-0">
@@ -334,6 +382,15 @@
         const timeCapsuleCard = document.getElementById('time-capsule-card');
         const holidayListCard = document.getElementById('holiday-list-card');
         let rightColumnInitialHeight = 0;
+
+        // --- [NEW] Year Input Feature Elements ---
+        const yearDisplayControls = document.getElementById('year-display-controls');
+        const yearEditControls = document.getElementById('year-edit-controls');
+        const holidayListYearSpan = document.getElementById('holiday-list-year');
+        const yearInput = document.getElementById('year-input');
+        const confirmYearBtn = document.getElementById('confirm-year-btn');
+        const cancelYearBtn = document.getElementById('cancel-year-btn');
+        const yearInputError = document.getElementById('year-input-error');
 
         // --- 设置随机背景图片 ---
         function setRandomBackground() {
@@ -1156,6 +1213,71 @@
             });
             document.getElementById('next-year').addEventListener('click', () => {
                 handleYearChange(holidayListDisplayedYear + 1);
+            });
+
+            // --- [NEW] Year Input Logic ---
+            const enterEditMode = () => {
+                yearDisplayControls.classList.add('animate-fade-out');
+                setTimeout(() => {
+                    yearDisplayControls.classList.add('hidden');
+                    yearDisplayControls.classList.remove('animate-fade-out');
+
+                    // Show edit controls after fade-out completes
+                    yearEditControls.classList.remove('hidden');
+                    yearEditControls.classList.add('animate-fade-in');
+                    yearInput.value = holidayListDisplayedYear;
+                    yearInput.focus();
+                    yearInput.select();
+
+                    setTimeout(() => {
+                        yearEditControls.classList.remove('animate-fade-in');
+                    }, 200);
+                }, 200); // Wait for fade-out to finish
+            };
+
+            const exitEditMode = () => {
+                // Always hide error message and reset input style on exit
+                yearInput.classList.remove('invalid');
+                yearInputError.classList.add('hidden');
+
+                yearEditControls.classList.add('animate-fade-out');
+                setTimeout(() => {
+                    yearEditControls.classList.add('hidden');
+                    yearEditControls.classList.remove('animate-fade-out');
+
+                    // Show display controls after fade-out completes
+                    yearDisplayControls.classList.remove('hidden');
+                    yearDisplayControls.classList.add('animate-fade-in');
+                    setTimeout(() => {
+                        yearDisplayControls.classList.remove('animate-fade-in');
+                    }, 200);
+                }, 200);
+            };
+
+            const submitNewYear = () => {
+                const newYear = parseInt(yearInput.value, 10);
+                if (!isNaN(newYear) && newYear >= 1900 && newYear < 2050) {
+                    handleYearChange(newYear);
+                    exitEditMode();
+                } else {
+                    yearInputError.textContent = '支持年份: 1900-2049';
+                    yearInputError.classList.remove('hidden');
+                    yearInput.classList.add('invalid');
+                    setTimeout(() => {
+                        yearInput.classList.remove('invalid');
+                    }, 500);
+                    setTimeout(() => {
+                         yearInputError.classList.add('hidden');
+                    }, 2500);
+                }
+            };
+
+            holidayListYearSpan.addEventListener('click', enterEditMode);
+            confirmYearBtn.addEventListener('click', submitNewYear);
+            cancelYearBtn.addEventListener('click', exitEditMode);
+            yearInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { submitNewYear(); }
+                else if (e.key === 'Escape') { exitEditMode(); }
             });
 
             // 点击一言卡片刷新
