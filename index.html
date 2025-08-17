@@ -305,6 +305,7 @@
         const lFtv = ["0101 春节", "0115 元宵节", "0202 龙抬头", "0505 端午节", "0707 七夕", "0715 中元节", "0815 中秋节", "0909 重阳节", "1208 腊八节", "1223 北方小年", "1224 南方小年"];
         let holidayListDisplayedYear = new Date().getFullYear();
         let hasManuallyScrolled = false;
+        let holidayListSimpleBar; // Instance for the holiday list scrollbar
 
         // --- DOM 元素获取 ---
         const bgContainer = document.getElementById('bg-container');
@@ -1053,39 +1054,38 @@
                     holidayListDisplayedYear = new Date().getFullYear();
                     displayHolidayList(holidayListDisplayedYear, true);
                     
-                    const simpleBarInstance = new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
-                    
-                    // --- START OF DYNAMIC MASK CODE ---
-                    const scrollElement = simpleBarInstance.getScrollElement();
-                    const maskContainer = document.getElementById('holiday-list-container-wrapper');
-                    const maxFadeSize = 40; // in pixels
+                    // Only initialize SimpleBar and listeners once to prevent bugs
+                    if (!holidayListSimpleBar) {
+                        holidayListSimpleBar = new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
+                        const scrollElement = holidayListSimpleBar.getScrollElement();
+                        const maskContainer = document.getElementById('holiday-list-container-wrapper');
+                        const maxFadeSize = 40;
 
-                    const updateMask = () => {
-                        const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+                        const updateMask = () => {
+                            const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+                            const tolerance = 1;
+                            if (scrollHeight <= clientHeight + tolerance) {
+                                maskContainer.style.setProperty('--fade-top-size', '0px');
+                                maskContainer.style.setProperty('--fade-bottom-size', '0px');
+                                return;
+                            }
+                            const scrollBottom = scrollHeight - clientHeight - scrollTop;
+                            const topFade = Math.min(scrollTop, maxFadeSize);
+                            const bottomFade = Math.min(scrollBottom, maxFadeSize);
+                            maskContainer.style.setProperty('--fade-top-size', `${topFade}px`);
+                            maskContainer.style.setProperty('--fade-bottom-size', `${bottomFade}px`);
+                        };
+
+                        scrollElement.addEventListener('scroll', updateMask);
                         
-                        const tolerance = 1;
-                        if (scrollHeight <= clientHeight + tolerance) {
-                            maskContainer.style.setProperty('--fade-top-size', '0px');
-                            maskContainer.style.setProperty('--fade-bottom-size', '0px');
-                            return;
-                        }
+                        // Also handle the original manual scroll flag listener
+                        scrollElement.addEventListener('scroll', () => {
+                            hasManuallyScrolled = true;
+                        }, { once: true });
 
-                        const scrollBottom = scrollHeight - clientHeight - scrollTop;
-                        const topFade = Math.min(scrollTop, maxFadeSize);
-                        const bottomFade = Math.min(scrollBottom, maxFadeSize);
-
-                        maskContainer.style.setProperty('--fade-top-size', `${topFade}px`);
-                        maskContainer.style.setProperty('--fade-bottom-size', `${bottomFade}px`);
-                    };
-
-                    scrollElement.addEventListener('scroll', updateMask);
-                    // Call once after a short delay to ensure layout is calculated correctly
-                    setTimeout(updateMask, 50);
-                    // --- END OF DYNAMIC MASK CODE ---
-
-                    simpleBarInstance.getScrollElement().addEventListener('scroll', () => {
-                        hasManuallyScrolled = true;
-                    }, { once: true });
+                        // Call once after a short delay to ensure layout is calculated correctly
+                        setTimeout(updateMask, 50);
+                    }
 
                     // Initial scroll is now animated
                     setTimeout(() => {
