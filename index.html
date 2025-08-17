@@ -1033,7 +1033,12 @@
             };
 
             // 切换到时光胶囊
-            profileCard.addEventListener('click', () => {
+            profileCard.addEventListener('click', (e) => { // 1. 接收 event 对象，命名为 e
+                // 2. 增加判断：如果点击的目标是 <a> 标签或其内部元素，则直接返回
+                if (e.target.closest('a')) {
+                    return;
+                }
+
                 // If the time capsule is already visible, hide it and show the main column.
                 if (!timeCapsuleCard.classList.contains('hidden')) {
                     timeCapsuleCard.classList.add('hidden');
