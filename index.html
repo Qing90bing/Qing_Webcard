@@ -13,6 +13,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* --- CSS Variables and Theming --- */
+        body.theme-dark {
+            --bg-color: #0d1a26;
+            --card-bg-color: rgba(30, 41, 59, 0.5);
+            --card-border-color: rgba(255, 255, 255, 0.1);
+            --card-hover-bg-color: rgba(30, 41, 59, 0.6);
+            --card-hover-border-color: rgba(255, 255, 255, 0.2);
+            --text-color-primary: #e5e7eb; /* gray-200 */
+            --text-color-secondary: #9ca3af; /* gray-400 */
+            --text-color-tertiary: #6b7280; /* gray-500 */
+            --accent-color: #38bdf8; /* sky-400 */
+            --accent-color-highlight: rgba(56, 189, 248, 0.15);
+            --progress-bar-bg: rgba(255, 255, 255, 0.1);
+            --link-color: #e5e7eb;
+            --link-hover-color: #fff;
+            --separator-color: rgba(255, 255, 255, 0.1);
+            --status-past: #6b7280; /* gray-500 */
+            --status-yesterday: #eab308; /* yellow-500 */
+            --status-today: #22c55e; /* green-500 */
+            --status-tomorrow: #60a5fa; /* blue-400 */
+        }
+        body.theme-light {
+            --bg-color: #f1f5f9; /* slate-100 */
+            --card-bg-color: rgba(255, 255, 255, 0.6);
+            --card-border-color: rgba(0, 0, 0, 0.08);
+            --card-hover-bg-color: rgba(255, 255, 255, 0.8);
+            --card-hover-border-color: rgba(0, 0, 0, 0.12);
+            --text-color-primary: #1e293b; /* slate-800 */
+            --text-color-secondary: #475569; /* slate-600 */
+            --text-color-tertiary: #64748b; /* slate-500 */
+            --accent-color: #3b82f6; /* blue-500 */
+            --accent-color-highlight: rgba(59, 130, 246, 0.1);
+            --progress-bar-bg: rgba(0, 0, 0, 0.08);
+            --link-color: #1e293b;
+            --link-hover-color: #000;
+            --separator-color: rgba(0, 0, 0, 0.1);
+            --status-past: #64748b; /* slate-500 */
+            --status-yesterday: #ca8a04; /* yellow-600 */
+            --status-today: #16a34a; /* green-600 */
+            --status-tomorrow: #2563eb; /* blue-600 */
+        }
+
         /* 自定义样式 */
         html, body {
             margin: 0;
@@ -22,8 +64,9 @@
         }
         body {
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
-            background-color: #0d1a26;
-            color: #e0e0e0;
+            background-color: var(--bg-color);
+            color: var(--text-color-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* 背景图片容器 */
@@ -42,17 +85,23 @@
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.5);
+            background: var(--card-bg-color);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-radius: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border-color);
             transition: all 0.3s ease;
         }
         
         .glass-card:hover {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--card-hover-bg-color);
+            border: 1px solid var(--card-hover-border-color);
+        }
+
+        /* Override for settings window to disable hover effect */
+        #settings-window.glass-card:hover {
+            background: var(--card-bg-color);
+            border: 1px solid var(--card-border-color);
         }
 
         #time-display, .runtime-number, #countdown-display, #holiday-list-container, #time-capsule-card {
@@ -62,11 +111,12 @@
         #time-display {
             font-family: 'Inter', sans-serif;
             font-weight: 700;
-            text-shadow: 0 0 10px rgba(137, 207, 240, 0.5);
+            text-shadow: 0 0 10px var(--accent-color);
         }
 
         .simplebar-scrollbar:before {
-            background-color: rgba(137, 207, 240, 0.6);
+            background-color: var(--accent-color);
+            opacity: 0.6;
             border-radius: 4px;
         }
         .simplebar-track.simplebar-vertical {
@@ -85,20 +135,20 @@
 
         /* 进度条样式 */
         .progress-bar {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: var(--progress-bar-bg);
             border-radius: 9999px;
             overflow: hidden;
         }
         .progress-bar-inner {
-            background-color: #38bdf8; /* sky-500 */
+            background-color: var(--accent-color);
             border-radius: 9999px;
             transition: width 0.5s ease-out;
         }
         
         /* 高亮最近的节日 */
         .highlight-holiday {
-            background-color: rgba(56, 189, 248, 0.15);
-            border-left: 3px solid #38bdf8;
+            background-color: var(--accent-color-highlight);
+            border-left: 3px solid var(--accent-color);
         }
 
         #holiday-list-container {
@@ -106,6 +156,9 @@
         }
         #holiday-list-year {
             transition: opacity 0.1s ease-in-out, color 0.2s ease-in-out;
+        }
+        #holiday-list-year:hover {
+            color: var(--accent-color);
         }
 
         #holiday-list-container-wrapper {
@@ -117,15 +170,19 @@
 
         #back-to-today-btn {
             display: flex;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border-color);
+            background-color: var(--accent-color);
             opacity: 0;
             transform: scale(0.9);
             visibility: hidden;
             pointer-events: none;
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s, background-color 0.2s ease;
+        }
+        #back-to-today-btn:hover {
+            opacity: 0.85 !important;
         }
         #back-to-today-btn.visible {
-            opacity: 1;
+            opacity: 0.7;
             transform: scale(1);
             visibility: visible;
             pointer-events: auto;
@@ -205,7 +262,7 @@
     }
 
     #year-input.invalid {
-        border-color: #f87171 !important; /* Tailwind red-400 */
+        border-color: #ef4444 !important; /* red-500, a consistent error color */
         animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
     }
 
@@ -226,7 +283,7 @@
     }
 
     #gh-chart-loader {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: var(--progress-bar-bg);
         animation: gh-chart-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
 
@@ -241,6 +298,222 @@
     #gh-chart-error.visible {
         display: flex;
     }
+
+    /* --- Settings UI Styles --- */
+    .setting-section {
+        border-top: 1px solid var(--separator-color);
+        padding-top: 1.5rem;
+    }
+    .setting-section:first-child {
+        border-top: none;
+        padding-top: 0;
+    }
+    .setting-radio-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s ease-in-out;
+        border: 1px solid transparent;
+    }
+    .setting-radio-label:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .setting-radio-input {
+        display: none; /* Hide original radio button */
+    }
+    .setting-radio-input:checked + .setting-radio-label {
+        background-color: rgba(56, 189, 248, 0.15);
+        border-color: rgba(56, 189, 248, 0.5);
+    }
+    .custom-radio-button {
+        width: 1.25em;
+        height: 1.25em;
+        border: 2px solid #9ca3af; /* gray-400 */
+        border-radius: 50%;
+        margin-right: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s;
+        flex-shrink: 0;
+    }
+    .setting-radio-input:checked + .setting-radio-label .custom-radio-button {
+        border-color: #38bdf8; /* sky-500 */
+    }
+    .custom-radio-button::after {
+        content: '';
+        width: 0.75em;
+        height: 0.75em;
+        background-color: #38bdf8; /* sky-500 */
+        border-radius: 50%;
+        transform: scale(0);
+        transition: transform 0.15s ease-in-out;
+    }
+    .setting-radio-input:checked + .setting-radio-label .custom-radio-button::after {
+        transform: scale(1);
+    }
+
+    #default-bg-options {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-in-out, padding-top 0.3s ease;
+        opacity: 0;
+        padding-left: 0.5rem; /* Symmetrical padding */
+        padding-right: 0.5rem; /* Symmetrical padding */
+    }
+    #default-bg-options.open {
+        max-height: 300px; /* Adjust as needed */
+        opacity: 1;
+        padding-top: 0.75rem;
+        padding-bottom: 0.5rem; /* Add space for hover effect */
+    }
+    .thumb-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 0.75rem;
+        justify-content: center;
+    }
+    .thumb-item {
+        aspect-ratio: 16 / 9;
+        border-radius: 0.5rem; /* Softer corners */
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border-color 0.2s, transform 0.2s;
+        position: relative;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .thumb-item:hover {
+        transform: scale(1.05);
+    }
+    .thumb-item.active {
+        border-color: #38bdf8; /* sky-500 */
+    }
+    .thumb-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .thumb-item .thumb-overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.875rem;
+    }
+
+    .theme-swatch {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        cursor: pointer;
+        padding: 4px;
+        border: 2px solid transparent;
+        transition: border-color 0.2s, transform 0.2s;
+    }
+    .theme-swatch:hover {
+        transform: scale(1.1);
+    }
+    .theme-swatch.active {
+        border-color: var(--accent-color);
+        transform: scale(1.1);
+    }
+    .swatch-color {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    body.theme-light .swatch-color {
+        border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .setting-btn-group {
+        display: flex;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        border: 1px solid var(--separator-color);
+    }
+    .setting-btn {
+        flex-grow: 1;
+        padding: 0.5rem 0.75rem;
+        background-color: transparent;
+        color: var(--text-color-secondary);
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+        font-size: 0.875rem;
+    }
+    .setting-btn:not(:last-child) {
+        border-right: 1px solid var(--separator-color);
+    }
+    .setting-btn.active {
+        background-color: var(--accent-color);
+        color: white;
+        font-weight: 500;
+    }
+    .setting-btn:hover:not(.active) {
+        background-color: var(--card-hover-bg-color);
+    }
+
+    .progress-bar-text {
+        color: var(--text-color-primary);
+        text-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+    body.theme-light .progress-bar-text {
+        /* In light mode, the primary text is dark, so a light shadow is better for contrast against the accent-colored bar */
+        text-shadow: 0 0 4px rgba(255,255,255,0.5);
+    }
+    
+    /* --- Toggle Switch --- */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 52px;
+        height: 28px;
+    }
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--text-color-tertiary);
+        transition: .3s;
+        border-radius: 28px;
+    }
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-radius: 50%;
+    }
+    input:checked + .toggle-slider {
+        background-color: var(--accent-color);
+    }
+    input:focus + .toggle-slider {
+        box-shadow: 0 0 1px var(--accent-color);
+    }
+    input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+    }
     </style>
 </head>
 <body>
@@ -251,28 +524,28 @@
 
                 <div class="lg:col-span-1 space-y-5 flex flex-col">
                     <div class="glass-card flex items-center justify-center p-5 gap-4">
-                        <h1 class="text-3xl font-bold text-white">Qing90bing</h1>
+                        <h1 class="text-3xl font-bold" style="color: var(--text-color-primary);">Qing90bing</h1>
                     </div>
 
                     <div id="countdown-card" class="glass-card p-5 cursor-pointer">
-                        <h2 class="text-xl font-semibold text-white mb-3 text-center">日历倒计时</h2>
-                        <div id="countdown-display" class="text-center text-lg text-sky-300 leading-relaxed">正在计算...</div>
+                        <h2 class="text-xl font-semibold mb-3 text-center" style="color: var(--text-color-primary);">日历倒计时</h2>
+                        <div id="countdown-display" class="text-center text-lg leading-relaxed" style="color: var(--accent-color);">正在计算...</div>
                     </div>
                     
                     <div id="profile-card" class="glass-card p-5 flex flex-col justify-between flex-grow cursor-pointer">
                         <div class="relative px-4 py-2">
-                            <span class="absolute top-0 left-0 text-6xl text-white/20 font-serif -translate-y-4 -translate-x-2 select-none">“</span>
-                            <p class="text-lg">Hello, World!</p>
-                            <p class="text-gray-300 mt-1">一个建立于21世纪的小站，存活于互联网的边缘</p>
-                            <span class="absolute bottom-0 right-0 text-6xl text-white/20 font-serif translate-y-6 translate-x-2 select-none">”</span>
+                            <span class="absolute top-0 left-0 text-6xl font-serif -translate-y-4 -translate-x-2 select-none" style="color: var(--separator-color);">“</span>
+                            <p class="text-lg" style="color: var(--text-color-primary);">Hello, World!</p>
+                            <p class="mt-1" style="color: var(--text-color-secondary);">一个建立于21世纪的小站，存活于互联网的边缘</p>
+                            <span class="absolute bottom-0 right-0 text-6xl font-serif translate-y-6 translate-x-2 select-none" style="color: var(--separator-color);">”</span>
                         </div>
                         <div class="mt-8">
-                            <p class="text-sm text-gray-400 mb-4">与我联系:</p>
+                            <p class="text-sm mb-4" style="color: var(--text-color-secondary);">与我联系:</p>
                             <div class="flex items-center gap-5">
-                                <a href="https://github.com/Qing90bing" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="GitHub">
+                                <a href="https://github.com/Qing90bing" target="_blank" title="GitHub" style="color: var(--text-color-secondary); transition: color 0.2s;">
                                     <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
                                 </a>
-                                <a href="mailto:1879495519@qq.com" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="Email">
+                                <a href="mailto:1879495519@qq.com" target="_blank" title="Email" style="color: var(--text-color-secondary); transition: color 0.2s;">
                                     <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Email</title><path fill="currentColor" d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>
                                 </a>
                             </div>
@@ -283,56 +556,62 @@
                 <div id="right-column" class="lg:col-span-3 space-y-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="glass-card p-5 flex flex-col justify-center items-center">
-                            <div id="date-display" class="text-lg text-gray-300"></div>
-                            <div id="time-display" class="text-6xl text-white my-1"></div>
-                            <div id="greeting" class="text-sm text-gray-400"></div>
+                            <div id="date-display" class="text-lg" style="color: var(--text-color-secondary);"></div>
+                            <div id="time-display" class="text-6xl my-1" style="color: var(--text-color-primary);"></div>
+                            <div id="greeting" class="text-sm" style="color: var(--text-color-secondary);"></div>
                         </div>
                         <div id="hitokoto-card" class="glass-card p-5 flex flex-col justify-center cursor-pointer min-h-[120px] md:min-h-full">
-                            <p id="hitokoto-text" class="text-center text-gray-200 transition-opacity duration-500 ease-in-out">正在加载一言...</p>
-                            <p id="hitokoto-from" class="text-right text-sm text-gray-400 mt-2 transition-opacity duration-500 ease-in-out"></p>
+                            <p id="hitokoto-text" class="text-center transition-opacity duration-500 ease-in-out" style="color: var(--text-color-primary);">正在加载一言...</p>
+                            <p id="hitokoto-from" class="text-right text-sm mt-2 transition-opacity duration-500 ease-in-out" style="color: var(--text-color-secondary);"></p>
                         </div>
                     </div>
                     
                     <div class="glass-card p-5">
-                        <h2 class="text-xl font-semibold text-white mb-4">
-                           <svg class="inline-block w-6 h-6 mr-2 -mt-1" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                           GitHub 贡献图
-                        </h2>
-                        <div id="gh-chart-container" class="w-full rounded-md p-2 bg-gray-800/50">
-                            <div id="gh-chart-wrapper" class="relative">
-                                <!-- Loader: Centered inside the wrapper -->
-                                <div id="gh-chart-loader" class="absolute inset-0 flex items-center justify-center">
-                                    <!-- CSS-based breathing animation will be applied here -->
+                        <div id="main-card-view-wrapper">
+                            <!-- GitHub View -->
+                            <div id="github-view">
+                                <h2 class="text-xl font-semibold mb-4" style="color: var(--text-color-primary);">
+                                   <svg class="inline-block w-6 h-6 mr-2 -mt-1" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                                   GitHub 贡献图
+                                </h2>
+                                <div id="gh-chart-container" class="w-full rounded-md p-2" style="background-color: var(--progress-bar-bg);">
+                                    <div id="gh-chart-wrapper" class="relative">
+                                        <div id="gh-chart-loader" class="absolute inset-0 flex items-center justify-center"></div>
+                                        <div id="gh-chart-error" class="absolute inset-0 hidden flex-col items-center justify-center cursor-pointer">
+                                            <svg class="w-8 h-8" style="color: var(--text-color-tertiary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.695v-2.286c0-1.033-.842-1.875-1.875-1.875H10.5a1.875 1.875 0 00-1.875 1.875v2.286m7.5 0l-3.181 3.183m0 0L12 21.354l-3.181-3.183m0 0l-3.181-3.183"></path></svg>
+                                            <p id="gh-chart-error-message" class="mt-2 text-sm" style="color: var(--text-color-secondary);">加载贡献图失败，点击重试</p>
+                                        </div>
+                                        <a href="https://github.com/Qing90bing" target="_blank" id="gh-chart-link" class="invisible">
+                                            <img id="gh-chart-img" data-src="https://ghchart.rshah.org/Qing90bing?theme=dark" alt="Qing90bing's GitHub Contribution Graph" class="w-full h-full block opacity-0 transition-opacity duration-500"/>
+                                        </a>
+                                    </div>
                                 </div>
-
-                                <!-- Error state: Centered, shown on error -->
-                                <div id="gh-chart-error" class="absolute inset-0 hidden flex-col items-center justify-center cursor-pointer">
-                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.695v-2.286c0-1.033-.842-1.875-1.875-1.875H10.5a1.875 1.875 0 00-1.875 1.875v2.286m7.5 0l-3.181 3.183m0 0L12 21.354l-3.181-3.183m0 0l-3.181-3.183"></path></svg>
-                                    <p id="gh-chart-error-message" class="mt-2 text-sm text-gray-400">加载贡献图失败，点击重试</p>
-                                </div>
-
-                                <!-- The actual image, linked -->
-                                <a href="https://github.com/Qing90bing" target="_blank" id="gh-chart-link" class="invisible">
-                                    <img id="gh-chart-img" data-src="https://ghchart.rshah.org/Qing90bing?theme=dark" alt="Qing90bing's GitHub Contribution Graph" class="w-full h-full block opacity-0 transition-opacity duration-500"/>
-                                </a>
+                            </div>
+                            <!-- Weather View -->
+                            <div id="weather-view" class="hidden">
+                                 <h2 class="text-xl font-semibold mb-4" style="color: var(--text-color-primary);">天气信息</h2>
+                                 <div id="weather-content-wrapper" class="w-full rounded-md p-2" style="background-color: var(--progress-bar-bg);">
+                                    <!-- Weather content will be injected here -->
+                                    <p style="color: var(--text-color-secondary);">正在加载天气...</p>
+                                 </div>
                             </div>
                         </div>
 
-                        <h2 class="text-xl font-semibold text-white mb-4 mt-6">
+                        <h2 class="text-xl font-semibold mb-4 mt-6" style="color: var(--text-color-primary);">
                             <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                             网站列表
                         </h2>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu" style="color: var(--text-color-primary);">
+                                <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 <span class="font-medium">博客</span>
                             </a>
-                            <a href="https://qing90bing.github.io/Qing_Music/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
+                            <a href="https://qing90bing.github.io/Qing_Music/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu" style="color: var(--text-color-primary);">
+                                <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
                                 <span class="font-medium">音乐</span>
                             </a>
-                            <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu">
-                                <svg class="w-8 h-8 mb-2 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu" style="color: var(--text-color-primary);">
+                                <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                                 <span class="font-medium">起始页</span>
                             </a>
                         </div>
@@ -342,10 +621,10 @@
                 <!-- Holiday List Card -->
                 <div id="holiday-list-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-semibold text-white">节日倒数列表</h2>
+                        <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);">节日倒数列表</h2>
                         <div class="flex items-center gap-3">
-                            <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full bg-sky-500/70 hover:bg-sky-500 transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
-                            <button id="close-holiday-list" title="关闭" class="text-gray-400 hover:text-white transition-colors">
+                            <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
+                            <button id="close-holiday-list" title="关闭" class="transition-colors" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -353,26 +632,26 @@
                     <div class="flex justify-center items-center h-8 relative">
                         <!-- Display Mode -->
                         <div id="year-display-controls" class="flex items-center gap-4 text-lg">
-                            <button id="prev-year" title="上一年" class="p-1 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all active:scale-95">
+                            <button id="prev-year" title="上一年" class="p-1 rounded-full transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
-                            <span id="holiday-list-year" class="font-bold text-white w-16 text-center cursor-pointer hover:text-sky-300 transition-colors"></span>
-                            <button id="next-year" title="下一年" class="p-1 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all active:scale-95">
+                            <span id="holiday-list-year" class="font-bold w-16 text-center cursor-pointer" style="color: var(--text-color-primary);"></span>
+                            <button id="next-year" title="下一年" class="p-1 rounded-full transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
                         <!-- Edit Mode -->
                         <div id="year-edit-controls" class="hidden flex items-center gap-2 text-lg">
-                            <input type="text" id="year-input" class="bg-slate-900/50 text-white font-bold w-20 text-center rounded-md border border-slate-600 focus:border-sky-500 focus:ring-0 px-1 py-0.5 text-lg" style="outline: none;">
-                            <button id="confirm-year-btn" title="确认" class="p-1 rounded-full text-green-400 hover:bg-white/10 transition-all active:scale-95">
+                            <input type="text" id="year-input" class="font-bold w-20 text-center rounded-md border focus:ring-0 px-1 py-0.5 text-lg" style="background-color: var(--card-bg-color); color: var(--text-color-primary); border-color: var(--separator-color); outline: none;">
+                            <button id="confirm-year-btn" title="确认" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--status-today);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             </button>
-                            <button id="cancel-year-btn" title="取消" class="p-1 rounded-full text-red-400 hover:bg-white/10 transition-all active:scale-95">
+                            <button id="cancel-year-btn" title="取消" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: #ef4444;">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
                         <!-- Error Message for input validation -->
-                        <div id="year-input-error" class="hidden absolute -bottom-6 text-red-400 text-sm font-bold"></div>
+                        <div id="year-input-error" class="hidden absolute -bottom-6 text-sm font-bold" style="color: #ef4444;"></div>
                     </div>
                     <div class="relative flex-1 min-h-0">
                         <!-- Warning is now absolutely positioned inside this container -->
@@ -388,59 +667,59 @@
                 <!-- Time Capsule Card -->
                 <div id="time-capsule-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold text-white">时光胶囊</h2>
+                        <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);">时光胶囊</h2>
                         <div class="flex items-center gap-4">
-                            <button id="open-settings-btn" title="设置" class="text-gray-400 hover:text-white transition-colors">
+                            <button id="open-settings-btn" title="设置" class="transition-colors" style="color: var(--text-color-secondary);">
                                 <i class="fas fa-gear fa-lg"></i>
                             </button>
-                            <button id="close-time-capsule" title="关闭" class="text-gray-400 hover:text-white transition-colors">
+                            <button id="close-time-capsule" title="关闭" class="transition-colors" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
                     </div>
                     <div class="space-y-5">
                         <div class="space-y-2">
-                            <div class="flex justify-between text-sm font-medium text-gray-300">
+                            <div class="flex justify-between text-sm font-medium" style="color: var(--text-color-secondary);">
                                 <span>今日已过 <span id="day-passed">0</span> 小时</span>
                                 <span>剩余 <span id="day-left">24</span> 小时</span>
                             </div>
                             <div class="progress-bar h-5 flex items-center justify-center relative">
                                 <div id="day-progress" class="progress-bar-inner absolute top-0 left-0 h-full" style="width: 0%;"></div>
-                                <span id="day-percent" class="relative z-10 text-xs font-bold text-white">0%</span>
+                                <span id="day-percent" class="relative z-10 text-xs font-bold progress-bar-text">0%</span>
                             </div>
                         </div>
                         <div class="space-y-2">
-                            <div class="flex justify-between text-sm font-medium text-gray-300">
+                            <div class="flex justify-between text-sm font-medium" style="color: var(--text-color-secondary);">
                                 <span>本周已过 <span id="week-passed">0</span> 天</span>
                                 <span>剩余 <span id="week-left">7</span> 天</span>
                             </div>
                             <div class="progress-bar h-5 flex items-center justify-center relative">
                                 <div id="week-progress" class="progress-bar-inner absolute top-0 left-0 h-full" style="width: 0%;"></div>
-                                <span id="week-percent" class="relative z-10 text-xs font-bold text-white">0%</span>
+                                <span id="week-percent" class="relative z-10 text-xs font-bold progress-bar-text">0%</span>
                             </div>
                         </div>
                         <div class="space-y-2">
-                            <div class="flex justify-between text-sm font-medium text-gray-300">
+                            <div class="flex justify-between text-sm font-medium" style="color: var(--text-color-secondary);">
                                 <span>本月已过 <span id="month-passed">0</span> 天</span>
                                 <span>剩余 <span id="month-left">30</span> 天</span>
                             </div>
                             <div class="progress-bar h-5 flex items-center justify-center relative">
                                 <div id="month-progress" class="progress-bar-inner absolute top-0 left-0 h-full" style="width: 0%;"></div>
-                                <span id="month-percent" class="relative z-10 text-xs font-bold text-white">0%</span>
+                                <span id="month-percent" class="relative z-10 text-xs font-bold progress-bar-text">0%</span>
                             </div>
                         </div>
                         <div class="space-y-2">
-                            <div class="flex justify-between text-sm font-medium text-gray-300">
+                            <div class="flex justify-between text-sm font-medium" style="color: var(--text-color-secondary);">
                                 <span>今年已过 <span id="year-passed">0</span> 天</span>
                                 <span>剩余 <span id="year-left">365</span> 天</span>
                             </div>
                             <div class="progress-bar h-5 flex items-center justify-center relative">
                                 <div id="year-progress" class="progress-bar-inner absolute top-0 left-0 h-full" style="width: 0%;"></div>
-                                <span id="year-percent" class="relative z-10 text-xs font-bold text-white">0%</span>
+                                <span id="year-percent" class="relative z-10 text-xs font-bold progress-bar-text">0%</span>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-6 text-center text-gray-300">
+                    <div class="mt-6 text-center" style="color: var(--text-color-secondary);">
                         <p id="site-runtime-display">正在计算...</p>
                     </div>
                 </div>
@@ -454,20 +733,51 @@
         <div id="settings-window" class="glass-card w-full max-w-2xl p-5 flex flex-col overflow-y-auto">
             <!-- Header -->
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold text-white">设置</h2>
-                <button id="close-settings-btn" title="关闭" class="text-gray-400 hover:text-white transition-colors">
+                <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);">设置</h2>
+                <button id="close-settings-btn" title="关闭" style="color: var(--text-color-secondary);">
                     <i class="fas fa-times fa-lg"></i>
                 </button>
             </div>
             <!-- Content -->
-            <div class="flex-grow text-center text-gray-400 py-8">
-                <p>设置内容待添加...</p>
+            <div class="flex-grow" data-simplebar>
+                <div class="space-y-6 p-3">
+                    <!-- 1. Background Settings -->
+                    <div class="setting-section">
+                        <h3 class="text-lg font-semibold mb-3" style="color: var(--text-color-primary);">背景来源</h3>
+                        <div id="background-settings-content" class="space-y-2">
+                            <!-- Background options will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- 2. Theme Color Settings -->
+                    <div class="setting-section">
+                        <h3 class="text-lg font-semibold mb-3" style="color: var(--text-color-primary);">主题模式</h3>
+                        <div id="theme-settings-content" class="flex flex-wrap gap-4">
+                            <!-- Theme color swatches will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- 3. GitHub/Weather Toggle -->
+                    <div class="setting-section">
+                        <h3 class="text-lg font-semibold mb-3" style="color: var(--text-color-primary);">主卡片视图</h3>
+                        <div id="view-toggle-content">
+                            <!-- The toggle switch for GitHub/Weather will be inserted here -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
         // --- 初始状态和常量 ---
+        const DEFAULT_BG_IMAGES = [
+            'https://s21.ax1x.com/2025/08/10/pVdEmM6.jpg',
+            'https://s21.ax1x.com/2025/08/10/pVdEnsK.jpg',
+            'https://s21.ax1x.com/2025/08/10/pVdEuqO.jpg',
+            'https://s21.ax1x.com/2025/08/10/pVdEQde.jpg',
+            'https://s21.ax1x.com/2025/08/10/pVdEMZD.jpg'
+        ];
         const lunarInfo = [0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2, 0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977, 0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970, 0x06566, 0x0d4a0, 0x0ea50, 0x06e95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950, 0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557, 0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5d0, 0x14573, 0x052d0, 0x0a9a8, 0x0e950, 0x06aa0, 0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0, 0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b5a0, 0x195a6, 0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570, 0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x055c0, 0x0ab60, 0x096d5, 0x092e0, 0x0c960, 0xd954, 0x0d4a0, 0xda50, 0x07552, 0x056a0, 0xabb7, 0x025d0, 0x092d0, 0x0cab5, 0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930, 0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530, 0x05aa0, 0x076a3, 0x096d0, 0x04bd7, 0x04ad0, 0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45, 0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0];
         const solarTerm = ["小寒", "大寒", "立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至"];
         const sTermInfo = [0, 21208, 42467, 63836, 85337, 107014, 128867, 150921, 173149, 195551, 218072, 240693, 263343, 285989, 308563, 331033, 353350, 375494, 397447, 419210, 440795, 462224, 483532, 504758];
@@ -510,6 +820,7 @@
         let holidayListDisplayedYear = new Date().getFullYear();
         let hasManuallyScrolled = false;
         let holidayListSimpleBar; // Instance for the holiday list scrollbar
+        let settingsSimpleBar = null; // Instance for the settings scrollbar
 
         // --- DOM 元素获取 ---
         const bgContainer = document.getElementById('bg-container');
@@ -533,14 +844,7 @@
 
         // --- 设置随机背景图片 ---
         function setRandomBackground() {
-            const myImages = [
-                'https://s21.ax1x.com/2025/08/10/pVdEmM6.jpg',
-                'https://s21.ax1x.com/2025/08/10/pVdEnsK.jpg',
-                'https://s21.ax1x.com/2025/08/10/pVdEuqO.jpg',
-                'https://s21.ax1x.com/2025/08/10/pVdEQde.jpg',
-                'https://s21.ax1x.com/2025/08/10/pVdEMZD.jpg'
-            ];
-            const randomImageUrl = myImages[Math.floor(Math.random() * myImages.length)];
+            const randomImageUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
             const img = new Image();
             img.src = randomImageUrl;
             img.onload = () => {
@@ -915,11 +1219,11 @@
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                 if (diffDays === 0) {
-                    countdownDisplay.innerHTML = `<span class="text-lg text-white">今天</span><br><strong class="text-3xl font-bold text-sky-300">${nextHoliday.name}</strong>`;
+                    countdownDisplay.innerHTML = `<span class="text-lg" style="color: var(--text-color-primary);">今天</span><br><strong class="text-3xl font-bold" style="color: var(--accent-color);">${nextHoliday.name}</strong>`;
                 } else if (diffDays === 1) {
-                    countdownDisplay.innerHTML = `<span class="text-lg text-white">明天</span><br><strong class="text-3xl font-bold text-sky-300">${nextHoliday.name}</strong>`;
+                    countdownDisplay.innerHTML = `<span class="text-lg" style="color: var(--text-color-primary);">明天</span><br><strong class="text-3xl font-bold" style="color: var(--accent-color);">${nextHoliday.name}</strong>`;
                 } else {
-                    countdownDisplay.innerHTML = `<span class="text-white">距离</span><br><strong class="text-xl text-white">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`;
+                    countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><strong class="text-xl" style="color: var(--text-color-primary);">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`;
                 }
             } else {
                 countdownDisplay.textContent = '所有节日都已计算完毕！';
@@ -951,21 +1255,21 @@
                 let html = '';
                 for (let month = 0; month < 12; month++) {
                     if (holidaysByMonth[month]) {
-                        html += `<div class="mb-3"><h3 class="text-lg font-semibold text-white/80 border-b border-white/10 pb-1 mb-2">${month + 1}月</h3>`;
+                        html += `<div class="mb-3"><h3 class="text-lg font-semibold border-b pb-1 mb-2" style="color: var(--text-color-secondary); border-color: var(--separator-color);">${month + 1}月</h3>`;
                         holidaysByMonth[month].forEach(holiday => {
                             const diffTime = holiday.date - today;
                             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                             let statusText = '';
                             if (holiday.date.getFullYear() < now.getFullYear() || (holiday.date.getFullYear() === now.getFullYear() && diffDays < -1)) {
-                                statusText = `<span class="text-gray-500">已过</span>`;
+                                statusText = `<span style="color: var(--status-past);">已过</span>`;
                             } else if (diffDays === -1) {
-                                statusText = `<span class="text-yellow-400">昨天</span>`;
+                                statusText = `<span style="color: var(--status-yesterday);">昨天</span>`;
                             } else if (diffDays === 0) {
-                                statusText = `<span class="text-green-400 font-bold">今天</span>`;
+                                statusText = `<span style="color: var(--status-today); font-weight: bold;">今天</span>`;
                             } else if (diffDays === 1) {
-                                statusText = `<span class="text-blue-400 font-bold">明天</span>`;
+                                statusText = `<span style="color: var(--status-tomorrow); font-weight: bold;">明天</span>`;
                             } else {
-                                statusText = `<span class="text-sky-300">${diffDays} 天</span>`;
+                                statusText = `<span style="color: var(--accent-color);">${diffDays} 天</span>`;
                             }
                             
                             const isHighlighted = firstUpcoming && firstUpcoming.name === holiday.name && firstUpcoming.date.getTime() === holiday.date.getTime();
@@ -974,8 +1278,8 @@
                             html += `
                                 <div class="flex justify-between items-center p-2 rounded-lg ${highlightClass}">
                                     <div>
-                                        <span class="text-white">${holiday.name}</span>
-                                        <span class="text-xs text-gray-400 ml-2">${String(holiday.date.getMonth() + 1).padStart(2, '0')}-${String(holiday.date.getDate()).padStart(2, '0')}</span>
+                                        <span style="color: var(--text-color-primary);">${holiday.name}</span>
+                                        <span class="text-xs ml-2" style="color: var(--text-color-secondary);">${String(holiday.date.getMonth() + 1).padStart(2, '0')}-${String(holiday.date.getDate()).padStart(2, '0')}</span>
                                     </div>
                                     ${statusText}
                                 </div>
@@ -1218,7 +1522,7 @@
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-            displayElement.innerHTML = `小破站已经在风雨中度过了 <span class="text-white font-semibold runtime-number">${days}</span> 天 <span class="text-white font-semibold runtime-number">${hours}</span> 小时 <span class="text-white font-semibold runtime-number">${minutes}</span> 分 <span class="text-white font-semibold runtime-number">${seconds}</span> 秒`;
+            displayElement.innerHTML = `小破站已经在风雨中度过了 <span class="font-semibold runtime-number" style="color: var(--text-color-primary);">${days}</span> 天 <span class="font-semibold runtime-number" style="color: var(--text-color-primary);">${hours}</span> 小时 <span class="font-semibold runtime-number" style="color: var(--text-color-primary);">${minutes}</span> 分 <span class="font-semibold runtime-number" style="color: var(--text-color-primary);">${seconds}</span> 秒`;
         }
 
         // --- GitHub Chart Loader Logic ---
@@ -1263,8 +1567,516 @@
             loadImage();
         }
 
+        // --- [NEW] Settings Panel UI Generation ---
+        function setupSettingsUI() {
+            // --- 1. Background Settings ---
+            const bgSettingsContainer = document.getElementById('background-settings-content');
+            if (bgSettingsContainer) {
+                const bgOptions = [
+                    { value: 'default', label: '默认图片' },
+                    { value: 'bing', label: '每日一Bing' },
+                    { value: 'anime', label: '随机动漫' },
+                    { value: 'random', label: '随机图片' }
+                ];
+
+                let bgSettingsHTML = '';
+                bgOptions.forEach(option => {
+                    bgSettingsHTML += `
+                        <div>
+                            <input type="radio" id="bg-radio-${option.value}" name="background-source" value="${option.value}" class="setting-radio-input">
+                            <label for="bg-radio-${option.value}" class="setting-radio-label">
+                                <span class="custom-radio-button"></span>
+                                <span>${option.label}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+                
+                let defaultOptionsHTML = `
+                    <div id="default-bg-options">
+                        <div class="thumb-container">
+                            <div class="thumb-item" data-bg-url="random">
+                                <div class="thumb-overlay">随机</div>
+                            </div>
+                `;
+                DEFAULT_BG_IMAGES.forEach((url, index) => {
+                    defaultOptionsHTML += `
+                        <div class="thumb-item" data-bg-url="${url}">
+                            <img src="${url}" alt="Default Background ${index + 1}" loading="lazy">
+                        </div>
+                    `;
+                });
+                defaultOptionsHTML += `</div></div>`;
+
+                bgSettingsContainer.innerHTML = bgSettingsHTML + defaultOptionsHTML;
+            }
+        }
+
+        // --- [NEW] Settings Management ---
+        let appSettings = {
+            background: {
+                source: 'default',
+                specifier: 'random'
+            },
+            theme: 'system', // 'system', 'light', 'dark'
+            view: 'github',
+            weather: {
+                city: null, // User-overridden city
+                lastFetchedCity: null // City from last successful fetch
+            }
+        };
+
+        const WEATHER_TIPS = {
+            sunny: ["阳光明媚，适合出门散步。", "天气晴朗，心情也跟着阳光起来！", "今天紫外线可能较强，注意防晒哦。"],
+            rain: ["下雨了，出门别忘了带伞。", "雨天路滑，出行请注意安全。", "细雨蒙蒙，最适合听音乐、读本书。"],
+            snow: ["下雪啦！注意保暖，小心地滑。", "瑞雪兆丰年，冬天快乐！", "雪天路况复杂，请谨慎驾驶。"],
+            cloudy: ["虽然是多云，但也要保持好心情。", "云层稍厚，但偶尔也会有阳光。", "阴天，是适合思念和放空的天气。"],
+            overcast: ["天空阴沉沉的，但别让它影响你的好心情。", "阴天，适合静下心来，享受宁静。", "今天可能看不到蓝天白云了，但有另一番景致。"],
+            hot: ["天气炎热，注意防暑降温，多喝水。", "热浪来袭，尽量避免午后长时间户外活动。", "心静自然凉，但空调也许是更好的选择。"],
+            cold: ["天气转冷，及时增添衣物，谨防感冒。", "寒风凛冽，喝杯热茶暖暖身子吧。", "冬天到啦，保暖是第一要务。"],
+            windy: ["今天风有点大，出门戴好帽子，小心发型。", "风大的日子，适合在室内感受安逸。", "听，风在唱歌。"],
+            fog: ["大雾弥漫，能见度低，出行注意安全。", "雾天开车，请减速慢行，保持车距。", "今天的世界，仿佛加了一层朦胧滤镜。"],
+            default: ["愿你眼里的星星，永远闪亮。", "生活或许不易，但请别忘了微笑。😊", "每一天都是一份独一無二的礼物。"]
+        };
+
+        function getWeatherTip(current, forecast) {
+            const tempC = parseInt(current.temp_C);
+            const weatherDesc = current.weatherDesc[0].value.toLowerCase();
+            const month = new Date().getMonth() + 1; // 1-12
+            const isWinter = month === 12 || month === 1 || month === 2;
+
+            if (tempC > 30) return WEATHER_TIPS.hot[Math.floor(Math.random() * WEATHER_TIPS.hot.length)];
+            if (tempC < 5) return WEATHER_TIPS.cold[Math.floor(Math.random() * WEATHER_TIPS.cold.length)];
+
+            if (weatherDesc.includes('rain') || weatherDesc.includes('shower')) return WEATHER_TIPS.rain[Math.floor(Math.random() * WEATHER_TIPS.rain.length)];
+            if (weatherDesc.includes('snow') || weatherDesc.includes('sleet') || weatherDesc.includes('blizzard')) return WEATHER_TIPS.snow[Math.floor(Math.random() * WEATHER_TIPS.snow.length)];
+            
+            if ((weatherDesc.includes('sunny') || weatherDesc.includes('clear')) && !isWinter) {
+                 return WEATHER_TIPS.sunny[Math.floor(Math.random() * WEATHER_TIPS.sunny.length)];
+            } else if (weatherDesc.includes('sunny') || weatherDesc.includes('clear')) {
+                return "冬日暖阳，难得的好天气！";
+            }
+
+            if (weatherDesc.includes('overcast')) return WEATHER_TIPS.overcast[Math.floor(Math.random() * WEATHER_TIPS.overcast.length)];
+            if (weatherDesc.includes('cloudy') || weatherDesc.includes('mist')) return WEATHER_TIPS.cloudy[Math.floor(Math.random() * WEATHER_TIPS.cloudy.length)];
+            if (parseInt(current.windspeedKmph) > 30) return WEATHER_TIPS.windy[Math.floor(Math.random() * WEATHER_TIPS.windy.length)];
+            if (weatherDesc.includes('fog')) return WEATHER_TIPS.fog[Math.floor(Math.random() * WEATHER_TIPS.fog.length)];
+
+            return WEATHER_TIPS.default[Math.floor(Math.random() * WEATHER_TIPS.default.length)];
+        }
+
+
+        // --- [NEW] Weather Fetching Logic ---
+        async function fetchAndDisplayWeather() {
+            const weatherWrapper = document.getElementById('weather-content-wrapper');
+            weatherWrapper.innerHTML = `<p style="color: var(--text-color-secondary);">正在获取天气...</p>`;
+
+            let location = appSettings.weather.city;
+
+            if (!location) {
+                try {
+                    const ipResponse = await fetch('https://ipapi.co/json/');
+                    if (!ipResponse.ok) throw new Error('IP API request failed');
+                    const ipData = await ipResponse.json();
+                    location = ipData.city || 'auto:ip';
+                } catch (e) {
+                    console.error("IP-based geolocation failed.", e);
+                    weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p>`;
+                    return;
+                }
+            }
+
+            try {
+                const weatherResponse = await fetch(`https://wttr.in/${encodeURIComponent(location)}?format=j1`);
+                if (!weatherResponse.ok) throw new Error(`Weather data not found for ${location}`);
+                const data = await weatherResponse.json();
+                
+                const current = data.current_condition[0];
+                const forecast = data.weather[0];
+                const nearestArea = data.nearest_area[0];
+                
+                appSettings.weather.lastFetchedCity = `${nearestArea.areaName[0].value}, ${nearestArea.country[0].value}`;
+                saveSettings();
+                
+                const tip = getWeatherTip(current, forecast);
+
+                // --- Render HTML ---
+                weatherWrapper.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-2xl font-bold" style="color: var(--text-color-primary);">${current.temp_C}°C</p>
+                            <p class="text-sm" style="color: var(--text-color-secondary);">${current.weatherDesc[0].value}, 体感 ${current.FeelsLikeC}°C</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold" style="color: var(--text-color-primary);">${nearestArea.areaName[0].value}</p>
+                            <p class="text-xs" style="color: var(--text-color-secondary);">${nearestArea.country[0].value}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm space-y-2">
+                        <div class="flex justify-between">
+                            <span style="color: var(--text-color-secondary);">最高/最低</span>
+                            <span style="color: var(--text-color-primary);">${forecast.maxtempC}°C / ${forecast.mintempC}°C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span style="color: var(--text-color-secondary);">风速</span>
+                            <span style="color: var(--text-color-primary);">${current.windspeedKmph} km/h</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span style="color: var(--text-color-secondary);">湿度</span>
+                            <span style="color: var(--text-color-primary);">${current.humidity}%</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 text-center text-xs" style="border-top: 1px solid var(--separator-color); color: var(--text-color-tertiary);">
+                        ${tip}
+                    </div>
+                `;
+                
+                updateSettingsUI(); // Update UI with new city name if it was auto-detected
+            } catch (e) {
+                console.error("Failed to fetch weather data.", e);
+                weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">无法加载 "${location}" 的天气信息。</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请检查城市名称或网络连接。</p>`;
+                appSettings.weather.lastFetchedCity = '加载失败';
+                updateSettingsUI();
+            }
+        }
+
+
+        function saveSettings() {
+            localStorage.setItem('qing-homepage-settings', JSON.stringify(appSettings));
+        }
+
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('qing-homepage-settings');
+            if (savedSettings) {
+                try {
+                    const parsedSettings = JSON.parse(savedSettings);
+                    // Merge saved settings with defaults to ensure compatibility with future updates
+                    appSettings = {
+                        ...appSettings,
+                        ...parsedSettings,
+                        background: { ...appSettings.background, ...parsedSettings.background },
+                    };
+                } catch (e) {
+                    console.error("Failed to parse settings from localStorage", e);
+                    // If parsing fails, use default settings
+                }
+            }
+        }
+        
+        async function applyCurrentBackground() {
+            const { source, specifier } = appSettings.background;
+            let imageUrl = '';
+            const bgContainer = document.getElementById('bg-container');
+        
+            // This function replaces the old `setRandomBackground`
+            // It directly uses the settings state.
+            const showImage = (url) => {
+                const img = new Image();
+                img.src = url;
+                img.onload = () => {
+                    bgContainer.style.backgroundImage = `url('${url}')`;
+                    bgContainer.style.opacity = 1;
+                };
+                img.onerror = () => {
+                    console.error(`Failed to load image: ${url}. Falling back to default.`);
+                    // Fallback to a truly random default image on error
+                    const randomFallbackUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
+                    showImage(randomFallbackUrl);
+                };
+            };
+
+            bgContainer.style.opacity = 0; // Fade out before loading new image
+
+            try {
+                switch (source) {
+                    case 'bing':
+                        // Using a CORS proxy for client-side reliability
+                        const bingResponse = await fetch('https://cors.eu.org/https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN');
+                        if (!bingResponse.ok) throw new Error('Bing API request failed');
+                        const bingData = await bingResponse.json();
+                        imageUrl = `https://www.bing.com${bingData.images[0].url}`;
+                        break;
+                    case 'anime':
+                        // Add a timestamp to prevent caching
+                        imageUrl = 'https://api.btstu.cn/sjbz/api.php?lx=dongman&format=images&_t=' + Date.now();
+                        break;
+                    case 'random':
+                        imageUrl = 'https://api.btstu.cn/sjbz/api.php?lx=suiji&format=images&_t=' + Date.now();
+                        break;
+                    case 'default':
+                    default:
+                        if (specifier && specifier !== 'random' && DEFAULT_BG_IMAGES.includes(specifier)) {
+                            imageUrl = specifier;
+                        } else {
+                            imageUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
+                        }
+                        break;
+                }
+                showImage(imageUrl);
+            } catch (error) {
+                console.error(`Error fetching background from source: ${source}`, error);
+                // Fallback to a random default image on any error
+                const randomFallbackUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
+                showImage(randomFallbackUrl);
+            }
+        }
+
+        function updateBgSettingsUI() {
+            const { source, specifier } = appSettings.background;
+
+            // Update radio buttons
+            const radio = document.querySelector(`input[name="background-source"][value="${source}"]`);
+            if (radio) {
+                radio.checked = true;
+            }
+
+            // Update thumbnail selection
+            const defaultOptionsContainer = document.getElementById('default-bg-options');
+            const allThumbs = defaultOptionsContainer.querySelectorAll('.thumb-item');
+            allThumbs.forEach(thumb => thumb.classList.remove('active'));
+            
+            const activeThumb = defaultOptionsContainer.querySelector(`.thumb-item[data-bg-url="${specifier}"]`);
+            if (activeThumb) {
+                activeThumb.classList.add('active');
+            }
+
+            // Show/hide thumbnail section
+            if (source === 'default') {
+                defaultOptionsContainer.classList.add('open');
+            } else {
+                defaultOptionsContainer.classList.remove('open');
+            }
+        }
+
+        function updateThemeSettingsUI() {
+            const currentTheme = appSettings.theme;
+            document.querySelectorAll('.setting-btn-group .setting-btn').forEach(btn => {
+                if (btn.dataset.theme === currentTheme) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        // --- [NEW] Settings Panel UI Generation ---
+        function setupSettingsUI() {
+            // --- 1. Background Settings ---
+            const bgSettingsContainer = document.getElementById('background-settings-content');
+            if (bgSettingsContainer) {
+                const bgOptions = [
+                    { value: 'default', label: '默认图片' },
+                    { value: 'bing', label: '每日一Bing' },
+                    { value: 'anime', label: '随机动漫' },
+                    { value: 'random', label: '随机图片' }
+                ];
+
+                let bgSettingsHTML = '';
+                bgOptions.forEach(option => {
+                    bgSettingsHTML += `
+                        <div>
+                            <input type="radio" id="bg-radio-${option.value}" name="background-source" value="${option.value}" class="setting-radio-input">
+                            <label for="bg-radio-${option.value}" class="setting-radio-label">
+                                <span class="custom-radio-button"></span>
+                                <span>${option.label}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+                
+                let defaultOptionsHTML = `
+                    <div id="default-bg-options">
+                        <div class="thumb-container">
+                            <div class="thumb-item" data-bg-url="random">
+                                <div class="thumb-overlay">随机</div>
+                            </div>
+                `;
+                DEFAULT_BG_IMAGES.forEach((url, index) => {
+                    defaultOptionsHTML += `
+                        <div class="thumb-item" data-bg-url="${url}">
+                            <img src="${url}" alt="Default Background ${index + 1}" loading="lazy">
+                        </div>
+                    `;
+                });
+                defaultOptionsHTML += `</div></div>`;
+
+                bgSettingsContainer.innerHTML = bgSettingsHTML + defaultOptionsHTML;
+            }
+
+            // --- 2. Theme Mode Settings ---
+            const themeSettingsContainer = document.getElementById('theme-settings-content').parentElement;
+            if (themeSettingsContainer) {
+                themeSettingsContainer.querySelector('h3').textContent = '主题模式';
+                const container = themeSettingsContainer.querySelector('#theme-settings-content');
+                container.innerHTML = `
+                    <div class="setting-btn-group w-full">
+                        <button class="setting-btn" data-theme="system">跟随系统</button>
+                        <button class="setting-btn" data-theme="light">日间模式</button>
+                        <button class="setting-btn" data-theme="dark">夜间模式</button>
+                    </div>
+                `;
+            }
+
+            // --- 3. View Toggle Settings ---
+            const viewToggleContainer = document.getElementById('view-toggle-content');
+            if (viewToggleContainer) {
+                viewToggleContainer.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-col">
+                            <span class="font-medium">主卡片视图</span>
+                            <span id="view-toggle-label" class="text-sm mt-1" style="color: var(--text-color-secondary);">当前显示: GitHub 贡献图</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="view-toggle-checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="manual-city-input-wrapper" class="mt-2 pl-1" style="max-height: 0; overflow: hidden; transition: all 0.3s ease;">
+                         <input type="text" id="weather-city-input" placeholder="手动输入城市 (回车确认)" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); border-color: var(--separator-color); color: var(--text-color-primary);">
+                    </div>
+                `;
+            }
+        }
+
+        function updateViewToggleUI() {
+            const toggle = document.getElementById('view-toggle-checkbox');
+            const label = document.getElementById('view-toggle-label');
+            const cityInputWrapper = document.getElementById('manual-city-input-wrapper');
+            const cityInput = document.getElementById('weather-city-input');
+
+            const isWeatherView = appSettings.view === 'weather';
+            toggle.checked = isWeatherView;
+            label.textContent = isWeatherView ? '当前显示: 天气信息' : '当前显示: GitHub 贡献图';
+            
+            cityInputWrapper.style.maxHeight = isWeatherView ? '50px' : '0';
+            cityInputWrapper.style.marginTop = isWeatherView ? '0.5rem' : '0';
+
+            if (isWeatherView) {
+                cityInput.placeholder = appSettings.weather.city || appSettings.weather.lastFetchedCity || '手动输入城市';
+            }
+        }
+
+        function updateSettingsUI() {
+            updateBgSettingsUI();
+            updateThemeSettingsUI();
+            updateViewToggleUI();
+        }
+
+        // --- [NEW] View (GitHub/Weather) Management ---
+        function applyCurrentView() {
+            const githubView = document.getElementById('github-view');
+            const weatherView = document.getElementById('weather-view');
+            
+            if (appSettings.view === 'weather') {
+                githubView.classList.add('hidden');
+                weatherView.classList.remove('hidden');
+                fetchAndDisplayWeather();
+            } else {
+                weatherView.classList.add('hidden');
+                githubView.classList.remove('hidden');
+            }
+        }
+
+        function applyCurrentTheme() {
+            const body = document.body;
+            // Clear all theme-* classes before adding the new one
+            body.classList.forEach(className => {
+                if (className.startsWith('theme-')) {
+                    body.classList.remove(className);
+                }
+            });
+
+            let themeToApply;
+            if (appSettings.theme === 'system') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                themeToApply = prefersDark ? 'theme-dark' : 'theme-light';
+            } else {
+                themeToApply = `theme-${appSettings.theme}`;
+            }
+            body.classList.add(themeToApply);
+        }
+
         // --- 交互事件监听 ---
         function setupEventListeners() {
+            // --- Theme Settings Listeners ---
+            document.querySelectorAll('.setting-btn-group .setting-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const theme = btn.dataset.theme;
+                    appSettings.theme = theme;
+                    applyCurrentTheme();
+                    saveSettings();
+                    updateThemeSettingsUI(); // Update active state
+                });
+            });
+
+            // --- Background Settings Listeners ---
+            const bgRadioButtons = document.querySelectorAll('input[name="background-source"]');
+            const defaultOptionsContainer = document.getElementById('default-bg-options');
+
+            bgRadioButtons.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const source = radio.value;
+                    appSettings.background.source = source;
+
+                    if (source === 'default') {
+                        defaultOptionsContainer.classList.add('open');
+                        // When switching to default, immediately apply the currently selected default image
+                        applyCurrentBackground();
+                    } else {
+                        defaultOptionsContainer.classList.remove('open');
+                        applyCurrentBackground();
+                    }
+                    saveSettings();
+                });
+            });
+
+            const thumbItems = defaultOptionsContainer.querySelectorAll('.thumb-item');
+            thumbItems.forEach(thumb => {
+                thumb.addEventListener('click', () => {
+                    // This listener only matters when the 'default' source is active
+                    if (appSettings.background.source !== 'default') {
+                        // To be safe, check the 'default' radio
+                        document.getElementById('bg-radio-default').checked = true;
+                        appSettings.background.source = 'default';
+                    }
+                    
+                    const specifier = thumb.dataset.bgUrl;
+                    appSettings.background.specifier = specifier;
+                    
+                    // Update UI immediately for responsiveness
+                    thumbItems.forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                    
+                    applyCurrentBackground();
+                    saveSettings();
+                });
+            });
+
+
+            // --- View Toggle Listeners ---
+            const viewToggle = document.getElementById('view-toggle-checkbox');
+            const cityInput = document.getElementById('weather-city-input');
+
+            viewToggle.addEventListener('change', () => {
+                appSettings.view = viewToggle.checked ? 'weather' : 'github';
+                applyCurrentView();
+                updateViewToggleUI();
+                saveSettings();
+            });
+
+            cityInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const newCity = e.target.value.trim();
+                    if (newCity) {
+                        appSettings.weather.city = newCity;
+                        fetchAndDisplayWeather(); // Re-fetch with new city
+                        e.target.blur();
+                        e.target.value = ''; // Clear input after submission
+                    }
+                }
+            });
+
+
             // --- Settings Modal Logic ---
             const openSettingsBtn = document.getElementById('open-settings-btn');
             const settingsOverlay = document.getElementById('settings-overlay');
@@ -1528,12 +2340,17 @@
 
         // --- 页面加载时执行的函数 ---
         document.addEventListener('DOMContentLoaded', () => {
-            setRandomBackground();
+            loadSettings();
+            applyCurrentTheme();
+            applyCurrentBackground();
+            applyCurrentView(); // This will fetch weather if needed
+
             updateTime();
             updateGreeting();
             updateCountdown();
             fetchHitokoto();
             setupGitHubChartLoader();
+            
             // 确保布局稳定后再获取高度，并同步卡片高度
             setTimeout(() => {
                 // 仅在桌面视图（lg断点以上）应用固定高度，防止影响移动端布局
@@ -1543,8 +2360,11 @@
                     holidayListCard.style.height = `${rightColumnHeight}px`;
                     timeCapsuleCard.style.height = `${rightColumnHeight}px`;
                 }
+                setupSettingsUI();
                 setupEventListeners();
+                updateSettingsUI(); // Update UI to reflect loaded settings
             }, 100);
+
             updateSiteRuntime();
             updateTimeCapsule();
             
@@ -1553,6 +2373,12 @@
             setInterval(updateGreeting, 1800000); 
             setInterval(updateCountdown, 3600000); 
             setInterval(updateTimeCapsule, 60000);
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (appSettings.theme === 'system') {
+                    applyCurrentTheme();
+                }
+            });
         });
     </script>
 </body>
