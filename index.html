@@ -16,9 +16,9 @@
         /* --- CSS Variables and Theming --- */
         body.theme-dark {
             --bg-color: #0d1a26;
-            --card-bg-color: rgba(30, 41, 59, 0.5);
+            --card-bg-color: rgba(30, 41, 59, 0.7);
             --card-border-color: rgba(255, 255, 255, 0.1);
-            --card-hover-bg-color: rgba(30, 41, 59, 0.6);
+            --card-hover-bg-color: rgba(30, 41, 59, 0.75);
             --card-hover-border-color: rgba(255, 255, 255, 0.2);
             --text-color-primary: #e5e7eb; /* gray-200 */
             --text-color-secondary: #9ca3af; /* gray-400 */
@@ -36,9 +36,9 @@
         }
         body.theme-light {
             --bg-color: #f1f5f9; /* slate-100 */
-            --card-bg-color: rgba(255, 255, 255, 0.6);
+            --card-bg-color: rgba(255, 255, 255, 0.7);
             --card-border-color: rgba(0, 0, 0, 0.08);
-            --card-hover-bg-color: rgba(255, 255, 255, 0.8);
+            --card-hover-bg-color: rgba(255, 255, 255, 0.75);
             --card-hover-border-color: rgba(0, 0, 0, 0.12);
             --text-color-primary: #1e293b; /* slate-800 */
             --text-color-secondary: #475569; /* slate-600 */
@@ -66,7 +66,7 @@
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.1s ease, color 0.1s ease;
         }
 
         /* 背景图片容器 */
@@ -1798,10 +1798,10 @@
                         break;
                     case 'anime':
                         // Add a timestamp to prevent caching
-                        imageUrl = 'https://api.btstu.cn/sjbz/api.php?lx=dongman&format=images&_t=' + Date.now();
+                        imageUrl = 'https://api.sretna.cn/api/anime.php';
                         break;
                     case 'random':
-                        imageUrl = 'https://api.btstu.cn/sjbz/api.php?lx=suiji&format=images&_t=' + Date.now();
+                        imageUrl = 'https://imgapi.cn/api.php?zd=zsy&fl=fengjing&gs=images';
                         break;
                     case 'default':
                     default:
@@ -1923,7 +1923,7 @@
                 viewToggleContainer.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex flex-col">
-                            <span class="font-medium">主卡片视图</span>
+                            <span class="font-medium">是否切换GitHub贡献图为天气信息</span>
                             <span id="view-toggle-label" class="text-sm mt-1" style="color: var(--text-color-secondary);">当前显示: GitHub 贡献图</span>
                         </div>
                         <label class="toggle-switch">
