@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* 自定义样式 */
         html, body {
@@ -132,6 +133,35 @@
 
         #main-wrapper {
             height: 100vh;
+            transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, opacity 0.2s ease-in-out;
+        }
+        
+        /* --- Settings Modal States --- */
+        #settings-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s;
+        }
+        #settings-window {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease-in-out;
+        }
+
+        body.settings-open #main-wrapper {
+            transform: scale(0.98);
+            filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+        }
+        body.settings-open #settings-overlay {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0s;
+        }
+        body.settings-open #settings-window {
+            transform: scale(1);
+            opacity: 1;
         }
 
     @media (max-width: 1023px) {
@@ -359,9 +389,14 @@
                 <div id="time-capsule-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-semibold text-white">时光胶囊</h2>
-                        <button id="close-time-capsule" title="关闭" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
+                        <div class="flex items-center gap-4">
+                            <button id="open-settings-btn" title="设置" class="text-gray-400 hover:text-white transition-colors">
+                                <i class="fas fa-gear fa-lg"></i>
+                            </button>
+                            <button id="close-time-capsule" title="关闭" class="text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="space-y-5">
                         <div class="space-y-2">
@@ -411,6 +446,23 @@
                 </div>
 
             </main>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-overlay" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4" style="z-index: 50;">
+        <div id="settings-window" class="glass-card w-full max-w-2xl p-5 flex flex-col overflow-y-auto">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-white">设置</h2>
+                <button id="close-settings-btn" title="关闭" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times fa-lg"></i>
+                </button>
+            </div>
+            <!-- Content -->
+            <div class="flex-grow text-center text-gray-400 py-8">
+                <p>设置内容待添加...</p>
+            </div>
         </div>
     </div>
     
@@ -467,6 +519,7 @@
         const timeCapsuleCard = document.getElementById('time-capsule-card');
         const holidayListCard = document.getElementById('holiday-list-card');
         let rightColumnInitialHeight = 0;
+        let cachedRightColumnHeight = 0; // Cache the height of the right column
 
         // --- [NEW] Year Input Feature Elements ---
         const yearDisplayControls = document.getElementById('year-display-controls');
@@ -1212,6 +1265,45 @@
 
         // --- 交互事件监听 ---
         function setupEventListeners() {
+            // --- Settings Modal Logic ---
+            const openSettingsBtn = document.getElementById('open-settings-btn');
+            const settingsOverlay = document.getElementById('settings-overlay');
+            const closeSettingsBtn = document.getElementById('close-settings-btn');
+
+            function openSettings() {
+                const settingsWindow = document.getElementById('settings-window');
+                
+                // Use the cached height on larger screens
+                if (window.innerWidth >= 1024 && cachedRightColumnHeight > 0) {
+                    settingsWindow.style.height = `${cachedRightColumnHeight}px`;
+                } else {
+                    // On smaller screens, reset to auto height to remain responsive
+                    settingsWindow.style.height = 'auto';
+                }
+
+                document.body.classList.add('settings-open');
+            }
+
+            function closeSettings() {
+                document.body.classList.remove('settings-open');
+            }
+
+            openSettingsBtn.addEventListener('click', openSettings);
+            closeSettingsBtn.addEventListener('click', closeSettings);
+
+            settingsOverlay.addEventListener('click', (e) => {
+                if (e.target === settingsOverlay) {
+                    closeSettings();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && document.body.classList.contains('settings-open')) {
+                    closeSettings();
+                }
+            });
+            // --- End Settings Modal Logic ---
+
             const animateRightColumnIn = () => {
                 const elementsToAnimate = rightColumn.querySelectorAll(':scope > div');
                 elementsToAnimate.forEach(el => {
@@ -1447,6 +1539,7 @@
                 // 仅在桌面视图（lg断点以上）应用固定高度，防止影响移动端布局
                 if (window.innerWidth >= 1024) {
                     const rightColumnHeight = rightColumn.offsetHeight;
+                    cachedRightColumnHeight = rightColumnHeight; // Cache the stable height
                     holidayListCard.style.height = `${rightColumnHeight}px`;
                     timeCapsuleCard.style.height = `${rightColumnHeight}px`;
                 }
