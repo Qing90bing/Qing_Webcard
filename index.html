@@ -529,9 +529,15 @@
 
     .setting-btn-group {
         display: flex;
-        border-radius: 0.5rem;
-        overflow: hidden;
-        border: 1px solid var(--separator-color);
+        border-radius: 1rem;
+        background-color: var(--progress-bar-bg);
+    }
+    .theme-slider {
+        background-color: var(--accent-color);
+        
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        /* The magic bounce transition */
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .setting-btn {
         flex-grow: 1;
@@ -540,19 +546,19 @@
         color: var(--text-color-secondary);
         border: none;
         cursor: pointer;
-        transition: background-color 0.2s, color 0.2s;
+        transition: color 0.2s ease-in-out;
         font-size: 0.875rem;
+        font-weight: 500; /* Make all text slightly bolder */
     }
+    /* No border needed for the new design */
     .setting-btn:not(:last-child) {
-        border-right: 1px solid var(--separator-color);
+       border-right: none;
     }
     .setting-btn.active {
-        background-color: var(--accent-color);
         color: white;
-        font-weight: 500;
     }
     .setting-btn:hover:not(.active) {
-        background-color: var(--card-hover-bg-color);
+        color: var(--text-color-primary);
     }
 
     .progress-bar-text {
@@ -2108,14 +2114,32 @@
         }
 
         function updateThemeSettingsUI() {
-            const currentTheme = appSettings.theme;
-            document.querySelectorAll('.setting-btn-group .setting-btn').forEach(btn => {
-                if (btn.dataset.theme === currentTheme) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
+            // Timeout to ensure the DOM is painted and dimensions are available
+            setTimeout(() => {
+                const slider = document.querySelector('.theme-slider');
+                const parent = slider ? slider.parentElement : null;
+                const currentTheme = appSettings.theme;
+                const activeButton = document.querySelector(`.setting-btn[data-theme='${currentTheme}']`);
+
+                if (!slider || !parent || !activeButton) {
+                    return; // Exit if any required element is missing
                 }
-            });
+
+                // Update active classes on all buttons
+                document.querySelectorAll('.setting-btn-group .setting-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn === activeButton);
+                });
+
+                // Use getBoundingClientRect for precise positioning
+                const parentRect = parent.getBoundingClientRect();
+                const buttonRect = activeButton.getBoundingClientRect();
+
+                const left = buttonRect.left - parentRect.left;
+                const width = buttonRect.width;
+
+                slider.style.width = `${width}px`;
+                slider.style.transform = `translateX(${left}px)`;
+            }, 10); // A slightly longer timeout can sometimes help with font loading race conditions
         }
         
         // --- [NEW] Settings Panel UI Generation ---
@@ -2185,10 +2209,11 @@
                 themeSettingsContainer.querySelector('h3').textContent = '主题模式';
                 const container = themeSettingsContainer.querySelector('#theme-settings-content');
                 container.innerHTML = `
-                    <div class="setting-btn-group w-full">
-                        <button class="setting-btn" data-theme="system"><i class="fas fa-desktop fa-fw mr-2"></i>跟随系统</button>
-                        <button class="setting-btn" data-theme="light"><i class="fas fa-sun fa-fw mr-2"></i>日间模式</button>
-                        <button class="setting-btn" data-theme="dark"><i class="fas fa-moon fa-fw mr-2"></i>夜间模式</button>
+                    <div class="setting-btn-group w-full relative">
+                        <div class="theme-slider absolute h-full rounded-md transition-all duration-300"></div>
+                        <button class="setting-btn relative z-10" data-theme="system"><i class="fas fa-desktop fa-fw mr-2"></i>跟随系统</button>
+                        <button class="setting-btn relative z-10" data-theme="light"><i class="fas fa-sun fa-fw mr-2"></i>日间模式</button>
+                        <button class="setting-btn relative z-10" data-theme="dark"><i class="fas fa-moon fa-fw mr-2"></i>夜间模式</button>
                     </div>
                 `;
             }
