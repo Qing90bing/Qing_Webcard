@@ -357,6 +357,9 @@
         opacity: 1;
         margin-top: 0.75rem;
     }
+    #bg-preview-wrapper {
+        border: 1px solid var(--card-border-color);
+    }
 
     #bg-preview-wrapper.visible {
         max-height: 200px;
@@ -1938,6 +1941,9 @@
             preloader.onload = () => {
                 if (requestId !== latestPreviewRequestId) return; // Ignore outdated request
 
+                // [FIX] Make the image visible before fading it in
+                previewImg.classList.remove('hidden');
+
                 // 1. Set transition time and fade out
                 previewImg.style.transition = 'opacity 0.2s ease-in-out';
                 previewImg.style.opacity = 0;
@@ -2152,7 +2158,7 @@
                 const previewHTML = `
                     <div id="background-preview-container">
                         <div id="bg-preview-wrapper" class="relative w-full aspect-[16/9] rounded-lg overflow-hidden bg-white/5 transition-all duration-300 ease-in-out">
-                            <img id="bg-preview-img" src="${DEFAULT_BG_IMAGES[0]}" alt="背景预览" class="w-full h-full object-cover" crossorigin="anonymous">
+                            <img id="bg-preview-img" src="${DEFAULT_BG_IMAGES[0]}" alt="背景预览" class="w-full h-full object-cover hidden" crossorigin="anonymous">
                             <div id="preview-loader"></div>
                             <a id="bg-preview-download-btn" href="#" download="background.jpg" title="保存该图片" class="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
                                 <i class="fas fa-download"></i>
@@ -2402,9 +2408,29 @@
                 }
             });
 
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && document.body.classList.contains('settings-open')) {
-                    closeSettings();
+                        document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    // Priority 1: Close settings modal if it's open
+                    if (document.body.classList.contains('settings-open')) {
+                        closeSettings();
+                        return;
+                    }
+
+                    // Priority 2: Close holiday list card if it's open
+                    if (!holidayListCard.classList.contains('hidden')) {
+                        holidayListCard.classList.add('hidden');
+                        rightColumn.classList.remove('hidden');
+                        animateRightColumnIn();
+                        return;
+                    }
+
+                    // Priority 3: Close time capsule card if it's open
+                    if (!timeCapsuleCard.classList.contains('hidden')) {
+                        timeCapsuleCard.classList.add('hidden');
+                        rightColumn.classList.remove('hidden');
+                        animateRightColumnIn();
+                        return;
+                    }
                 }
             });
             // --- End Settings Modal Logic ---
