@@ -1613,9 +1613,9 @@
             document.getElementById('day-progress').style.width = `${dayPercent}%`;
 
             // 2. 本周进度 (周一为第一天)
-            const weekPassed = dayOfWeek === 0 ? 7 : dayOfWeek;
+            const weekPassed = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
             const weekLeft = 7 - weekPassed;
-            const weekPercent = (weekPassed / 7) * 100;
+            const weekPercent = ((weekPassed + (hour / 24)) / 7) * 100;
             document.getElementById('week-passed').textContent = weekPassed;
             document.getElementById('week-left').textContent = weekLeft;
             document.getElementById('week-percent').textContent = `${weekPercent.toFixed(1)}%`;
