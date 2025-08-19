@@ -393,6 +393,12 @@
         transform: scale(1.1) !important;
     }
 
+    #bg-preview-download-btn:active,
+    #bg-preview-refresh-btn:active {
+        transform: scale(1) !important;
+        transition: transform 0.1s;
+    }
+
     .setting-section {
         border-top: 1px solid var(--separator-color);
         padding-top: 1.5rem;
@@ -480,6 +486,9 @@
     }
     .thumb-item:hover {
         transform: scale(1.05);
+    }
+    .thumb-item:active {
+        transform: scale(0.98);
     }
     .thumb-item.active {
         border-color: #38bdf8; /* sky-500 */
@@ -642,13 +651,13 @@
                             <span class="absolute bottom-0 right-0 text-6xl font-serif translate-y-6 translate-x-2 select-none" style="color: var(--separator-color);">”</span>
                         </div>
                         <div class="mt-8">
-                            <p class="text-sm mb-4" style="color: var(--text-color-secondary);">与我联系:</p>
-                            <div class="flex items-center gap-5">
-                                <a href="https://github.com/Qing90bing" target="_blank" title="GitHub" style="color: var(--text-color-secondary); transition: color 0.2s;">
-                                    <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            <p class="text-sm " style="color: var(--text-color-secondary);">与我联系:</p>
+                            <div class="flex items-center gap-2">
+                                <a href="https://github.com/Qing90bing" target="_blank" title="GitHub" class="p-2 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                                    <i class="fa-brands fa-github fa-xl"></i>
                                 </a>
-                                <a href="mailto:1879495519@qq.com" target="_blank" title="Email" style="color: var(--text-color-secondary); transition: color 0.2s;">
-                                    <svg class="w-7 h-7" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Email</title><path fill="currentColor" d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"/></svg>
+                                <a href="mailto:1879495519@qq.com" target="_blank" title="Email" class="p-2 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                                    <i class="fa-solid fa-envelope fa-xl"></i>
                                 </a>
                             </div>
                         </div>
@@ -679,7 +688,7 @@
                                 <div id="gh-chart-container" class="w-full rounded-md p-2" style="background-color: var(--progress-bar-bg);">
                                     <div id="gh-chart-wrapper" class="relative">
                                         <div id="gh-chart-loader" class="absolute inset-0 flex items-center justify-center"></div>
-                                        <div id="gh-chart-error" class="absolute inset-0 hidden flex-col items-center justify-center cursor-pointer">
+                                        <div id="gh-chart-error" class="absolute inset-0 hidden flex-col items-center justify-center cursor-pointer rounded-md transition-all hover:bg-white/10">
                                             <svg class="w-8 h-8" style="color: var(--text-color-tertiary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.695v-2.286c0-1.033-.842-1.875-1.875-1.875H10.5a1.875 1.875 0 00-1.875 1.875v2.286m7.5 0l-3.181 3.183m0 0L12 21.354l-3.181-3.183m0 0l-3.181-3.183"></path></svg>
                                             <p id="gh-chart-error-message" class="mt-2 text-sm" style="color: var(--text-color-secondary);">加载贡献图失败，点击重试</p>
                                         </div>
@@ -704,15 +713,15 @@
                             网站列表
                         </h2>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu" style="color: var(--text-color-primary);">
+                            <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu" style="color: var(--text-color-primary);">
                                 <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 <span class="font-medium">博客</span>
                             </a>
-                            <a href="https://qing90bing.github.io/Qing_Music/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu" style="color: var(--text-color-primary);">
+                            <a href="https://qing90bing.github.io/Qing_Music/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu" style="color: var(--text-color-primary);">
                                 <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
                                 <span class="font-medium">音乐</span>
                             </a>
-                            <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 transform-gpu" style="color: var(--text-color-primary);">
+                            <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu" style="color: var(--text-color-primary);">
                                 <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                                 <span class="font-medium">起始页</span>
                             </a>
@@ -726,7 +735,7 @@
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);">节日倒数列表</h2>
                         <div class="flex items-center gap-3">
                             <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
-                            <button id="close-holiday-list" title="关闭" class="transition-colors" style="color: var(--text-color-secondary);">
+                            <button id="close-holiday-list" title="关闭" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -734,11 +743,11 @@
                     <div class="flex justify-center items-center h-8 relative">
                         <!-- Display Mode -->
                         <div id="year-display-controls" class="flex items-center gap-4 text-lg">
-                            <button id="prev-year" title="上一年" class="p-1 rounded-full transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="prev-year" title="上一年" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
                             <span id="holiday-list-year" class="font-bold w-16 text-center cursor-pointer" style="color: var(--text-color-primary);"></span>
-                            <button id="next-year" title="下一年" class="p-1 rounded-full transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="next-year" title="下一年" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
@@ -771,10 +780,10 @@
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);">时光胶囊</h2>
                         <div class="flex items-center gap-4">
-                            <button id="open-settings-btn" title="设置" class="transition-colors" style="color: var(--text-color-secondary);">
-                                <i class="fas fa-gear fa-lg"></i>
+                            <button id="open-settings-btn" title="设置" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                                <i class="fas fa-gear fa-lg w-6 h-6 flex items-center justify-center"></i>
                             </button>
-                            <button id="close-time-capsule" title="关闭" class="transition-colors" style="color: var(--text-color-secondary);">
+                            <button id="close-time-capsule" title="关闭" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -836,8 +845,8 @@
             <!-- Header -->
             <div class="flex justify-between items-center ">
                 <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);">设置</h2>
-                <button id="close-settings-btn" title="关闭" style="color: var(--text-color-secondary);">
-                    <i class="fas fa-times fa-lg"></i>
+                <button id="close-settings-btn" title="关闭" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                    <i class="fas fa-times fa-lg w-6 h-6 flex items-center justify-center"></i>
                 </button>
             </div>
             <!-- Content -->
