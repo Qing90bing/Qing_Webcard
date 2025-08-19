@@ -541,7 +541,7 @@
     }
     .setting-btn {
         flex-grow: 1;
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 0.5rem;
         background-color: transparent;
         color: var(--text-color-secondary);
         border: none;
@@ -2113,33 +2113,40 @@
             }
         }
 
-        function updateThemeSettingsUI() {
-            // Timeout to ensure the DOM is painted and dimensions are available
-            setTimeout(() => {
-                const slider = document.querySelector('.theme-slider');
-                const parent = slider ? slider.parentElement : null;
-                const currentTheme = appSettings.theme;
-                const activeButton = document.querySelector(`.setting-btn[data-theme='${currentTheme}']`);
+        function updateThemeSettingsUI(isInstant = false) {
+            const slider = document.querySelector('.theme-slider');
+            const parent = slider ? slider.parentElement : null;
+            const currentTheme = appSettings.theme;
+            const activeButton = document.querySelector(`.setting-btn[data-theme='${currentTheme}']`);
 
-                if (!slider || !parent || !activeButton) {
-                    return; // Exit if any required element is missing
-                }
+            if (!slider || !parent || !activeButton) {
+                return; // Exit if any required element is missing
+            }
 
-                // Update active classes on all buttons
-                document.querySelectorAll('.setting-btn-group .setting-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn === activeButton);
-                });
+            if (isInstant) {
+                slider.style.transition = 'none';
+            }
 
-                // Use getBoundingClientRect for precise positioning
-                const parentRect = parent.getBoundingClientRect();
-                const buttonRect = activeButton.getBoundingClientRect();
+            // Update active classes on all buttons
+            document.querySelectorAll('.setting-btn-group .setting-btn').forEach(btn => {
+                btn.classList.toggle('active', btn === activeButton);
+            });
 
-                const left = buttonRect.left - parentRect.left;
-                const width = buttonRect.width;
+            // Use getBoundingClientRect for precise positioning
+            const parentRect = parent.getBoundingClientRect();
+            const buttonRect = activeButton.getBoundingClientRect();
 
-                slider.style.width = `${width}px`;
-                slider.style.transform = `translateX(${left}px)`;
-            }, 10); // A slightly longer timeout can sometimes help with font loading race conditions
+            const left = buttonRect.left - parentRect.left;
+            const width = buttonRect.width;
+
+            slider.style.width = `${width}px`;
+            slider.style.transform = `translateX(${left}px)`;
+
+            if (isInstant) {
+                // Force reflow to apply styles synchronously before re-enabling the transition
+                void slider.offsetHeight;
+                slider.style.transition = '';
+            }
         }
         
         // --- [NEW] Settings Panel UI Generation ---
@@ -2406,7 +2413,6 @@
             const closeSettingsBtn = document.getElementById('close-settings-btn');
 
             function openSettings() {
-                updateThemeSettingsUI();
                 const settingsWindow = document.getElementById('settings-window');
                 
                 // Use the cached height on larger screens
