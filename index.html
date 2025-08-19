@@ -1803,7 +1803,12 @@
 
                 currentBgUrl = url;
                 previewImg.src = url;
-                previewWrapper.classList.add('visible');
+                
+                // Direct style manipulation to ensure visibility
+                previewWrapper.style.maxHeight = '200px';
+                previewWrapper.style.opacity = '1';
+                previewWrapper.style.marginTop = '0.75rem';
+
                 downloadBtn.classList.add('visible');
                 refreshBtn.classList.add('visible');
             };
@@ -1818,7 +1823,11 @@
                     return;
                 }
                 
-                previewWrapper.classList.remove('visible');
+                // Direct style manipulation to ensure hiding
+                previewWrapper.style.maxHeight = '0';
+                previewWrapper.style.opacity = '0';
+                previewWrapper.style.marginTop = '0';
+
                 downloadBtn.classList.remove('visible');
                 refreshBtn.classList.remove('visible');
             };
@@ -1855,35 +1864,55 @@
 
             // Handle Dynamic Sources
             try {
-                let apiUrl = '';
-                switch (source) {
-                    case 'bing':
-                        const bingResponse = await fetch('https://cors.eu.org/https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN');
-                        if (!bingResponse.ok) throw new Error('Bing API request failed');
-                        const bingData = await bingResponse.json();
-                        apiUrl = `https://www.bing.com${bingData.images[0].urlbase}_1920x1080.jpg`;
-                        break;
-                    case 'anime':
-                        apiUrl = 'https://api.sretna.cn/api/anime.php';
-                        break;
-                    case 'random':
-                        apiUrl = 'https://imgapi.cn/api.php?zd=zsy&fl=fengjing&gs=images';
-                        break;
-                }
-                
-                const imageResponse = await fetch(`https://cors.eu.org/${apiUrl}`);
-                if (!imageResponse.ok) throw new Error(`Could not fetch image from ${apiUrl}`);
-                
-                const finalUrl = imageResponse.url.replace('https://cors.eu.org/', '');
-                const finalImage = new Image();
-                finalImage.src = finalUrl;
-                finalImage.onload = () => {
-                    bgContainer.style.backgroundImage = `url('${finalUrl}')`;
-                    bgContainer.style.opacity = 1;
-                    showPreview(finalUrl);
-                };
-                finalImage.onerror = () => handleError('Final image failed to load', source);
+                if (source === 'bing') {
+                    // Bing requires a metadata fetch first, so it has its own logic path.
+                    const bingResponse = await fetch('https://cors.eu.org/https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN');
+                    if (!bingResponse.ok) throw new Error('Bing API request failed');
+                    const bingData = await bingResponse.json();
+                    const bingUrl = `https://www.bing.com${bingData.images[0].urlbase}_1920x1080.jpg`;
+                    
+                    // We must fetch the image through a proxy.
+                    const imageResponse = await fetch(`https://cors.eu.org/${bingUrl}`);
+                    if (!imageResponse.ok) throw new Error(`Could not fetch Bing image from proxy.`);
+                    
+                    const finalUrl = imageResponse.url; // The final URL after proxying
+                    showPreview(finalUrl); // Show preview with the final, resolved URL.
+                    
+                    // Asynchronously set the background.
+                    const bgImage = new Image();
+                    bgImage.src = finalUrl;
+                    bgImage.onload = () => {
+                        bgContainer.style.backgroundImage = `url('${finalUrl}')`;
+                        bgContainer.style.opacity = 1;
+                    };
+                    bgImage.onerror = () => { console.error('Failed to load background for Bing image.'); };
 
+                } else if (source === 'anime' || source === 'random') {
+                    // These APIs redirect, so we can use the URL directly in the <img> src.
+                    const apiUrl = source === 'anime' 
+                        ? 'https://api.sretna.cn/api/anime.php' 
+                        : 'https://imgapi.cn/api.php?zd=zsy&fl=fengjing&gs=images';
+
+                    // Add a cache-busting parameter to ensure a new image is fetched.
+                    const previewUrl = `${apiUrl}?v=${new Date().getTime()}`;
+                    
+                    // Show the preview immediately. The browser will handle the redirect for the <img> tag.
+                    showPreview(previewUrl);
+
+                    // Asynchronously load the image to set as the page background.
+                    const bgImage = new Image();
+                    bgImage.src = previewUrl;
+                    bgImage.onload = () => {
+                        // After the image loads, its `src` will be the final, non-redirected URL.
+                        bgContainer.style.backgroundImage = `url('${bgImage.src}')`;
+                        bgContainer.style.opacity = 1;
+                    };
+                    bgImage.onerror = () => {
+                        console.error(`Failed to load background for ${source}, but preview should be visible.`);
+                        // Even if the background fails, we make sure the opacity is restored.
+                        bgContainer.style.opacity = 1;
+                    };
+                }
             } catch (error) {
                 handleError(error, source);
             }
