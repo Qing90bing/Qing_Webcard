@@ -299,6 +299,28 @@
     }
 
     /* --- Settings UI Styles --- */
+    #bg-preview-wrapper.visible {
+        max-height: 200px;
+        opacity: 1;
+        margin-top: 0.75rem; /* Add margin when visible */
+    }
+
+    #bg-preview-download-btn.visible {
+        transform: scale(1) !important;
+    }
+
+    #bg-preview-download-btn:hover {
+        transform: scale(1.1) !important;
+    }
+
+    #bg-preview-refresh-btn.visible {
+        transform: scaleY(1);
+        opacity: 1;
+        height: auto; /* auto height for content */
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
     .setting-section {
         border-top: 1px solid var(--separator-color);
         padding-top: 1.5rem;
@@ -1566,50 +1588,6 @@
             loadImage();
         }
 
-        // --- [NEW] Settings Panel UI Generation ---
-        function setupSettingsUI() {
-            // --- 1. Background Settings ---
-            const bgSettingsContainer = document.getElementById('background-settings-content');
-            if (bgSettingsContainer) {
-                const bgOptions = [
-                    { value: 'default', label: '默认图片' },
-                    { value: 'bing', label: '每日一Bing' },
-                    { value: 'anime', label: '随机动漫' },
-                    { value: 'random', label: '随机图片' }
-                ];
-
-                let bgSettingsHTML = '';
-                bgOptions.forEach(option => {
-                    bgSettingsHTML += `
-                        <div>
-                            <input type="radio" id="bg-radio-${option.value}" name="background-source" value="${option.value}" class="setting-radio-input">
-                            <label for="bg-radio-${option.value}" class="setting-radio-label">
-                                <span class="custom-radio-button"></span>
-                                <span>${option.label}</span>
-                            </label>
-                        </div>
-                    `;
-                });
-                
-                let defaultOptionsHTML = `
-                    <div id="default-bg-options">
-                        <div class="thumb-container">
-                            <div class="thumb-item" data-bg-url="random">
-                                <div class="thumb-overlay">随机</div>
-                            </div>
-                `;
-                DEFAULT_BG_IMAGES.forEach((url, index) => {
-                    defaultOptionsHTML += `
-                        <div class="thumb-item" data-bg-url="${url}">
-                            <img src="${url}" alt="Default Background ${index + 1}" loading="lazy">
-                        </div>
-                    `;
-                });
-                defaultOptionsHTML += `</div></div>`;
-
-                bgSettingsContainer.innerHTML = bgSettingsHTML + defaultOptionsHTML;
-            }
-        }
 
         // --- [NEW] Settings Management ---
         let appSettings = {
@@ -1762,61 +1740,152 @@
             }
         }
         
+        let currentBgUrl = ''; // Holds the resolved URL of the current background
+
+        // --- [NEW] Download Image Helper ---
+        async function downloadImage(url) {
+            if (!url) return;
+            const downloadBtn = document.getElementById('bg-preview-download-btn');
+            const originalIcon = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; // Show loading spinner
+
+            try {
+                // Fetch the image data through a CORS proxy to avoid cross-origin restrictions.
+                const response = await fetch(`https://cors.eu.org/${url}`);
+                if (!response.ok) throw new Error(`Network response was not ok, status: ${response.status}`);
+                
+                const blob = await response.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = objectUrl;
+                
+                // Create a filename from the URL, fallback to a generic name.
+                let filename = 'background.jpg';
+                try {
+                    const urlPath = new URL(url).pathname;
+                    const lastSegment = urlPath.substring(urlPath.lastIndexOf('/') + 1);
+                    if (lastSegment) {
+                        filename = lastSegment;
+                    }
+                } catch (e) { /* Ignore invalid URLs for filename generation */ }
+                a.download = filename;
+
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(objectUrl);
+            } catch (error) {
+                console.error('Download failed:', error);
+                // As a fallback, open the image in a new tab.
+                window.open(url, '_blank');
+            } finally {
+                downloadBtn.innerHTML = originalIcon; // Restore original icon
+            }
+        }
+
         async function applyCurrentBackground() {
             const { source, specifier } = appSettings.background;
             let imageUrl = '';
             const bgContainer = document.getElementById('bg-container');
-        
-            // This function replaces the old `setRandomBackground`
-            // It directly uses the settings state.
-            const showImage = (url) => {
-                const img = new Image();
-                img.src = url;
-                img.onload = () => {
-                    bgContainer.style.backgroundImage = `url('${url}')`;
-                    bgContainer.style.opacity = 1;
-                };
-                img.onerror = () => {
-                    console.error(`Failed to load image: ${url}. Falling back to default.`);
-                    // Fallback to a truly random default image on error
-                    const randomFallbackUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
-                    showImage(randomFallbackUrl);
-                };
+
+            const showPreview = (url) => {
+                const previewWrapper = document.getElementById('bg-preview-wrapper');
+                const previewImg = document.getElementById('bg-preview-img');
+                const downloadBtn = document.getElementById('bg-preview-download-btn');
+                const refreshBtn = document.getElementById('bg-preview-refresh-btn');
+                
+                if (!previewWrapper || !previewImg || !downloadBtn || !refreshBtn) {
+                    console.error("Preview elements not found in DOM, cannot show preview.");
+                    return;
+                }
+
+                currentBgUrl = url;
+                previewImg.src = url;
+                previewWrapper.classList.add('visible');
+                downloadBtn.classList.add('visible');
+                refreshBtn.classList.add('visible');
             };
 
-            bgContainer.style.opacity = 0; // Fade out before loading new image
+            const hidePreview = () => {
+                const previewWrapper = document.getElementById('bg-preview-wrapper');
+                const downloadBtn = document.getElementById('bg-preview-download-btn');
+                const refreshBtn = document.getElementById('bg-preview-refresh-btn');
+                
+                if (!previewWrapper || !downloadBtn || !refreshBtn) {
+                    // This is not an error on page load, so we don't log it.
+                    return;
+                }
+                
+                previewWrapper.classList.remove('visible');
+                downloadBtn.classList.remove('visible');
+                refreshBtn.classList.remove('visible');
+            };
+            
+            const handleError = (error, source) => {
+                console.error(`Error fetching background from source: ${source}`, error);
+                const randomFallbackUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
+                bgContainer.style.backgroundImage = `url('${randomFallbackUrl}')`;
+                bgContainer.style.opacity = 1;
+                hidePreview();
+            };
 
+            // --- Main Logic ---
+            bgContainer.style.opacity = 0; // Start fade out effect
+
+            const isDynamicSource = ['bing', 'anime', 'random'].includes(source);
+
+            if (!isDynamicSource) {
+                hidePreview();
+                if (specifier && specifier !== 'random' && DEFAULT_BG_IMAGES.includes(specifier)) {
+                    imageUrl = specifier;
+                } else {
+                    imageUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
+                }
+                const defaultImg = new Image();
+                defaultImg.src = imageUrl;
+                defaultImg.onload = () => {
+                    bgContainer.style.backgroundImage = `url('${imageUrl}')`;
+                    bgContainer.style.opacity = 1;
+                };
+                defaultImg.onerror = () => handleError('Default image failed to load', 'default');
+                return;
+            }
+
+            // Handle Dynamic Sources
             try {
+                let apiUrl = '';
                 switch (source) {
                     case 'bing':
-                        // Using a CORS proxy for client-side reliability
                         const bingResponse = await fetch('https://cors.eu.org/https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN');
                         if (!bingResponse.ok) throw new Error('Bing API request failed');
                         const bingData = await bingResponse.json();
-                        imageUrl = `https://www.bing.com${bingData.images[0].url}`;
+                        apiUrl = `https://www.bing.com${bingData.images[0].urlbase}_1920x1080.jpg`;
                         break;
                     case 'anime':
-                        // Add a timestamp to prevent caching
-                        imageUrl = 'https://api.sretna.cn/api/anime.php';
+                        apiUrl = 'https://api.sretna.cn/api/anime.php';
                         break;
                     case 'random':
-                        imageUrl = 'https://imgapi.cn/api.php?zd=zsy&fl=fengjing&gs=images';
-                        break;
-                    case 'default':
-                    default:
-                        if (specifier && specifier !== 'random' && DEFAULT_BG_IMAGES.includes(specifier)) {
-                            imageUrl = specifier;
-                        } else {
-                            imageUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
-                        }
+                        apiUrl = 'https://imgapi.cn/api.php?zd=zsy&fl=fengjing&gs=images';
                         break;
                 }
-                showImage(imageUrl);
+                
+                const imageResponse = await fetch(`https://cors.eu.org/${apiUrl}`);
+                if (!imageResponse.ok) throw new Error(`Could not fetch image from ${apiUrl}`);
+                
+                const finalUrl = imageResponse.url.replace('https://cors.eu.org/', '');
+                const finalImage = new Image();
+                finalImage.src = finalUrl;
+                finalImage.onload = () => {
+                    bgContainer.style.backgroundImage = `url('${finalUrl}')`;
+                    bgContainer.style.opacity = 1;
+                    showPreview(finalUrl);
+                };
+                finalImage.onerror = () => handleError('Final image failed to load', source);
+
             } catch (error) {
-                console.error(`Error fetching background from source: ${source}`, error);
-                // Fallback to a random default image on any error
-                const randomFallbackUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
-                showImage(randomFallbackUrl);
+                handleError(error, source);
             }
         }
 
@@ -1900,6 +1969,22 @@
                 defaultOptionsHTML += `</div></div>`;
 
                 bgSettingsContainer.innerHTML = bgSettingsHTML + defaultOptionsHTML;
+
+                // --- [NEW] Add background preview area ---
+                const previewHTML = `
+                    <div id="background-preview-container" class="pl-2 pr-2 mt-3">
+                        <div id="bg-preview-wrapper" class="relative w-full aspect-[16/9] rounded-lg overflow-hidden bg-white/5 transition-all duration-300 ease-in-out" style="max-height: 0; opacity: 0;">
+                            <img id="bg-preview-img" src="" alt="背景预览" class="w-full h-full object-cover transition-opacity duration-300">
+                            <a id="bg-preview-download-btn" href="#" target="_blank" download="background.jpg" title="下载图片" class="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                        <button id="bg-preview-refresh-btn" class="w-full text-center py-2 mt-3 rounded-lg font-semibold transition-all duration-300 opacity-0" style="background-color: var(--accent-color-highlight); color: var(--accent-color); transform: scaleY(0); transform-origin: top;">
+                            换一张
+                        </button>
+                    </div>
+                `;
+                bgSettingsContainer.insertAdjacentHTML('beforeend', previewHTML);
             }
 
             // --- 2. Theme Mode Settings ---
@@ -2050,6 +2135,24 @@
                     saveSettings();
                 });
             });
+
+            // --- [NEW] Preview Buttons Listeners ---
+            const refreshBtn = document.getElementById('bg-preview-refresh-btn');
+            const downloadBtn = document.getElementById('bg-preview-download-btn');
+
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    applyCurrentBackground();
+                });
+            }
+
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent the link from navigating
+                    downloadImage(currentBgUrl);
+                });
+            }
 
 
             // --- View Toggle Listeners ---
