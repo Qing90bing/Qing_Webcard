@@ -219,6 +219,8 @@
             transform: scale(0.95);
             opacity: 0;
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease-in-out;
+            height: 680px; /* [FIX] Set a fixed height for consistency */
+            max-height: 85vh; /* Add a responsive max-height for smaller viewports */
         }
 
         body.settings-open #main-wrapper {
@@ -2053,7 +2055,7 @@
                         finalUrl = `https://www.bing.com${bingData.images[0].urlbase}_1920x1080.jpg`;
                     } else { // anime or random
                         const apiUrl = source === 'anime' 
-                            ? 'https://api.sretna.cn/api/anime.php' 
+                            ? 'https://api.sretna.cn/api/anime.php' // 防挂 https://www.dmoe.cc/random.php
                             : 'https://imgapi.cn/api.php?zd=zsy&fl=fengjing&gs=images';
                         finalUrl = `${apiUrl}?v=${new Date().getTime()}`;
                     }
@@ -2448,13 +2450,8 @@
             function openSettings() {
                 const settingsWindow = document.getElementById('settings-window');
                 
-                // Use the cached height on larger screens
-                if (window.innerWidth >= 1024 && cachedRightColumnHeight > 0) {
-                    settingsWindow.style.height = `${cachedRightColumnHeight}px`;
-                } else {
-                    // On smaller screens, reset to auto height to remain responsive
-                    settingsWindow.style.height = 'auto';
-                }
+                // [REMOVED] The problematic height calculation is gone.
+                // The height is now controlled by CSS for consistency.
 
                 document.body.classList.add('settings-open');
 
