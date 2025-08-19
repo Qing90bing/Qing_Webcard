@@ -177,6 +177,13 @@
             mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
         }
 
+        #settings-window [data-simplebar] {
+            --fade-top-size: 24px;
+            --fade-bottom-size: 24px;
+            -webkit-mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+            mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+        }
+
         #back-to-today-btn {
             display: flex;
             border: 1px solid var(--card-border-color);
@@ -2391,6 +2398,29 @@
                     const contentWrapper = settingsWindow.querySelector('[data-simplebar]');
                     if (contentWrapper) {
                         settingsSimpleBar = new SimpleBar(contentWrapper);
+                        const scrollElement = settingsSimpleBar.getScrollElement();
+                        const maskContainer = contentWrapper; // The element with the mask is the one with data-simplebar
+                        const maxFadeSize = 24; // Corresponds to the CSS variable
+
+                        const updateSettingsMask = () => {
+                            const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+                            const tolerance = 1;
+                            // If content is not scrollable, remove fades
+                            if (scrollHeight <= clientHeight + tolerance) {
+                                maskContainer.style.setProperty('--fade-top-size', '0px');
+                                maskContainer.style.setProperty('--fade-bottom-size', '0px');
+                                return;
+                            }
+                            const scrollBottom = scrollHeight - clientHeight - scrollTop;
+                            const topFade = Math.min(scrollTop, maxFadeSize);
+                            const bottomFade = Math.min(scrollBottom, maxFadeSize);
+                            maskContainer.style.setProperty('--fade-top-size', `${topFade}px`);
+                            maskContainer.style.setProperty('--fade-bottom-size', `${bottomFade}px`);
+                        };
+
+                        scrollElement.addEventListener('scroll', updateSettingsMask);
+                        // Call once to set initial state, delayed to allow rendering
+                        setTimeout(updateSettingsMask, 50);
                     }
                 }
             }
