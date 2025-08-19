@@ -529,7 +529,7 @@
 
     .setting-btn-group {
         display: flex;
-        border-radius: 1rem;
+        border-radius: 0.8rem;
         background-color: var(--progress-bar-bg);
     }
     .theme-slider {
@@ -2210,7 +2210,7 @@
                 const container = themeSettingsContainer.querySelector('#theme-settings-content');
                 container.innerHTML = `
                     <div class="setting-btn-group w-full relative">
-                        <div class="theme-slider absolute h-full rounded-md transition-all duration-300"></div>
+                        <div class="theme-slider absolute h-full rounded-xl transition-all duration-300"></div>
                         <button class="setting-btn relative z-10" data-theme="system"><i class="fas fa-desktop fa-fw mr-2"></i>跟随系统</button>
                         <button class="setting-btn relative z-10" data-theme="light"><i class="fas fa-sun fa-fw mr-2"></i>日间模式</button>
                         <button class="setting-btn relative z-10" data-theme="dark"><i class="fas fa-moon fa-fw mr-2"></i>夜间模式</button>
@@ -2406,6 +2406,7 @@
             const closeSettingsBtn = document.getElementById('close-settings-btn');
 
             function openSettings() {
+                updateThemeSettingsUI();
                 const settingsWindow = document.getElementById('settings-window');
                 
                 // Use the cached height on larger screens
