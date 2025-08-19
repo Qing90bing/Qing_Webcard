@@ -308,6 +308,43 @@
         display: flex;
     }
 
+    /* --- [NEW] Preview Loader and Animations --- */
+    #preview-loader {
+        position: absolute;
+        top: 0.75rem; /* 12px */
+        right: 0.75rem; /* 12px */
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        z-index: 10;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+    }
+    #preview-loader.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes breathing {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    .breathing-effect {
+        animation: breathing 2s ease-in-out infinite;
+    }
+    
+    /* Utility to hide elements cleanly */
+    .hidden {
+      display: none !important;
+    }
+
     /* --- Settings UI Styles --- */
     #background-preview-container {
         transition: max-height 0.35s ease-in-out, opacity 0.3s ease-in-out, margin-top 0.3s ease-in-out;
@@ -327,6 +364,7 @@
     }
     #bg-preview-img {
         transition: opacity 0.3s ease-in-out;
+        background-color: var(--progress-bar-bg); /* [FIX] Add placeholder background */
     }
 
     #bg-preview-download-btn.visible {
@@ -1876,58 +1914,47 @@
 
         const showPreview = (displayUrl, originalUrl) => {
             const requestId = ++latestPreviewRequestId;
-            const container = document.getElementById('background-preview-container');
             const previewImg = document.getElementById('bg-preview-img');
+            const loader = document.getElementById('preview-loader');
             const downloadBtn = document.getElementById('bg-preview-download-btn');
             const refreshBtn = document.getElementById('bg-preview-refresh-btn');
 
-            if (!container || !previewImg || !downloadBtn || !refreshBtn) {
-                console.error("Preview elements not found in DOM.");
-                return;
-            }
+            if (!previewImg || !loader) return;
+
+            // --- [NEW] Stop loading indicators ---
+            previewImg.classList.remove('breathing-effect');
+            loader.classList.remove('visible');
             
+            // Ensure action buttons are visible
+            downloadBtn.classList.add('visible');
+            refreshBtn.classList.add('visible');
+
             currentBgUrl = originalUrl; // Store the original URL for the download fallback.
 
-            const isAlreadyVisible = container.classList.contains('visible');
+            // --- [NEW] Implement Fade-out, then Fade-in animation ---
+            const preloader = new Image();
+            preloader.src = displayUrl;
 
-            const loadImage = () => {
-                const preloader = new Image();
-                preloader.src = displayUrl;
-                
-                preloader.onload = () => {
-                    if (requestId !== latestPreviewRequestId) return; // Ignore outdated request
+            preloader.onload = () => {
+                if (requestId !== latestPreviewRequestId) return; // Ignore outdated request
+
+                // 1. Set transition time and fade out
+                previewImg.style.transition = 'opacity 0.2s ease-in-out';
+                previewImg.style.opacity = 0;
+
+                // 2. After fade-out, change src and fade back in
+                setTimeout(() => {
                     previewImg.src = preloader.src;
                     previewImg.style.opacity = 1;
-                    
-                    if (!isAlreadyVisible) {
-                        container.classList.add('visible');
-                        downloadBtn.classList.add('visible');
-                        refreshBtn.classList.add('visible');
-                    }
-                };
-
-                preloader.onerror = () => {
-                    if (requestId !== latestPreviewRequestId) return;
-                    console.error(`Preview image failed to load: ${displayUrl}`);
-                    previewImg.style.opacity = 1; // Show old image
-                };
+                }, 200); // Wait for fade-out to complete
             };
 
-            if (isAlreadyVisible) {
-                // Set up a one-time listener for when the fade-out transition ends
-                previewImg.addEventListener('transitionend', function handler() {
-                    // Once the old image has faded out, load the new one
-                    loadImage();
-                    // Remove this listener so it doesn't fire again
-                    previewImg.removeEventListener('transitionend', handler);
-                });
-                // Trigger the fade-out
-                previewImg.style.opacity = 0;
-            } else {
-                // For the very first load, just load it directly without a fade-out
-                previewImg.style.opacity = 0;
-                loadImage();
-            }
+            preloader.onerror = () => {
+                if (requestId !== latestPreviewRequestId) return;
+                console.error(`Preview image failed to load: ${displayUrl}`);
+                // If new image fails, just stop loading and show the old image
+                previewImg.style.opacity = 1; 
+            };
         };
 
         async function applyCurrentBackground() {
@@ -1944,9 +1971,12 @@
 
             const hidePreview = () => {
                 const container = document.getElementById('background-preview-container');
-                if (container) {
-                    container.classList.remove('visible');
-                }
+                const previewImg = document.getElementById('bg-preview-img');
+                const loader = document.getElementById('preview-loader');
+
+                if (container) container.classList.remove('visible');
+                if (previewImg) previewImg.classList.remove('breathing-effect');
+                if (loader) loader.classList.remove('visible');
             };
             
             const handleError = (error, source) => {
@@ -1960,6 +1990,23 @@
 
             try {
                 const isDynamicSource = ['bing', 'anime', 'random'].includes(source);
+                
+                // --- [NEW] Immediate UI feedback for dynamic sources ---
+                if (isDynamicSource) {
+                    const container = document.getElementById('background-preview-container');
+                    const previewImg = document.getElementById('bg-preview-img');
+                    const loader = document.getElementById('preview-loader');
+
+                    if (container && previewImg && loader) {
+                        // Ensure the container is visible to show the loading state
+                        if (!container.classList.contains('visible')) {
+                             container.classList.add('visible');
+                        }
+                        previewImg.classList.add('breathing-effect');
+                        loader.classList.add('visible');
+                    }
+                }
+
                 let finalUrl; // The original URL of the image
                 let displayUrl; // The URL to be used for display (object URL for dynamic, same as finalUrl for static)
 
@@ -2105,7 +2152,8 @@
                 const previewHTML = `
                     <div id="background-preview-container">
                         <div id="bg-preview-wrapper" class="relative w-full aspect-[16/9] rounded-lg overflow-hidden bg-white/5 transition-all duration-300 ease-in-out">
-                            <img id="bg-preview-img" src="" alt="背景预览" class="w-full h-full object-cover" crossorigin="anonymous">
+                            <img id="bg-preview-img" src="${DEFAULT_BG_IMAGES[0]}" alt="背景预览" class="w-full h-full object-cover" crossorigin="anonymous">
+                            <div id="preview-loader"></div>
                             <a id="bg-preview-download-btn" href="#" download="background.jpg" title="保存该图片" class="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
                                 <i class="fas fa-download"></i>
                             </a>
@@ -2590,37 +2638,33 @@
             // Initialize Faders
             const bgLayers = document.querySelectorAll('#bg-wrapper .bg-layer');
             backgroundFader = createCrossfader(Array.from(bgLayers));
-            
-            // Note: previewFader is initialized later, after its elements are created.
 
-            // Apply initial settings
+            // --- [FIX] Correct Initialization Order ---
+            // 1. Build the settings panel UI first, so other functions can find its elements.
+            setupSettingsUI();
+            setupEventListeners();
+            
+            // 2. Now apply all settings, which will correctly update the newly created UI.
             applyCurrentTheme();
             applyCurrentBackground();
-            applyCurrentView(); // This will fetch weather if needed
+            applyCurrentView();
+            updateSettingsUI();
 
+            // 3. Initial data fetches and updates.
             updateTime();
             updateGreeting();
             updateCountdown();
             fetchHitokoto();
             setupGitHubChartLoader();
-            
-            // 确保布局稳定后再获取高度，并同步卡片高度
-            setTimeout(() => {
-                // 仅在桌面视图（lg断点以上）应用固定高度，防止影响移动端布局
-                if (window.innerWidth >= 1024) {
-                    const rightColumnHeight = rightColumn.offsetHeight;
-                    cachedRightColumnHeight = rightColumnHeight; // Cache the stable height
-                }
-                setupSettingsUI();
-                
-                // previewFader is removed, no longer need to initialize it.
-
-                setupEventListeners();
-                updateSettingsUI(); // Update UI to reflect loaded settings
-            }, 100);
-
             updateSiteRuntime();
             updateTimeCapsule();
+            
+            // 4. Defer non-critical layout calculations.
+            setTimeout(() => {
+                if (window.innerWidth >= 1024) {
+                    cachedRightColumnHeight = rightColumn.offsetHeight;
+                }
+            }, 100);
             
             setInterval(updateTime, 1000);
             setInterval(updateSiteRuntime, 1000);
