@@ -66,7 +66,7 @@
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color-primary);
-            transition: background-color 0.1s ease, color 0.1s ease;
+            transition: color 0.3s ease;
         }
 
         /* 背景图片容器 */
@@ -2186,9 +2186,9 @@
                 const container = themeSettingsContainer.querySelector('#theme-settings-content');
                 container.innerHTML = `
                     <div class="setting-btn-group w-full">
-                        <button class="setting-btn" data-theme="system">跟随系统</button>
-                        <button class="setting-btn" data-theme="light">日间模式</button>
-                        <button class="setting-btn" data-theme="dark">夜间模式</button>
+                        <button class="setting-btn" data-theme="system"><i class="fas fa-desktop fa-fw mr-2"></i>跟随系统</button>
+                        <button class="setting-btn" data-theme="light"><i class="fas fa-sun fa-fw mr-2"></i>日间模式</button>
+                        <button class="setting-btn" data-theme="dark"><i class="fas fa-moon fa-fw mr-2"></i>夜间模式</button>
                     </div>
                 `;
             }
