@@ -2148,6 +2148,30 @@
                 slider.style.transition = '';
             }
         }
+
+        function initializeThemeSlider() {
+            const settingsWindow = document.getElementById('settings-window');
+            if (!settingsWindow) return;
+
+            // 1. Temporarily make the modal measurable but invisible to the user
+            const originalTransition = settingsWindow.style.transition;
+            settingsWindow.style.transition = 'none';
+            settingsWindow.style.visibility = 'hidden';
+            settingsWindow.style.display = 'flex'; // Ensure it's not display:none
+
+            // 2. Force it to its final "open" state to get correct dimensions
+            document.body.classList.add('settings-open');
+            
+            // 3. Now, take the measurement and set the slider's state instantly
+            updateThemeSettingsUI(true);
+
+            // 4. Immediately revert all changes so the user sees nothing.
+            // This happens synchronously before the browser can paint.
+            document.body.classList.remove('settings-open');
+            settingsWindow.style.display = ''; // Revert to default
+            settingsWindow.style.visibility = ''; // Revert to default
+            settingsWindow.style.transition = originalTransition;
+        }
         
         // --- [NEW] Settings Panel UI Generation ---
         function setupSettingsUI() {
@@ -2266,7 +2290,7 @@
 
         function updateSettingsUI() {
             updateBgSettingsUI();
-            updateThemeSettingsUI();
+            // updateThemeSettingsUI(); // This is now handled by a dedicated initializer
             updateViewToggleUI();
         }
 
@@ -2731,8 +2755,11 @@
             // 1. Build the settings panel UI first, so other functions can find its elements.
             setupSettingsUI();
             setupEventListeners();
+
+            // 2. Pre-calculate the theme slider's correct position before it's ever shown.
+            initializeThemeSlider();
             
-            // 2. Now apply all settings, which will correctly update the newly created UI.
+            // 3. Now apply all other settings.
             applyCurrentTheme();
             applyCurrentBackground();
             applyCurrentView();
