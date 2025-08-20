@@ -343,7 +343,6 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;
     }
     .weather-icon-initial {
         opacity: 0;
@@ -359,7 +358,7 @@
         width: 20px;
         height: 20px;
         border: 2px solid rgba(255, 255, 255, 0.2);
-        border-top-color: var(--accent-color);
+        border-top-color: #fff;
         border-radius: 50%;
         animation: spin 1s linear infinite;
         z-index: 10;
@@ -2111,7 +2110,7 @@
             }
 
             // If all handlers failed
-            const errorHtml = `<p style="color: var(--accent-color);">天气信息当前不可用。</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请检查您的网络连接或稍后重试。</p>`;
+            const errorHtml = `<div class="text-center"><p style="color: var(--accent-color);">天气信息当前不可用。</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请检查您的网络连接或稍后重试。</p></div>`;
             renderWeatherData(errorHtml, true);
         }
 
@@ -2126,7 +2125,7 @@
             // Show loader and set initial state
             weatherLoader.classList.add('visible');
             dataContainer.style.opacity = 1;
-            dataContainer.innerHTML = `<p style="color: var(--text-color-secondary);">正在获取天气...</p>`;
+            dataContainer.innerHTML = `<p class="text-center" style="color: var(--text-color-secondary);">正在获取天气...</p>`;
 
             let locationQuery = appSettings.weather.city;
             let locationName = locationQuery;
