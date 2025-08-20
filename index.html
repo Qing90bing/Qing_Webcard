@@ -337,6 +337,31 @@
         opacity: 1;
         visibility: visible;
     }
+
+    /* --- [NEW] Weather Loader --- */
+    #weather-loader {
+        position: absolute;
+        top: 0.75rem; /* 12px */
+        right: 0.75rem; /* 12px */
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-top-color: var(--accent-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        z-index: 10;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+    }
+    #weather-loader.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+    #weather-data-container {
+        transition: opacity 0.3s ease-in-out;
+    }
+
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
@@ -703,9 +728,12 @@
                             <!-- Weather View -->
                             <div id="weather-view" class="hidden">
                                  <h2 class="text-xl font-semibold mb-4" style="color: var(--text-color-primary);">天气信息</h2>
-                                 <div id="weather-content-wrapper" class="w-full rounded-md p-2" style="background-color: var(--progress-bar-bg);">
-                                    <!-- Weather content will be injected here -->
-                                    <p style="color: var(--text-color-secondary);">正在加载天气...</p>
+                                 <div id="weather-content-wrapper" class="w-full rounded-md p-2 relative" style="background-color: var(--progress-bar-bg);">
+                                    <div id="weather-loader"></div>
+                                    <div id="weather-data-container">
+                                        <!-- Weather content will be injected here -->
+                                        <p style="color: var(--text-color-secondary);">正在加载天气...</p>
+                                    </div>
                                  </div>
                             </div>
                         </div>
@@ -1777,35 +1805,139 @@
         // --- [NEW] Weather API Fallback Logic ---
 
         // Renders the standardized weather data object to the UI.
-        function renderWeatherData(weatherData) {
-            const weatherWrapper = document.getElementById('weather-content-wrapper');
-            weatherWrapper.innerHTML = `
-                <div class="flex items-center justify-between gap-4 text-sm">
-                    <!-- Left side: Temp, Condition -->
-                    <div class="flex items-center gap-3">
-                        <p class="text-3xl font-bold" style="color: var(--text-color-primary);">${weatherData.tempC}°C</p>
-                        <div>
-                            <p class="font-semibold" style="color: var(--text-color-primary);">${weatherData.weatherDesc}</p>
-                            <p style="color: var(--text-color-secondary);">体感 ${weatherData.feelsLikeC}°C</p>
+        function getWeatherIconName(code, isDay) {
+            const codeStr = String(code);
+            const iconPrefix = 'https://basmilius.github.io/weather-icons/production/fill/all/';
+            let iconName = 'not-available.svg';
+
+            switch (codeStr) {
+                case '113': iconName = isDay ? 'clear-day.svg' : 'clear-night.svg'; break;
+                case '116': iconName = isDay ? 'partly-cloudy-day.svg' : 'partly-cloudy-night.svg'; break;
+                case '119': iconName = 'cloudy.svg'; break;
+                case '122': iconName = 'overcast.svg'; break;
+                case '143': iconName = isDay ? 'fog-day.svg' : 'fog-night.svg'; break;
+                case '176': iconName = isDay ? 'partly-cloudy-day-rain.svg' : 'partly-cloudy-night-rain.svg'; break;
+                case '179': iconName = isDay ? 'partly-cloudy-day-snow.svg' : 'partly-cloudy-night-snow.svg'; break;
+                case '182': iconName = isDay ? 'partly-cloudy-day-sleet.svg' : 'partly-cloudy-night-sleet.svg'; break;
+                case '185': iconName = isDay ? 'partly-cloudy-day-drizzle.svg' : 'partly-cloudy-night-drizzle.svg'; break;
+                case '200': iconName = isDay ? 'thunderstorms-day.svg' : 'thunderstorms-night.svg'; break;
+                case '227':
+                case '230': iconName = 'wind.svg'; break;
+                case '248':
+                case '260': iconName = 'fog.svg'; break;
+                case '263':
+                case '266':
+                case '293':
+                case '296': iconName = 'drizzle.svg'; break;
+                case '281':
+                case '284':
+                case '311':
+                case '314':
+                case '317':
+                case '320':
+                case '362':
+                case '365': iconName = 'sleet.svg'; break;
+                case '299':
+                case '302':
+                case '305':
+                case '308':
+                case '353':
+                case '356':
+                case '359': iconName = 'rain.svg'; break;
+                case '323':
+                case '326':
+                case '329':
+                case '332':
+                case '335':
+                case '338':
+                case '368':
+                case '371': iconName = 'snow.svg'; break;
+                case '350':
+                case '374':
+                case '377': iconName = 'hail.svg'; break;
+                case '386':
+                case '389': iconName = isDay ? 'thunderstorms-day-rain.svg' : 'thunderstorms-night-rain.svg'; break;
+                case '392':
+                case '395': iconName = isDay ? 'thunderstorms-day-snow.svg' : 'thunderstorms-night-snow.svg'; break;
+            }
+            return iconPrefix + iconName;
+        }
+
+        function getWeatherDataHtml(weatherData) {
+            const iconUrl = getWeatherIconName(weatherData.weatherCode, weatherData.isDay);
+            return `
+                <div class="flex gap-x-6 items-center w-full">
+                    <!-- Column 1: Icon and Main Temp (Narrower) -->
+                    <div class="flex-shrink-0 flex flex-col items-center justify-center">
+                        <img src="${iconUrl}" alt="${weatherData.weatherDesc}" class="w-24 h-24">
+                        <p class="font-bold text-4xl" style="color: var(--text-color-primary);">${weatherData.tempC}°C</p>
+                    </div>
+
+                    <!-- Column 2: Location, Condition, Tip (Flexible) -->
+                    <div class="flex-grow flex flex-col text-left min-w-0">
+                        <p class="font-bold text-xl truncate" style="color: var(--text-color-primary);" title="${weatherData.location}">${weatherData.location}</p>
+                        <p class="text-base font-medium mt-1.5" style="color: var(--text-color-secondary);">${weatherData.weatherDesc} / 最高 ${weatherData.maxTempC}° 最低 ${weatherData.minTempC}°</p>
+                        <p class="text-sm mt-1.5" style="color: var(--text-color-tertiary);">${weatherData.tip}</p>
+                    </div>
+
+                    <!-- Column 3: Details (Fixed Width) -->
+                    <div class="flex-shrink-0 w-44 flex flex-col text-sm space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="far fa-sun fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
+                                <span class="ml-2" style="color: var(--text-color-secondary);">日出/落</span>
+                            </div>
+                            <span class="font-semibold" style="color: var(--text-color-primary);">${weatherData.sunrise} / ${weatherData.sunset}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                             <div class="flex items-center">
+                                <i class="fas fa-temperature-half fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
+                                <span class="ml-2" style="color: var(--text-color-secondary);">体感</span>
+                            </div>
+                            <span class="font-semibold" style="color: var(--text-color-primary);">${weatherData.feelsLikeC}°</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                             <div class="flex items-center">
+                                <i class="fas fa-droplet fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
+                                <span class="ml-2" style="color: var(--text-color-secondary);">湿度</span>
+                            </div>
+                            <span class="font-semibold" style="color: var(--text-color-primary);">${weatherData.humidity}%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-wind fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
+                                <span class="ml-2" style="color: var(--text-color-secondary);">风速</span>
+                            </div>
+                            <span class="font-semibold" style="color: var(--text-color-primary);">${weatherData.windSpeedKmph} km/h</span>
                         </div>
                     </div>
-                    <!-- Right side: Details -->
-                    <div class="text-right">
-                        <p class="font-semibold text-lg" style="color: var(--text-color-primary);">${weatherData.location}</p>
-                        <p style="color: var(--text-color-secondary);">
-                            <span>${weatherData.maxTempC}°/${weatherData.minTempC}°C</span>
-                            <span class="mx-1">·</span>
-                            <span>${weatherData.windSpeedKmph}km/h</span>
-                            <span class="mx-1">·</span>
-                            <span>${weatherData.humidity}%</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="mt-3 pt-2 text-center text-xs" style="border-top: 1px solid var(--separator-color); color: var(--text-color-tertiary);">
-                    ${weatherData.tip}
                 </div>
             `;
-            updateSettingsUI();
+        }
+
+        function renderWeatherData(newHtml, isError = false) {
+            const weatherLoader = document.getElementById('weather-loader');
+            const dataContainer = document.getElementById('weather-data-container');
+            
+            if (!dataContainer) return;
+
+            // 1. Fade out current content
+            dataContainer.style.opacity = 0;
+
+            // 2. After fade-out, update content and fade back in
+            setTimeout(() => {
+                dataContainer.innerHTML = newHtml;
+                if (weatherLoader) {
+                    weatherLoader.classList.remove('visible');
+                }
+                dataContainer.style.opacity = 1; // Fade in new content
+
+                // This was in the old render function, so keep it for error cases
+                if (isError) {
+                    appSettings.weather.lastFetchedCity = '加载失败';
+                    updateSettingsUI();
+                }
+            }, 300); // Match CSS transition duration
         }
 
         // API Handler for wttr.in
@@ -1819,17 +1951,41 @@
             const current = data.current_condition[0];
             const forecast = data.weather[0];
             const nearestArea = data.nearest_area[0];
+            const astronomy = forecast.astronomy[0];
+
+            // Helper to convert 12h AM/PM time to a comparable number
+            const timeToMinutes = (timeStr) => {
+                const [time, modifier] = timeStr.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (modifier === 'PM' && hours < 12) {
+                    hours += 12;
+                }
+                if (modifier === 'AM' && hours === 12) { // 12 AM is midnight
+                    hours = 0;
+                }
+                return hours * 60 + minutes;
+            };
+
+            const now = new Date();
+            const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+            const sunriseMinutes = timeToMinutes(astronomy.sunrise);
+            const sunsetMinutes = timeToMinutes(astronomy.sunset);
+            const isDay = currentTimeMinutes >= sunriseMinutes && currentTimeMinutes < sunsetMinutes;
 
             const standardizedData = {
                 location: nearestArea.areaName[0].value,
                 country: nearestArea.country[0].value,
                 tempC: current.temp_C,
                 feelsLikeC: current.FeelsLikeC,
+                weatherCode: current.weatherCode,
                 weatherDesc: current.weatherDesc[0].value,
                 maxTempC: forecast.maxtempC,
                 minTempC: forecast.mintempC,
                 windSpeedKmph: current.windspeedKmph,
                 humidity: current.humidity,
+                sunrise: astronomy.sunrise.replace(' AM', '').replace(' PM', ''),
+                sunset: astronomy.sunset.replace(' AM', '').replace(' PM', ''),
+                isDay: isDay,
                 tip: getWeatherTip(current)
             };
             
@@ -1905,7 +2061,6 @@
 
         // Controller that tries a list of API handlers in order.
         async function tryWeatherApis(locationQuery, locationName) {
-            const weatherWrapper = document.getElementById('weather-content-wrapper');
             const apiHandlers = [
                 handleWttrIn,
                 handleOpenMeteo,
@@ -1915,7 +2070,8 @@
                 try {
                     const weatherData = await handler(locationQuery, locationName);
                     if (weatherData) {
-                        renderWeatherData(weatherData);
+                        const html = getWeatherDataHtml(weatherData);
+                        renderWeatherData(html);
                         return; // Success, exit the loop.
                     }
                 } catch (error) {
@@ -1925,15 +2081,21 @@
             }
 
             // If all handlers failed
-            weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">天气信息当前不可用。</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请检查您的网络连接或稍后重试。</p>`;
-            appSettings.weather.lastFetchedCity = '加载失败';
-            updateSettingsUI();
+            const errorHtml = `<p style="color: var(--accent-color);">天气信息当前不可用。</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请检查您的网络连接或稍后重试。</p>`;
+            renderWeatherData(errorHtml, true);
         }
 
         // Main entry point for the weather feature.
         async function fetchAndDisplayWeather() {
-            const weatherWrapper = document.getElementById('weather-content-wrapper');
-            weatherWrapper.innerHTML = `<p style="color: var(--text-color-secondary);">正在获取天气...</p>`;
+            const weatherLoader = document.getElementById('weather-loader');
+            const dataContainer = document.getElementById('weather-data-container');
+
+            if (!weatherLoader || !dataContainer) return;
+
+            // Show loader and set initial state
+            weatherLoader.classList.add('visible');
+            dataContainer.style.opacity = 1;
+            dataContainer.innerHTML = `<p style="color: var(--text-color-secondary);">正在获取天气...</p>`;
 
             let locationQuery = appSettings.weather.city;
             let locationName = locationQuery;
@@ -1948,13 +2110,15 @@
                     locationName = ipData.city;
                 } catch (e) {
                     console.error("IP-based geolocation failed.", e);
-                    weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p>`;
+                    const errorHtml = `<p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p>`;
+                    renderWeatherData(errorHtml, true);
                     return;
                 }
             }
 
             if (!locationQuery) {
-                weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">未设置城市</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入一个城市名称。</p>`;
+                const errorHtml = `<p style="color: var(--accent-color);">未设置城市</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入一个城市名称。</p>`;
+                renderWeatherData(errorHtml, true);
                 return;
             }
             
