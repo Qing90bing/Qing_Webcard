@@ -374,6 +374,12 @@
         transition: opacity 0.3s ease-in-out;
     }
 
+    .weather-hover-zone:hover + #weather-refresh-btn,
+    #weather-refresh-btn:hover {
+        opacity: 1;
+        visibility: visible;
+    }
+
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
@@ -741,6 +747,8 @@
                             <div id="weather-view" class="hidden">
                                  <h2 class="text-xl font-semibold mb-4" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Pro v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--><path d="M32 400C32 479.5 96.5 544 176 544L480 544C550.7 544 608 486.7 608 416C608 364.4 577.5 319.9 533.5 299.7C540.2 286.6 544 271.7 544 256C544 203 501 160 448 160C430.3 160 413.8 164.8 399.6 173.1C375.5 127.3 327.4 96 272 96C192.5 96 128 160.5 128 240C128 248 128.7 255.9 129.9 263.5C73 282.7 32 336.6 32 400z"/></svg>天气信息</h2>
                                  <div id="weather-content-wrapper" class="w-full rounded-md p-4 relative min-h-[140px]" style="background-color: var(--progress-bar-bg);">
+                                    <div class="weather-hover-zone absolute top-0 left-0 w-1/2 h-full z-10"></div>
+                                    <button id="weather-refresh-btn" title="手动刷新" class="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200 active:scale-90 z-20 opacity-0 invisible"><i class="fas fa-sync-alt"></i></button>
                                     <div id="weather-loader"></div>
                                     <div id="weather-data-container">
                                         <!-- Weather content will be injected here -->
@@ -974,6 +982,7 @@
         let hasManuallyScrolled = false;
         let holidayListSimpleBar; // Instance for the holiday list scrollbar
         let settingsSimpleBar = null; // Instance for the settings scrollbar
+        let isFetchingWeather = false; // Lock to prevent multiple weather requests
 
         // --- [NEW] Reusable Cross-fade Logic ---
         function createCrossfader(layers) {
@@ -1816,6 +1825,16 @@
 
         // --- [NEW] Weather API Fallback Logic ---
 
+        function setWeatherSpinner(isSpinning) {
+            const refreshBtn = document.getElementById('weather-refresh-btn');
+            if (refreshBtn) {
+                const icon = refreshBtn.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-spin', isSpinning);
+                }
+            }
+        }
+
         // Renders the standardized weather data object to the UI.
         function getWeatherIconName(code, isDay) {
             const codeStr = String(code);
@@ -1880,7 +1899,7 @@
             return `
                 <div class="flex gap-x-8 items-stretch w-full">
                     <!-- Column 1: 图标和主温度 (固定宽度, 居中) -->
-                    <div class="flex-shrink-0 flex flex-col items-center justify-center w-32">
+                    <div class="flex-shrink-0 flex flex-col items-center justify-center w-36">
                         <img id="weather-icon-img" src="${iconUrl}" alt="${weatherData.weatherDesc}" class="w-16 h-16 weather-icon-initial">
                         <p class="font-bold text-3xl" style="color: var(--text-color-primary);">${weatherData.tempC}°</p>
                     </div>
@@ -1940,6 +1959,8 @@
 
             // 2. After fade-out, update content and fade back in
             setTimeout(() => {
+                setWeatherSpinner(false); // Stop spinner on success or error
+                isFetchingWeather = false; // Release the lock
                 dataContainer.innerHTML = newHtml;
                 if (weatherLoader) {
                     weatherLoader.classList.remove('visible');
@@ -2116,44 +2137,57 @@
 
         // Main entry point for the weather feature.
         async function fetchAndDisplayWeather() {
+            if (isFetchingWeather) {
+                console.log("Weather fetch already in progress. Ignoring request.");
+                return;
+            }
+            isFetchingWeather = true;
+
             const weatherLoader = document.getElementById('weather-loader');
             const dataContainer = document.getElementById('weather-data-container');
             const wrapper = document.getElementById('weather-content-wrapper');
 
             if (!weatherLoader || !dataContainer || !wrapper) return;
 
-            // Show loader and set initial state
-            weatherLoader.classList.add('visible');
-            dataContainer.style.opacity = 1;
-            dataContainer.innerHTML = `<p class="text-center" style="color: var(--text-color-secondary);">正在获取天气...</p>`;
+            // --- [FIX] Fade out old content before showing loader ---
+            dataContainer.style.opacity = 0;
 
-            let locationQuery = appSettings.weather.city;
-            let locationName = locationQuery;
+            setTimeout(async () => {
+                // Show loader and set initial state after fade out
+                weatherLoader.classList.add('visible');
+                dataContainer.innerHTML = `<p class="text-center" style="color: var(--text-color-secondary);">正在获取天气...</p>`;
+                dataContainer.style.opacity = 1; // Fade in the "Loading..." text
 
-            // This part remains the same: get the location first.
-            if (appSettings.weather.source === 'auto' && !locationQuery) {
-                try {
-                    const ipResponse = await fetch('https://cors.eu.org/http://ip-api.com/json');
-                    if (!ipResponse.ok) throw new Error('IP API request failed');
-                    const ipData = await ipResponse.json();
-                    locationQuery = ipData.city || 'auto:ip';
-                    locationName = ipData.city;
-                } catch (e) {
-                    console.error("IP-based geolocation failed.", e);
-                    const errorHtml = `<p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p>`;
+                let locationQuery = appSettings.weather.city;
+                let locationName = locationQuery;
+
+                // This part remains the same: get the location first.
+                if (appSettings.weather.source === 'auto' && !locationQuery) {
+                    try {
+                        const ipResponse = await fetch('https://cors.eu.org/http://ip-api.com/json');
+                        if (!ipResponse.ok) throw new Error('IP API request failed');
+                        const ipData = await ipResponse.json();
+                        locationQuery = ipData.city || 'auto:ip';
+                        locationName = ipData.city;
+                    } catch (e) {
+                        setWeatherSpinner(false);
+                        isFetchingWeather = false; // Release the lock on early error
+                        console.error("IP-based geolocation failed.", e);
+                        const errorHtml = `<p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p>`;
+                        renderWeatherData(errorHtml, true);
+                        return;
+                    }
+                }
+
+                if (!locationQuery) {
+                    const errorHtml = `<p style="color: var(--accent-color);">未设置城市</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入一个城市名称。</p>`;
                     renderWeatherData(errorHtml, true);
                     return;
                 }
-            }
-
-            if (!locationQuery) {
-                const errorHtml = `<p style="color: var(--accent-color);">未设置城市</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入一个城市名称。</p>`;
-                renderWeatherData(errorHtml, true);
-                return;
-            }
-            
-            // Hand off to the controller function.
-            await tryWeatherApis(locationQuery, locationName || locationQuery);
+                
+                // Hand off to the controller function.
+                await tryWeatherApis(locationQuery, locationName || locationQuery);
+            }, 300); // Match CSS transition duration
         }
 
 
@@ -3097,6 +3131,12 @@
 
             // 点击一言卡片刷新
             document.getElementById('hitokoto-card').addEventListener('click', fetchHitokoto);
+            
+            // 天气刷新按钮
+            document.getElementById('weather-refresh-btn').addEventListener('click', () => {
+                setWeatherSpinner(true);
+                fetchAndDisplayWeather();
+            });
         }
 
         // --- 页面加载时执行的函数 ---
