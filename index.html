@@ -362,6 +362,14 @@
         transition: opacity 0.3s ease-in-out;
     }
 
+    .weather-icon-initial {
+        opacity: 0;
+    }
+    .weather-icon-loaded {
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+    }
+
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
@@ -1869,7 +1877,7 @@
                 <div class="flex gap-x-8 items-stretch w-full">
                     <!-- Column 1: 图标和主温度 (固定宽度, 居中) -->
                     <div class="flex-shrink-0 flex flex-col items-center justify-center w-32">
-                        <img src="${iconUrl}" alt="${weatherData.weatherDesc}" class="w-16 h-16">
+                        <img id="weather-icon-img" src="${iconUrl}" alt="${weatherData.weatherDesc}" class="w-16 h-16 weather-icon-initial">
                         <p class="font-bold text-3xl" style="color: var(--text-color-primary);">${weatherData.tempC}°</p>
                     </div>
 
@@ -1935,6 +1943,21 @@
                 if (weatherLoader) {
                     weatherLoader.classList.remove('visible');
                 }
+
+                // Handle icon fade-in after image load
+                const iconImg = document.getElementById('weather-icon-img');
+                if (iconImg) {
+                    const fadeInIcon = () => {
+                        iconImg.classList.remove('weather-icon-initial');
+                        iconImg.classList.add('weather-icon-loaded');
+                    };
+                    if (iconImg.complete) {
+                        fadeInIcon();
+                    } else {
+                        iconImg.onload = fadeInIcon;
+                    }
+                }
+
                 dataContainer.style.opacity = 1; // Fade in new content
 
                 // This was in the old render function, so keep it for error cases
