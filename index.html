@@ -710,7 +710,7 @@
                             </div>
                         </div>
 
-                        <h2 class="text-xl font-semibold mb-4 mt-6" style="color: var(--text-color-primary);">
+                        <h2 class="text-xl font-semibold mb-4 mt-4" style="color: var(--text-color-primary);">
                             <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                             网站列表
                         </h2>
@@ -1727,8 +1727,9 @@
                 specifier: 'random'
             },
             theme: 'system', // 'system', 'light', 'dark'
-            view: 'github',
+            view: 'github', // 'github' or 'weather'
             weather: {
+                source: 'auto', // 'auto' or 'manual'
                 city: null, // User-overridden city
                 lastFetchedCity: null // City from last successful fetch
             }
@@ -1747,7 +1748,7 @@
             default: ["愿你眼里的星星，永远闪亮。", "生活或许不易，但请别忘了微笑。😊", "每一天都是一份独一無二的礼物。"]
         };
 
-        function getWeatherTip(current, forecast) {
+        function getWeatherTip(current) {
             const tempC = parseInt(current.temp_C);
             const weatherDesc = current.weatherDesc[0].value.toLowerCase();
             const month = new Date().getMonth() + 1; // 1-12
@@ -1767,26 +1768,26 @@
 
             if (weatherDesc.includes('overcast')) return WEATHER_TIPS.overcast[Math.floor(Math.random() * WEATHER_TIPS.overcast.length)];
             if (weatherDesc.includes('cloudy') || weatherDesc.includes('mist')) return WEATHER_TIPS.cloudy[Math.floor(Math.random() * WEATHER_TIPS.cloudy.length)];
-            if (parseInt(current.windspeedKmph) > 30) return WEATHER_TIPS.windy[Math.floor(Math.random() * WEATHER_TIPS.windy.length)];
+            if (parseInt(current.windspeedKmph) > 20) return WEATHER_TIPS.windy[Math.floor(Math.random() * WEATHER_TIPS.windy.length)];
             if (weatherDesc.includes('fog')) return WEATHER_TIPS.fog[Math.floor(Math.random() * WEATHER_TIPS.fog.length)];
 
             return WEATHER_TIPS.default[Math.floor(Math.random() * WEATHER_TIPS.default.length)];
         }
 
-
-        // --- [NEW] Weather Fetching Logic ---
         async function fetchAndDisplayWeather() {
             const weatherWrapper = document.getElementById('weather-content-wrapper');
             weatherWrapper.innerHTML = `<p style="color: var(--text-color-secondary);">正在获取天气...</p>`;
 
-            let location = appSettings.weather.city;
+            let locationQuery = appSettings.weather.city;
+            let locationName = locationQuery;
 
-            if (!location) {
+            if (appSettings.weather.source === 'auto' && !locationQuery) {
                 try {
                     const ipResponse = await fetch('https://ipapi.co/json/');
                     if (!ipResponse.ok) throw new Error('IP API request failed');
                     const ipData = await ipResponse.json();
-                    location = ipData.city || 'auto:ip';
+                    locationQuery = ipData.city || 'auto:ip';
+                    locationName = ipData.city;
                 } catch (e) {
                     console.error("IP-based geolocation failed.", e);
                     weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p>`;
@@ -1794,55 +1795,58 @@
                 }
             }
 
+            if (!locationQuery) {
+                weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">未设置城市</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入一个城市名称。</p>`;
+                return;
+            }
+
             try {
-                const weatherResponse = await fetch(`https://wttr.in/${encodeURIComponent(location)}?format=j1`);
-                if (!weatherResponse.ok) throw new Error(`Weather data not found for ${location}`);
+                const weatherResponse = await fetch(`https://wttr.in/${encodeURIComponent(locationQuery)}?format=j1`);
+                if (!weatherResponse.ok) throw new Error(`Weather data not found for ${locationQuery}`);
                 const data = await weatherResponse.json();
-                
+
                 const current = data.current_condition[0];
                 const forecast = data.weather[0];
                 const nearestArea = data.nearest_area[0];
                 
-                appSettings.weather.lastFetchedCity = `${nearestArea.areaName[0].value}, ${nearestArea.country[0].value}`;
+                locationName = nearestArea.areaName[0].value;
+                appSettings.weather.lastFetchedCity = `${locationName}, ${nearestArea.country[0].value}`;
                 saveSettings();
                 
-                const tip = getWeatherTip(current, forecast);
+                const tip = getWeatherTip(current);
 
                 // --- Render HTML ---
                 weatherWrapper.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-2xl font-bold" style="color: var(--text-color-primary);">${current.temp_C}°C</p>
-                            <p class="text-sm" style="color: var(--text-color-secondary);">${current.weatherDesc[0].value}, 体感 ${current.FeelsLikeC}°C</p>
+                    <div class="flex items-center justify-between gap-4 text-sm">
+                        <!-- Left side: Temp, Condition -->
+                        <div class="flex items-center gap-3">
+                            <p class="text-3xl font-bold" style="color: var(--text-color-primary);">${current.temp_C}°C</p>
+                            <div>
+                                <p class="font-semibold" style="color: var(--text-color-primary);">${current.weatherDesc[0].value}</p>
+                                <p style="color: var(--text-color-secondary);">体感 ${current.FeelsLikeC}°C</p>
+                            </div>
                         </div>
+                        <!-- Right side: Details -->
                         <div class="text-right">
-                            <p class="font-semibold" style="color: var(--text-color-primary);">${nearestArea.areaName[0].value}</p>
-                            <p class="text-xs" style="color: var(--text-color-secondary);">${nearestArea.country[0].value}</p>
+                            <p class="font-semibold text-lg" style="color: var(--text-color-primary);">${locationName}</p>
+                            <p style="color: var(--text-color-secondary);">
+                                <span>${forecast.maxtempC}°/${forecast.mintempC}°C</span>
+                                <span class="mx-1">·</span>
+                                <span>${current.windspeedKmph}km/h</span>
+                                <span class="mx-1">·</span>
+                                <span>${current.humidity}%</span>
+                            </p>
                         </div>
                     </div>
-                    <div class="mt-4 text-sm space-y-2">
-                        <div class="flex justify-between">
-                            <span style="color: var(--text-color-secondary);">最高/最低</span>
-                            <span style="color: var(--text-color-primary);">${forecast.maxtempC}°C / ${forecast.mintempC}°C</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span style="color: var(--text-color-secondary);">风速</span>
-                            <span style="color: var(--text-color-primary);">${current.windspeedKmph} km/h</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span style="color: var(--text-color-secondary);">湿度</span>
-                            <span style="color: var(--text-color-primary);">${current.humidity}%</span>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-3 text-center text-xs" style="border-top: 1px solid var(--separator-color); color: var(--text-color-tertiary);">
+                    <div class="mt-3 pt-2 text-center text-xs" style="border-top: 1px solid var(--separator-color); color: var(--text-color-tertiary);">
                         ${tip}
                     </div>
                 `;
                 
-                updateSettingsUI(); // Update UI with new city name if it was auto-detected
+                updateSettingsUI();
             } catch (e) {
-                console.error("Failed to fetch weather data.", e);
-                weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">无法加载 "${location}" 的天气信息。</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请检查城市名称或网络连接。</p>`;
+                console.error("Failed to fetch wttr.in data.", e);
+                weatherWrapper.innerHTML = `<p style="color: var(--accent-color);">无法加载 "${locationName || locationQuery}" 的天气信息。</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请检查城市名称或网络连接。</p>`;
                 appSettings.weather.lastFetchedCity = '加载失败';
                 updateSettingsUI();
             }
@@ -1862,8 +1866,14 @@
                     appSettings = {
                         ...appSettings,
                         ...parsedSettings,
-                        background: { ...appSettings.background, ...parsedSettings.background },
+                        background: { ...appSettings.background, ...(parsedSettings.background || {}) },
+                        weather: { ...appSettings.weather, ...(parsedSettings.weather || {}) },
                     };
+
+                    // Backward compatibility: If old setting `view: 'weather'` exists, but new `weather.source` doesn't, default it.
+                    if (appSettings.view === 'weather' && !appSettings.weather.source) {
+                        appSettings.weather.source = 'auto';
+                    }
                 } catch (e) {
                     console.error("Failed to parse settings from localStorage", e);
                     // If parsing fails, use default settings
@@ -2264,38 +2274,59 @@
             const viewToggleContainer = document.getElementById('view-toggle-content');
             if (viewToggleContainer) {
                 viewToggleContainer.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div class="flex flex-col">
-                            <span class="font-medium">是否切换GitHub贡献图为天气信息</span>
-                            <span id="view-toggle-label" class="text-sm mt-1" style="color: var(--text-color-secondary);">当前显示: GitHub 贡献图</span>
+                    <div class="space-y-2">
+                        <div>
+                            <input type="radio" id="view-radio-github" name="view-source" value="github" class="setting-radio-input">
+                            <label for="view-radio-github" class="setting-radio-label">
+                                <span class="custom-radio-button"></span>
+                                <span>显示 GitHub 贡献图</span>
+                            </label>
                         </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="view-toggle-checkbox">
-                            <span class="toggle-slider"></span>
-                        </label>
+                        <div>
+                            <input type="radio" id="view-radio-weather-auto" name="view-source" value="weather-auto" class="setting-radio-input">
+                            <label for="view-radio-weather-auto" class="setting-radio-label">
+                                <span class="custom-radio-button"></span>
+                                <span>天气信息 (IP 自动定位)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="view-radio-weather-manual" name="view-source" value="weather-manual" class="setting-radio-input">
+                            <label for="view-radio-weather-manual" class="setting-radio-label">
+                                <span class="custom-radio-button"></span>
+                                <span>天气信息 (手动输入)</span>
+                            </label>
+                        </div>
                     </div>
-                    <div id="manual-city-input-wrapper" class="mt-2 pl-1" style="max-height: 0; overflow: hidden; transition: all 0.3s ease;">
-                         <input type="text" id="weather-city-input" placeholder="手动输入城市 (回车确认)" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); border-color: var(--separator-color); color: var(--text-color-primary);">
+                    <div id="manual-city-input-wrapper" class="mt-2 pl-4 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
+                        <input type="text" id="weather-city-input" placeholder="输入城市后回车 (例如: 北京)" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); border-color: var(--separator-color); color: var(--text-color-primary);">
                     </div>
                 `;
             }
         }
 
         function updateViewToggleUI() {
-            const toggle = document.getElementById('view-toggle-checkbox');
-            const label = document.getElementById('view-toggle-label');
             const cityInputWrapper = document.getElementById('manual-city-input-wrapper');
             const cityInput = document.getElementById('weather-city-input');
 
-            const isWeatherView = appSettings.view === 'weather';
-            toggle.checked = isWeatherView;
-            label.textContent = isWeatherView ? '当前显示: 天气信息' : '当前显示: GitHub 贡献图';
-            
-            cityInputWrapper.style.maxHeight = isWeatherView ? '50px' : '0';
-            cityInputWrapper.style.marginTop = isWeatherView ? '0.5rem' : '0';
+            let selectedViewValue;
+            if (appSettings.view === 'github') {
+                selectedViewValue = 'github';
+            } else { // view is 'weather'
+                selectedViewValue = `weather-${appSettings.weather.source}`;
+            }
 
-            if (isWeatherView) {
-                cityInput.placeholder = appSettings.weather.city || appSettings.weather.lastFetchedCity || '手动输入城市';
+            const radio = document.querySelector(`input[name="view-source"][value="${selectedViewValue}"]`);
+            if (radio) {
+                radio.checked = true;
+            }
+
+            const isManual = appSettings.view === 'weather' && appSettings.weather.source === 'manual';
+            cityInputWrapper.style.maxHeight = isManual ? '60px' : '0';
+            cityInputWrapper.style.marginTop = isManual ? '0.75rem' : '0';
+
+            if (isManual) {
+                cityInput.placeholder = appSettings.weather.city || '输入城市后回车 (例如: 北京)';
+                cityInput.value = appSettings.weather.city || '';
             }
         }
 
@@ -2419,25 +2450,40 @@
 
 
             // --- View Toggle Listeners ---
-            const viewToggle = document.getElementById('view-toggle-checkbox');
             const cityInput = document.getElementById('weather-city-input');
 
-            viewToggle.addEventListener('change', () => {
-                appSettings.view = viewToggle.checked ? 'weather' : 'github';
-                applyCurrentView();
-                updateViewToggleUI();
-                saveSettings();
+            document.querySelectorAll('input[name="view-source"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const value = radio.value;
+                    if (value === 'github') {
+                        appSettings.view = 'github';
+                    } else {
+                        appSettings.view = 'weather';
+                        if (value === 'weather-auto') {
+                            appSettings.weather.source = 'auto';
+                            // When switching to auto, clear the manual city and re-fetch
+                            appSettings.weather.city = null; 
+                        } else { // weather-manual
+                            appSettings.weather.source = 'manual';
+                        }
+                    }
+                    
+                    applyCurrentView();
+                    updateViewToggleUI(); // This will show/hide the input field
+                    saveSettings();
+                });
             });
 
             cityInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     const newCity = e.target.value.trim();
-                    if (newCity) {
-                        appSettings.weather.city = newCity;
-                        fetchAndDisplayWeather(); // Re-fetch with new city
-                        e.target.blur();
-                        e.target.value = ''; // Clear input after submission
-                    }
+                    appSettings.weather.city = newCity || null; // Set to null if empty, to re-trigger auto
+                    
+                    applyCurrentView(); // Re-fetch with new city
+                    saveSettings();
+                    
+                    e.target.blur();
+                    // Don't clear the input, so user can see what they typed
                 }
             });
 
@@ -2792,6 +2838,13 @@
             setInterval(updateGreeting, 1800000); 
             setInterval(updateCountdown, 3600000); 
             setInterval(updateTimeCapsule, 60000);
+
+            // [NEW] Auto-refresh weather data every 30 minutes
+            setInterval(() => {
+                if (appSettings.view === 'weather') {
+                    fetchAndDisplayWeather();
+                }
+            }, 30 * 60 * 1000);
 
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
                 if (appSettings.theme === 'system') {
