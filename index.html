@@ -1783,7 +1783,7 @@
 
             if (appSettings.weather.source === 'auto' && !locationQuery) {
                 try {
-                    const ipResponse = await fetch('https://ipapi.co/json/');
+                    const ipResponse = await fetch('https://cors.eu.org/http://ip-api.com/json');
                     if (!ipResponse.ok) throw new Error('IP API request failed');
                     const ipData = await ipResponse.json();
                     locationQuery = ipData.city || 'auto:ip';
