@@ -728,7 +728,7 @@
                             <!-- Weather View -->
                             <div id="weather-view" class="hidden">
                                  <h2 class="text-xl font-semibold mb-4" style="color: var(--text-color-primary);">天气信息</h2>
-                                 <div id="weather-content-wrapper" class="w-full rounded-md p-2 relative" style="background-color: var(--progress-bar-bg);">
+                                 <div id="weather-content-wrapper" class="w-full rounded-md p-4 relative" style="background-color: var(--progress-bar-bg);">
                                     <div id="weather-loader"></div>
                                     <div id="weather-data-container">
                                         <!-- Weather content will be injected here -->
@@ -1866,45 +1866,46 @@
         function getWeatherDataHtml(weatherData) {
             const iconUrl = getWeatherIconName(weatherData.weatherCode, weatherData.isDay);
             return `
-                <div class="flex gap-x-6 items-center w-full">
-                    <!-- Column 1: Icon and Main Temp (Narrower) -->
-                    <div class="flex-shrink-0 flex flex-col items-center justify-center">
-                        <img src="${iconUrl}" alt="${weatherData.weatherDesc}" class="w-24 h-24">
-                        <p class="font-bold text-4xl" style="color: var(--text-color-primary);">${weatherData.tempC}°C</p>
+                <div class="flex gap-x-8 items-stretch w-full">
+                    <!-- Column 1: 图标和主温度 (固定宽度, 居中) -->
+                    <div class="flex-shrink-0 flex flex-col items-center justify-center w-32">
+                        <img src="${iconUrl}" alt="${weatherData.weatherDesc}" class="w-16 h-16">
+                        <p class="font-bold text-3xl" style="color: var(--text-color-primary);">${weatherData.tempC}°</p>
                     </div>
 
-                    <!-- Column 2: Location, Condition, Tip (Flexible) -->
-                    <div class="flex-grow flex flex-col text-left min-w-0">
+                    <!-- Column 2: Location, Condition, Tip (Flexible, Left-aligned) -->
+                    <div class="flex-1 flex flex-col text-left justify-between">
                         <p class="font-bold text-xl truncate" style="color: var(--text-color-primary);" title="${weatherData.location}">${weatherData.location}</p>
-                        <p class="text-base font-medium mt-1.5" style="color: var(--text-color-secondary);">${weatherData.weatherDesc} / 最高 ${weatherData.maxTempC}° 最低 ${weatherData.minTempC}°</p>
-                        <p class="text-sm mt-1.5" style="color: var(--text-color-tertiary);">${weatherData.tip}</p>
+                        <p class="text-base font-medium" style="color: var(--text-color-secondary);">${weatherData.weatherDesc}</p>
+                        <p class="text-base font-medium" style="color: var(--text-color-secondary);">最高 ${weatherData.maxTempC}° 最低 ${weatherData.minTempC}°</p>
+                        <p class="text-sm" style="color: var(--text-color-tertiary);">${weatherData.tip}</p>
                     </div>
 
-                    <!-- Column 3: Details (Fixed Width) -->
-                    <div class="flex-shrink-0 w-44 flex flex-col text-sm space-y-2">
+                    <!-- Column 3: 详细信息 (固定宽度, 左对齐) -->
+                    <div class="flex-shrink-0 flex flex-col text-sm justify-between w-56">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center">
+                            <div class="flex items-center w-20">
                                 <i class="far fa-sun fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
                                 <span class="ml-2" style="color: var(--text-color-secondary);">日出/落</span>
                             </div>
                             <span class="font-semibold" style="color: var(--text-color-primary);">${weatherData.sunrise} / ${weatherData.sunset}</span>
                         </div>
                         <div class="flex items-center justify-between">
-                             <div class="flex items-center">
+                            <div class="flex items-center w-20">
                                 <i class="fas fa-temperature-half fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
                                 <span class="ml-2" style="color: var(--text-color-secondary);">体感</span>
                             </div>
                             <span class="font-semibold" style="color: var(--text-color-primary);">${weatherData.feelsLikeC}°</span>
                         </div>
                         <div class="flex items-center justify-between">
-                             <div class="flex items-center">
+                            <div class="flex items-center w-20">
                                 <i class="fas fa-droplet fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
                                 <span class="ml-2" style="color: var(--text-color-secondary);">湿度</span>
                             </div>
                             <span class="font-semibold" style="color: var(--text-color-primary);">${weatherData.humidity}%</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center">
+                            <div class="flex items-center w-20">
                                 <i class="fas fa-wind fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
                                 <span class="ml-2" style="color: var(--text-color-secondary);">风速</span>
                             </div>
