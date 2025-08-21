@@ -667,6 +667,34 @@
     input:checked + .toggle-slider:before {
         transform: translateX(24px);
     }
+
+    /* --- [NEW] Manual City Input Styles --- */
+    #weather-city-input {
+        transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        -webkit-appearance: none; /* Removes inner shadow on iOS */
+        padding-right: 2.5rem; /* Make space for the icon */
+    }
+    #weather-city-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px var(--accent-color-highlight);
+    }
+    #weather-city-input.invalid {
+        border-color: #ef4444 !important; /* red-500 */
+        animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    #save-city-btn, #confirm-city-icon {
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    #city-input-error {
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        transform: translateY(-4px);
+        opacity: 0;
+    }
+    #city-input-error.visible {
+        transform: translateY(0);
+        opacity: 1;
+    }
     </style>
 </head>
 <body>
@@ -2859,7 +2887,16 @@
                         </div>
                     </div>
                     <div id="manual-city-input-wrapper" class="mt-2 pl-4 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
-                        <input type="text" id="weather-city-input" placeholder="输入城市后回车 (例如: 北京)" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); border-color: var(--separator-color); color: var(--text-color-primary);">
+                        <div class="relative flex items-center">
+                            <input type="text" id="weather-city-input" placeholder="输入城市后回车 (例如: 北京)" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); color: var(--text-color-primary); border-color: var(--separator-color);">
+                            <button id="save-city-btn" title="保存" class="absolute right-1 p-1 rounded-full text-gray-400 hover:text-white">
+                                <i class="fas fa-save w-5 h-5 flex items-center justify-center"></i>
+                            </button>
+                            <div id="confirm-city-icon" class="absolute right-1 p-1 hidden opacity-0" style="color: var(--status-today);">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                        </div>
+                        <div id="city-input-error" class="text-xs mt-1 pl-1 hidden" style="color: #ef4444;"></div>
                     </div>
                 `;
             }
@@ -3034,6 +3071,58 @@
 
             // --- View Toggle Listeners ---
             const cityInput = document.getElementById('weather-city-input');
+            const saveCityBtn = document.getElementById('save-city-btn');
+            const confirmCityIcon = document.getElementById('confirm-city-icon');
+            const cityInputError = document.getElementById('city-input-error');
+
+            const saveCity = () => {
+                const newCity = cityInput.value.trim();
+
+                // Validation
+                if (newCity === '') {
+                    cityInput.classList.add('invalid');
+                    cityInputError.textContent = '内容不能为空';
+                    cityInputError.classList.add('visible');
+                    cityInputError.classList.remove('hidden');
+                    return;
+                }
+                if (newCity.length > 20) {
+                    cityInput.classList.add('invalid');
+                    cityInputError.textContent = '内容过长 (最多20个字符)';
+                    cityInputError.classList.add('visible');
+                    cityInputError.classList.remove('hidden');
+                    return;
+                }
+
+                // Clear previous errors
+                cityInput.classList.remove('invalid');
+                cityInputError.classList.remove('visible');
+                // Use a timeout to hide it after the transition
+                setTimeout(() => { cityInputError.classList.add('hidden'); }, 200);
+
+                // Save logic
+                appSettings.weather.city = newCity;
+                applyCurrentView();
+                saveSettings();
+                cityInput.blur();
+
+                // Feedback animation
+                saveCityBtn.style.opacity = '0';
+                confirmCityIcon.classList.remove('hidden');
+                setTimeout(() => { 
+                    confirmCityIcon.style.opacity = '1';
+                    confirmCityIcon.style.transform = 'scale(1)';
+                }, 10);
+
+                setTimeout(() => {
+                    confirmCityIcon.style.opacity = '0';
+                    confirmCityIcon.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        confirmCityIcon.classList.add('hidden');
+                        saveCityBtn.style.opacity = '1';
+                    }, 200);
+                }, 2000); 
+            };
 
             document.querySelectorAll('input[name="view-source"]').forEach(radio => {
                 radio.addEventListener('change', () => {
@@ -3044,7 +3133,6 @@
                         appSettings.view = 'weather';
                         if (value === 'weather-auto') {
                             appSettings.weather.source = 'auto';
-                            // When switching to auto, clear the manual city and re-fetch
                             appSettings.weather.city = null; 
                         } else { // weather-manual
                             appSettings.weather.source = 'manual';
@@ -3052,23 +3140,25 @@
                     }
                     
                     applyCurrentView();
-                    updateViewToggleUI(); // This will show/hide the input field
+                    updateViewToggleUI();
                     saveSettings();
                 });
             });
 
+            cityInput.addEventListener('focus', () => {
+                cityInput.classList.remove('invalid');
+                cityInputError.classList.remove('visible');
+                setTimeout(() => { cityInputError.classList.add('hidden'); }, 200);
+            });
+
             cityInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
-                    const newCity = e.target.value.trim();
-                    appSettings.weather.city = newCity || null; // Set to null if empty, to re-trigger auto
-                    
-                    applyCurrentView(); // Re-fetch with new city
-                    saveSettings();
-                    
-                    e.target.blur();
-                    // Don't clear the input, so user can see what they typed
+                    e.preventDefault();
+                    saveCity();
                 }
             });
+
+            saveCityBtn.addEventListener('click', saveCity);
 
 
             // --- Settings Modal Logic ---
