@@ -455,6 +455,7 @@
     .setting-radio-label {
         display: flex;
         align-items: center;
+        gap: 0.75rem;
         cursor: pointer;
         padding: 0.5rem 0.75rem;
         border-radius: 0.5rem;
@@ -476,7 +477,7 @@
         height: 1.25em;
         border: 2px solid #9ca3af; /* gray-400 */
         border-radius: 50%;
-        margin-right: 0.75rem;
+        /* margin-right is replaced by parent gap */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -497,6 +498,19 @@
     }
     .setting-radio-input:checked + .setting-radio-label .custom-radio-button::after {
         transform: scale(1);
+    }
+    .setting-description {
+        font-size: 0.8rem;
+        color: var(--text-color-secondary);
+        line-height: 1.3;
+        transition: color 0.2s ease-in-out;
+    }
+    .setting-radio-input:checked + .setting-radio-label .setting-description {
+        color: var(--text-color-primary);
+    }
+    .setting-description.text-center {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
     }
 
     #default-bg-options {
@@ -940,7 +954,7 @@
 
                     <!-- 2. Theme Color Settings -->
                     <div class="setting-section">
-                        <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M512 256c0 .9 0 1.8 0 2.7c-.4 36.5-33.6 61.3-70.1 61.3H344c-26.5 0-48 21.5-48 48c0 3.4 .4 6.7 1 9.9c2.1 10.2 6.5 20 10.8 29.9c6.1 13.8 12.1 27.5 12.1 42c0 31.8-21.6 60.7-53.4 62c-3.5 .1-7 .2-10.6 .2C114.6 512 0 397.4 0 256S114.6 0 256 0S512 114.6 512 256zM128 288a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm0-96a32 32 0 1 0 0-64 32 32 0 1 0 0 64zM288 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm96 96a32 32 0 1 0 0-64 32 32 0 1 0 0 64z"/></svg>主题模式</h3>
+                        <h3 class="text-lg font-semibold mb-2 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M512 256c0 .9 0 1.8 0 2.7c-.4 36.5-33.6 61.3-70.1 61.3H344c-26.5 0-48 21.5-48 48c0 3.4 .4 6.7 1 9.9c2.1 10.2 6.5 20 10.8 29.9c6.1 13.8 12.1 27.5 12.1 42c0 31.8-21.6 60.7-53.4 62c-3.5 .1-7 .2-10.6 .2C114.6 512 0 397.4 0 256S114.6 0 256 0S512 114.6 512 256zM128 288a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm0-96a32 32 0 1 0 0-64 32 32 0 1 0 0 64zM288 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm96 96a32 32 0 1 0 0-64 32 32 0 1 0 0 64z"/></svg>主题模式</h3>
                         <div id="theme-settings-content" class="flex flex-wrap">
                             <!-- Theme color swatches will be dynamically inserted here -->
                         </div>
@@ -2767,10 +2781,10 @@
             const bgSettingsContainer = document.getElementById('background-settings-content');
             if (bgSettingsContainer) {
                 const bgOptions = [
-                    { value: 'default', label: '默认图片' },
-                    { value: 'bing', label: '每日一Bing' },
-                    { value: 'anime', label: '随机动漫' },
-                    { value: 'random', label: '随机图片' }
+                    { value: 'default', label: '默认图片', description: '随机选择一张内置图片作为背景' },
+                    { value: 'bing', label: '每日一Bing', description: '展示 Bing 搜索的每日壁纸' },
+                    { value: 'anime', label: '随机动漫', description: '从公共动漫图库随机加载一张高清壁纸' },
+                    { value: 'random', label: '随机图片', description: '从公共图库中随机加载一张风景图' }
                 ];
 
                 let bgSettingsHTML = '';
@@ -2780,7 +2794,10 @@
                             <input type="radio" id="bg-radio-${option.value}" name="background-source" value="${option.value}" class="setting-radio-input">
                             <label for="bg-radio-${option.value}" class="setting-radio-label">
                                 <span class="custom-radio-button"></span>
-                                <span>${option.label}</span>
+                                <div>
+                                    <span>${option.label}</span>
+                                    <div class="setting-description">${option.description}</div>
+                                </div>
                             </label>
                         </div>
                     `;
@@ -2827,6 +2844,7 @@
             if (themeSettingsContainer) {
                 const container = themeSettingsContainer.querySelector('#theme-settings-content');
                 container.innerHTML = `
+                <div class="setting-description text-center mb-3">选择主题，或跟随系统设置自动切换</div>
                     <div class="setting-btn-group w-full relative">
                         <div class="theme-slider absolute h-full rounded-xl transition-all duration-300"></div>
                         <button class="setting-btn relative z-10" data-theme="system"><i class="fas fa-desktop fa-fw mr-2"></i>跟随系统</button>
@@ -2845,14 +2863,20 @@
                             <input type="radio" id="time-format-24h" name="time-format" value="24h" class="setting-radio-input">
                             <label for="time-format-24h" class="setting-radio-label">
                                 <span class="custom-radio-button"></span>
-                                <span>24小时制（19：30）</span>
+                                <div>
+                                    <span>24小时制（ 19:30 ）</span>
+                                    <div class="setting-description">以 00:00 至 23:59 的格式显示时间</div>
+                                </div>
                             </label>
                         </div>
                         <div>
                             <input type="radio" id="time-format-12h" name="time-format" value="12h" class="setting-radio-input">
                             <label for="time-format-12h" class="setting-radio-label">
                                 <span class="custom-radio-button"></span>
-                                <span>12小时制（7：30 AM / 7：30 PM）</span>
+                                <div>
+                                    <span>12小时制（ 7:30 AM / 7:30 PM ）</span>
+                                    <div class="setting-description">使用 AM/PM 来区分上午和下午，符合部分用户习惯</div>
+                                </div>
                             </label>
                         </div>
                     </div>
@@ -2868,21 +2892,30 @@
                             <input type="radio" id="view-radio-github" name="view-source" value="github" class="setting-radio-input">
                             <label for="view-radio-github" class="setting-radio-label">
                                 <span class="custom-radio-button"></span>
-                                <span>显示 GitHub 贡献图</span>
+                                <div>
+                                    <span>显示 GitHub 贡献图</span>
+                                    <div class="setting-description">主卡片区域展示您的 GitHub 提交活动图表</div>
+                                </div>
                             </label>
                         </div>
                         <div>
                             <input type="radio" id="view-radio-weather-auto" name="view-source" value="weather-auto" class="setting-radio-input">
                             <label for="view-radio-weather-auto" class="setting-radio-label">
                                 <span class="custom-radio-button"></span>
-                                <span>天气信息 (IP 自动定位)</span>
+                                <div>
+                                    <span>天气信息（ IP 自动定位 ）</span>
+                                    <div class="setting-description">根据您的网络位置自动获取并显示当地的天气情况</div>
+                                </div>
                             </label>
                         </div>
                         <div>
                             <input type="radio" id="view-radio-weather-manual" name="view-source" value="weather-manual" class="setting-radio-input">
                             <label for="view-radio-weather-manual" class="setting-radio-label">
                                 <span class="custom-radio-button"></span>
-                                <span>天气信息 (手动输入)</span>
+                                <div>
+                                    <span>天气信息（ 手动输入 ）</span>
+                                    <div class="setting-description">手动输入城市名称来获取指定地点的天气预报</div>
+                                </div>
                             </label>
                         </div>
                     </div>
