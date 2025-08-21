@@ -2402,14 +2402,14 @@
                         setWeatherSpinner(false);
                         isFetchingWeather = false; // Release the lock on early error
                         console.error("IP-based geolocation failed.", e);
-                        const errorHtml = `<p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p>`;
+                        const errorHtml = `<div class="text-center"><p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p></div>`;
                         renderWeatherData(errorHtml, true);
                         return;
                     }
                 }
 
                 if (!locationQuery) {
-                    const errorHtml = `<p style="color: var(--accent-color);">未设置城市</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入一个城市名称。</p>`;
+                    const errorHtml = `<div class="text-center"><p style="color: var(--accent-color);">未设置城市</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入一个城市名称。</p></div>`;
                     renderWeatherData(errorHtml, true);
                     return;
                 }
@@ -3078,14 +3078,7 @@
             const saveCity = () => {
                 const newCity = cityInput.value.trim();
 
-                // Validation
-                if (newCity === '') {
-                    cityInput.classList.add('invalid');
-                    cityInputError.textContent = '内容不能为空';
-                    cityInputError.classList.add('visible');
-                    cityInputError.classList.remove('hidden');
-                    return;
-                }
+                // Validation for length
                 if (newCity.length > 20) {
                     cityInput.classList.add('invalid');
                     cityInputError.textContent = '内容过长 (最多20个字符)';
@@ -3167,6 +3160,7 @@
             const closeSettingsBtn = document.getElementById('close-settings-btn');
 
             function openSettings() {
+                updateSettingsUI(); // Refresh UI to match saved settings
                 const settingsWindow = document.getElementById('settings-window');
                 
                 // [REMOVED] The problematic height calculation is gone.
