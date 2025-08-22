@@ -3469,6 +3469,10 @@
 
             function closeSettings() {
                 document.body.classList.remove('settings-open');
+                const bgPreviewContainer = document.getElementById('background-preview-container');
+                if (bgPreviewContainer) {
+                    bgPreviewContainer.classList.remove('visible');
+                }
             }
 
             openSettingsBtn.addEventListener('click', openSettings);
