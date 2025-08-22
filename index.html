@@ -998,6 +998,9 @@
                                 </h2>
                                 <div id="gh-chart-container" class="w-full rounded-md p-2 min-h-[140px] flex items-center justify-center" style="background-color: var(--progress-bar-bg);">
                                     <div id="gh-chart-spinner"></div>
+                                    <div id="gh-chart-loading" class="hidden text-center">
+                                        <p style="color: var(--text-color-secondary);">正在获取 GitHub 贡献图...</p>
+                                    </div>
                                     <div id="gh-chart-wrapper" class="relative">
                                         <div id="gh-chart-error" class="absolute inset-0 hidden flex-col items-center justify-center cursor-pointer rounded-md transition-all icon-btn">
                                             <i class="fas fa-sync-alt fa-2x" style="color: var(--text-color-tertiary);"></i>
@@ -2054,11 +2057,19 @@
             const errorMessage = document.getElementById('gh-chart-error-message');
             const imgLink = document.getElementById('gh-chart-link');
             const img = document.getElementById('gh-chart-img');
+            const loadingContainer = document.getElementById('gh-chart-loading');
+            const chartWrapper = document.getElementById('gh-chart-wrapper');
 
             const loadImage = () => {
-                // Show new spinner, hide error
-                spinner.classList.add('visible');
+                // Reset image state for re-loads
+                img.classList.remove('loaded');
+                imgLink.classList.add('invisible');
                 errorContainer.classList.remove('visible');
+
+                // Show loading UI
+                chartWrapper.classList.add('hidden');
+                loadingContainer.classList.remove('hidden');
+                spinner.classList.add('visible');
 
                 const originalSrc = img.dataset.src;
                 const baseUrl = originalSrc.split('?')[0];
@@ -2067,14 +2078,29 @@
             };
 
             img.onload = () => {
+                // Hide loading UI
                 spinner.classList.remove('visible');
-                imgLink.classList.remove('invisible');
-                imgLink.classList.add('visible');
-                img.classList.add('loaded');
+                loadingContainer.classList.add('hidden');
+                
+                // Show the chart wrapper so its contents can be animated
+                chartWrapper.classList.remove('hidden');
+                
+                // Defer the animation trigger to the next paint cycle for reliability
+                requestAnimationFrame(() => {
+                    imgLink.classList.remove('invisible');
+                    imgLink.classList.add('visible');
+                    img.classList.add('loaded');
+                });
             };
 
             img.onerror = () => {
+                // Hide loading UI
                 spinner.classList.remove('visible');
+                loadingContainer.classList.add('hidden');
+
+                // Show the chart wrapper to display the error message
+                chartWrapper.classList.remove('hidden');
+
                 errorContainer.classList.add('visible');
                 errorMessage.textContent = '贡献图加载失败，请检查网络并重试。';
             };
@@ -3375,6 +3401,7 @@
             } else {
                 weatherView.classList.add('hidden');
                 githubView.classList.remove('hidden');
+                setupGitHubChartLoader();
             }
         }
 
