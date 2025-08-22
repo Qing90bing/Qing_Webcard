@@ -18,9 +18,9 @@
             --immersive-bg-color: #111827;
             --icon-hover-bg: rgba(255, 255, 255, 0.1);
             --bg-color: #0d1a26;
-            --card-bg-color: rgba(30, 41, 59, 0.7);
+            --card-bg-color: rgba(30, 41, 59, 0.75);
             --card-border-color: rgba(255, 255, 255, 0.1);
-            --card-hover-bg-color: rgba(30, 41, 59, 0.75);
+            --card-hover-bg-color: rgba(30, 41, 59, 0.80);
             --card-hover-border-color: rgba(255, 255, 255, 0.2);
             --text-color-primary: #e5e7eb; /* gray-200 */
             --text-color-secondary: #9ca3af; /* gray-400 */
@@ -40,9 +40,9 @@
             --immersive-bg-color: #f9fafb;
             --icon-hover-bg: rgba(0, 0, 0, 0.08);
             --bg-color: #f1f5f9; /* slate-100 */
-            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --card-bg-color: rgba(255, 255, 255, 0.75);
             --card-border-color: rgba(0, 0, 0, 0.08);
-            --card-hover-bg-color: rgba(255, 255, 255, 0.75);
+            --card-hover-bg-color: rgba(255, 255, 255, 0.80);
             --card-hover-border-color: rgba(0, 0, 0, 0.12);
             --text-color-primary: #1e293b; /* slate-800 */
             --text-color-secondary: #475569; /* slate-600 */
@@ -81,6 +81,7 @@
             width: 100%;
             height: 100%;
             z-index: -1;
+            transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
         }
         .bg-layer {
             position: absolute;
@@ -100,8 +101,8 @@
 
         .glass-card {
             background: var(--card-bg-color);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: 1rem;
             border: 1px solid var(--card-border-color);
             transition: all 0.3s ease;
@@ -238,10 +239,12 @@
         }
 
         body.settings-open #main-wrapper {
-            transform: scale(0.98);
-            filter: blur(8px);
             opacity: 0;
             pointer-events: none;
+        }
+        body.settings-open #bg-wrapper {
+            transform: scale(1);
+            filter: blur(16px);
         }
         body.settings-open #settings-overlay {
             opacity: 1;
