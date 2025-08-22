@@ -1589,11 +1589,11 @@
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                 if (diffDays === 0) {
-                    countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><span class="text-2xl font-bold" style="color: var(--text-color-primary);">${nextHoliday.name}</span><br><strong class="text- font-bold" style="color: var(--accent-color);">今天</strong>`;
+                    countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><span class="text-2xl font-bold" style="color: var(--text-color-primary);">${nextHoliday.name}</span><br><strong class="text-4xl font-bold" style="color: var(--accent-color);">今天</strong>`;
                 } else if (diffDays === 1) {
                     countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><span class="text-2xl font-bold" style="color: var(--text-color-primary);">${nextHoliday.name}</span><br><strong class="text-4xl font-bold" style="color: var(--accent-color);">明天</strong>`;
                 } else {
-                    countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><strong class="text-xl" style="color: var(--text-color-primary);">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`;
+                    countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><strong class="text-2xl" style="color: var(--text-color-primary);">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`;
                 }
             } else {
                 countdownDisplay.textContent = '所有节日都已计算完毕！';
