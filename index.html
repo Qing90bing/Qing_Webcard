@@ -3117,6 +3117,16 @@
             if (timeFormatContainer) {
                 timeFormatContainer.innerHTML = `
                     <div class="space-y-2">
+                        <div class="flex justify-between items-center p-2">
+                            <div>
+                                <span class="font-medium">沉浸模式冒号闪烁</span>
+                                <div class="setting-description">仅在全屏时钟下生效</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="immersive-blink-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
                         <div>
                             <input type="radio" id="time-format-24h" name="time-format" value="24h" class="setting-radio-input">
                             <label for="time-format-24h" class="setting-radio-label">
