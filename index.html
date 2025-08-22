@@ -16,6 +16,7 @@
         /* --- CSS Variables and Theming --- */
         body.theme-dark {
             --immersive-bg-color: #111827;
+            --icon-hover-bg: rgba(255, 255, 255, 0.1);
             --bg-color: #0d1a26;
             --card-bg-color: rgba(30, 41, 59, 0.7);
             --card-border-color: rgba(255, 255, 255, 0.1);
@@ -37,6 +38,7 @@
         }
         body.theme-light {
             --immersive-bg-color: #f9fafb;
+            --icon-hover-bg: rgba(0, 0, 0, 0.08);
             --bg-color: #f1f5f9; /* slate-100 */
             --card-bg-color: rgba(255, 255, 255, 0.7);
             --card-border-color: rgba(0, 0, 0, 0.08);
@@ -108,6 +110,10 @@
         .glass-card:hover {
             background: var(--card-hover-bg-color);
             border: 1px solid var(--card-hover-border-color);
+        }
+
+        .icon-btn:hover {
+            background-color: var(--icon-hover-bg);
         }
 
         /* Override for settings window to disable hover effect */
@@ -199,7 +205,7 @@
             transform: scale(0.9);
             visibility: hidden;
             pointer-events: none;
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s, background-color 0.2s ease;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0s linear 0.2s, background-color 0.2s ease;
         }
         #back-to-today-btn:hover {
             opacity: 0.85 !important;
@@ -209,6 +215,7 @@
             transform: scale(1);
             visibility: visible;
             pointer-events: auto;
+        transition-delay: 0s;
         }
 
         #main-wrapper {
@@ -289,10 +296,7 @@
     }
     #exit-immersive-btn:hover {
         color: var(--text-color-primary);
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-    body.theme-light #exit-immersive-btn:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: var(--icon-hover-bg);
     }
     #exit-immersive-btn:active {
         transform: scale(0.95);
@@ -385,6 +389,17 @@
         animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
     }
 
+    /* --- [NEW] Blinking Colon Animation --- */
+    @keyframes instant-blink {
+        /* This creates a 50/50 blink effect */
+        50% { opacity: 0; }
+    }
+    #immersive-time-view .time-colon {
+        animation: instant-blink 1s steps(1, end) infinite;
+        position: relative;
+        top: -0.05em; /* Prevents vertical layout shift */
+    }
+
     /* GitHub Chart Placeholder Styles */
     #gh-chart-container {
         position: relative;
@@ -400,7 +415,7 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
         z-index: 10;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        transition: opacity 0.3s ease, visibility 0s linear 0.3s;
         opacity: 0;
         visibility: hidden;
     }
@@ -439,7 +454,7 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
         z-index: 10;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        transition: opacity 0.3s ease, visibility 0s linear 0.3s;
         opacity: 0;
         visibility: hidden;
     }
@@ -472,7 +487,7 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
         z-index: 10;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        transition: opacity 0.3s ease, visibility 0s linear 0.3s;
         opacity: 0;
         visibility: hidden;
     }
@@ -488,6 +503,10 @@
     #weather-refresh-btn:hover {
         opacity: 1;
         visibility: visible;
+        transition-delay: 0s;
+    }
+    #weather-refresh-btn {
+        transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out, background-color 0.2s ease-in-out, visibility 0s linear 0.2s;
     }
 
     @keyframes spin {
@@ -938,10 +957,10 @@
                         <div class="mt-8">
                             <p class="text-sm " style="color: var(--text-color-secondary);">与我联系:</p>
                             <div class="flex items-center gap-2">
-                                <a href="https://github.com/Qing90bing" target="_blank" title="GitHub" class="p-2 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                                <a href="https://github.com/Qing90bing" target="_blank" title="GitHub" class="p-2 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                     <i class="fa-brands fa-github fa-xl"></i>
                                 </a>
-                                <a href="mailto:1879495519@qq.com" target="_blank" title="Email" class="p-2 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                                <a href="mailto:1879495519@qq.com" target="_blank" title="Email" class="p-2 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                     <i class="fa-solid fa-envelope fa-xl"></i>
                                 </a>
                             </div>
@@ -973,7 +992,7 @@
                                 <div id="gh-chart-container" class="w-full rounded-md p-2 min-h-[140px] flex items-center justify-center" style="background-color: var(--progress-bar-bg);">
                                     <div id="gh-chart-spinner"></div>
                                     <div id="gh-chart-wrapper" class="relative">
-                                        <div id="gh-chart-error" class="absolute inset-0 hidden flex-col items-center justify-center cursor-pointer rounded-md transition-all hover:bg-white/10">
+                                        <div id="gh-chart-error" class="absolute inset-0 hidden flex-col items-center justify-center cursor-pointer rounded-md transition-all icon-btn">
                                             <svg class="w-8 h-8" style="color: var(--text-color-tertiary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.695v-2.286c0-1.033-.842-1.875-1.875-1.875H10.5a1.875 1.875 0 00-1.875 1.875v2.286m7.5 0l-3.181 3.183m0 0L12 21.354l-3.181-3.183m0 0l-3.181-3.183"></path></svg>
                                             <p id="gh-chart-error-message" class="mt-2 text-sm" style="color: var(--text-color-secondary);">加载贡献图失败，点击重试</p>
                                         </div>
@@ -988,7 +1007,7 @@
                                  <h2 class="text-xl font-semibold mb-4" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Pro v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--><path d="M32 400C32 479.5 96.5 544 176 544L480 544C550.7 544 608 486.7 608 416C608 364.4 577.5 319.9 533.5 299.7C540.2 286.6 544 271.7 544 256C544 203 501 160 448 160C430.3 160 413.8 164.8 399.6 173.1C375.5 127.3 327.4 96 272 96C192.5 96 128 160.5 128 240C128 248 128.7 255.9 129.9 263.5C73 282.7 32 336.6 32 400z"/></svg>天气信息</h2>
                                  <div id="weather-content-wrapper" class="w-full rounded-md p-4 relative min-h-[140px]" style="background-color: var(--progress-bar-bg);">
                                     <div class="weather-hover-zone absolute top-0 left-0 w-1/2 h-full z-10"></div>
-                                    <button id="weather-refresh-btn" title="手动刷新" class="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200 active:scale-90 z-20 opacity-0 invisible"><i class="fas fa-sync-alt"></i></button>
+                                    <button id="weather-refresh-btn" title="手动刷新" class="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-white/60 hover:text-white icon-btn transition-all duration-200 active:scale-90 z-20 opacity-0 invisible"><i class="fas fa-sync-alt"></i></button>
                                     <div id="weather-loader"></div>
                                     <div id="weather-data-container">
                                         <!-- Weather content will be injected here -->
@@ -1025,7 +1044,7 @@
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);"><svg fill="currentColor" class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm128 0v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H336zM64 400v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H208zm112 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H336c-8.8 0-16 7.2-16 16z"/></svg>节日倒数列表</h2>
                         <div class="flex items-center gap-3">
                             <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
-                            <button id="close-holiday-list" title="关闭" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="close-holiday-list" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -1033,21 +1052,21 @@
                     <div class="flex justify-center items-center h-8 relative">
                         <!-- Display Mode -->
                         <div id="year-display-controls" class="flex items-center gap-4 text-lg">
-                            <button id="prev-year" title="上一年" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="prev-year" title="上一年" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
                             <span id="holiday-list-year" class="font-bold w-16 text-center cursor-pointer" style="color: var(--text-color-primary);"></span>
-                            <button id="next-year" title="下一年" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="next-year" title="下一年" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
                         <!-- Edit Mode -->
                         <div id="year-edit-controls" class="hidden flex items-center gap-2 text-lg">
                             <input type="text" id="year-input" class="font-bold w-20 text-center rounded-md border focus:ring-0 px-1 py-0.5 text-lg" style="background-color: var(--card-bg-color); color: var(--text-color-primary); border-color: var(--separator-color); outline: none;">
-                            <button id="confirm-year-btn" title="确认" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--status-today);">
+                            <button id="confirm-year-btn" title="确认" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--status-today);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             </button>
-                            <button id="cancel-year-btn" title="取消" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: #ef4444;">
+                            <button id="cancel-year-btn" title="取消" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: #ef4444;">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -1070,10 +1089,10 @@
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);"><svg fill="currentColor" class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M0 32C0 14.3 14.3 0 32 0H64 320h32c17.7 0 32 14.3 32 32s-14.3 32-32 32V75c0 42.4-16.9 83.1-46.9 113.1L237.3 256l67.9 67.9c30 30 46.9 70.7 46.9 113.1v11c17.7 0 32 14.3 32 32s-14.3 32-32 32H320 64 32c-17.7 0-32-14.3-32-32s14.3-32 32-32V437c0-42.4 16.9-83.1 46.9-113.1L146.7 256 78.9 188.1C48.9 158.1 32 117.4 32 75V64C14.3 64 0 49.7 0 32zM96 64V75c0 25.5 10.1 49.9 28.1 67.9L192 210.7l67.9-67.9c18-18 28.1-42.4 28.1-67.9V64H96zm0 384H288V437c0-25.5-10.1-49.9-28.1-67.9L192 301.3l-67.9 67.9c-18 18-28.1 42.4-28.1 67.9v11z"/></svg>时光胶囊</h2>
                         <div class="flex items-center gap-4">
-                            <button id="open-settings-btn" title="设置" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="open-settings-btn" title="设置" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <i class="fas fa-gear fa-lg w-6 h-6 flex items-center justify-center"></i>
                             </button>
-                            <button id="close-time-capsule" title="关闭" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="close-time-capsule" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -1135,7 +1154,7 @@
             <!-- Header -->
             <div class="flex justify-between items-center ">
                 <h2 class="text-xl font-semibold flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg>设置</h2>
-                <button id="close-settings-btn" title="关闭" class="p-1 rounded-full hover:bg-white/10 transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                <button id="close-settings-btn" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                     <i class="fas fa-times fa-lg w-6 h-6 flex items-center justify-center"></i>
                 </button>
             </div>
@@ -1330,22 +1349,24 @@
             const dateDisplay = document.getElementById('date-display');
             const now = new Date();
 
+            const hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const colon = `<span class="time-colon">:</span>`;
+
             if (appSettings.timeFormat === '12h') {
                 timeDisplay.classList.add('flex', 'items-baseline', 'justify-center');
-                let hours = now.getHours();
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
+                let h12 = hours % 12;
+                h12 = h12 ? h12 : 12; // the hour '0' should be '12'
+                const strH12 = String(h12).padStart(2, '0');
                 const ampm = hours >= 12 ? 'PM' : 'AM';
-                hours = hours % 12;
-                hours = hours ? hours : 12; // the hour '0' should be '12'
-                const strHours = String(hours).padStart(2, '0');
-                // Use a smaller gap and font-bold for the AM/PM
-                timeDisplay.innerHTML = `<span>${strHours}:${minutes}:${seconds}</span><span class="text-3xl font-bold ml-2">${ampm}</span>`;
+                
+                const timeString = `${strH12}${colon}${minutes}${colon}${seconds}`;
+                timeDisplay.innerHTML = `<span>${timeString}</span><span class="text-3xl font-bold ml-2">${ampm}</span>`;
             } else { // 24h format
-                // Ensure flex classes are removed and content is cleared for 24h mode
                 timeDisplay.classList.remove('flex', 'items-baseline', 'justify-center');
-                timeDisplay.innerHTML = ''; // Clear old content first
-                timeDisplay.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+                const strH24 = String(hours).padStart(2, '0');
+                timeDisplay.innerHTML = `${strH24}${colon}${minutes}${colon}${seconds}`;
             }
 
             const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
@@ -3233,7 +3254,7 @@
                                     </div>
                                 </div>
                                 <div class="flex-shrink-0">
-                                    <button id="hitokoto-save-btn" title="保存" class="p-2 rounded-full hover:bg-white/10 transition-all active:scale-95 relative w-9 h-9">
+                                    <button id="hitokoto-save-btn" title="保存" class="p-2 rounded-full icon-btn transition-all active:scale-95 relative w-9 h-9">
                                         <i class="fas fa-save fa-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300"></i>
                                         <div id="hitokoto-confirm-icon" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-300" style="color: var(--status-today);">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
