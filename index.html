@@ -394,7 +394,7 @@
         /* This creates a 50/50 blink effect */
         50% { opacity: 0; }
     }
-    #immersive-time-view .time-colon {
+    body.immersive-blink-enabled #immersive-time-view .time-colon {
         animation: instant-blink 1s steps(1, end) infinite;
         position: relative;
         top: -0.05em; /* Prevents vertical layout shift */
@@ -2098,6 +2098,7 @@
             },
             theme: 'system', // 'system', 'light', 'dark'
             timeFormat: '24h', // '12h' or '24h'
+            immersiveBlinkingColon: false,
             view: 'github', // 'github' or 'weather'
             weather: {
                 source: 'auto', // 'auto' or 'manual'
@@ -3348,12 +3349,20 @@
             }
         }
 
+        function updateImmersiveBlinkUI() {
+            const toggle = document.getElementById('immersive-blink-toggle');
+            if (toggle) {
+                toggle.checked = appSettings.immersiveBlinkingColon;
+            }
+        }
+
         function updateSettingsUI() {
             updateBgSettingsUI();
             // updateThemeSettingsUI(); // This is now handled by a dedicated initializer
             updateTimeFormatUI();
             updateViewToggleUI();
             updateHitokotoSettingsUI();
+            updateImmersiveBlinkUI();
         }
 
         // --- [NEW] View (GitHub/Weather) Management ---
@@ -3388,6 +3397,10 @@
                 themeToApply = `theme-${appSettings.theme}`;
             }
             body.classList.add(themeToApply);
+        }
+
+        function applyBlinkingEffect() {
+            document.body.classList.toggle('immersive-blink-enabled', appSettings.immersiveBlinkingColon);
         }
 
         // --- [NEW] Immersive Time View Logic ---
@@ -3500,6 +3513,16 @@
                     }
                 });
             });
+
+            // --- [NEW] Immersive Blink Toggle Listener ---
+            const immersiveBlinkToggle = document.getElementById('immersive-blink-toggle');
+            if (immersiveBlinkToggle) {
+                immersiveBlinkToggle.addEventListener('change', () => {
+                    appSettings.immersiveBlinkingColon = immersiveBlinkToggle.checked;
+                    saveSettings();
+                    applyBlinkingEffect();
+                });
+            }
 
             // --- View Toggle Listeners ---
             const cityInput = document.getElementById('weather-city-input');
@@ -4063,6 +4086,7 @@
             
             // 3. Now apply all other settings.
             applyCurrentTheme();
+            applyBlinkingEffect();
             applyCurrentBackground();
             applyCurrentView();
             updateSettingsUI();
