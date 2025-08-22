@@ -15,6 +15,7 @@
     <style>
         /* --- CSS Variables and Theming --- */
         body.theme-dark {
+            --immersive-bg-color: #111827;
             --bg-color: #0d1a26;
             --card-bg-color: rgba(30, 41, 59, 0.7);
             --card-border-color: rgba(255, 255, 255, 0.1);
@@ -35,6 +36,7 @@
             --status-tomorrow: #60a5fa; /* blue-400 */
         }
         body.theme-light {
+            --immersive-bg-color: #f9fafb;
             --bg-color: #f1f5f9; /* slate-100 */
             --card-bg-color: rgba(255, 255, 255, 0.7);
             --card-border-color: rgba(0, 0, 0, 0.08);
@@ -243,6 +245,100 @@
             transform: scale(1);
             opacity: 1;
         }
+
+    /* --- [NEW] Immersive Time View --- */
+    #immersive-time-view {
+        position: fixed;
+        inset: 0;
+        z-index: 100; /* Higher than settings overlay */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--immersive-bg-color);
+        color: var(--text-color-primary);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, background-color 0.3s ease;
+    }
+
+    #exit-immersive-btn {
+        position: absolute;
+        top: 2rem;  /* 32px */
+        right: 2rem; /* 32px */
+        width: 3rem;  /* 48px */
+        height: 3rem; /* 48px */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        color: var(--text-color-secondary);
+        background-color: transparent;
+        cursor: pointer;
+        border: none; /* remove default button border */
+        opacity: 0;
+        visibility: hidden;
+        /* Combine transitions for a cleaner rule */
+        transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, transform 0.2s ease-in-out, opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+    }
+    #exit-immersive-btn.visible {
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0s;
+    }
+    #exit-immersive-btn:hover {
+        color: var(--text-color-primary);
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    body.theme-light #exit-immersive-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    #exit-immersive-btn:active {
+        transform: scale(0.95);
+    }
+    #exit-immersive-btn svg {
+        width: 1.75rem; /* 28px */
+        height: 1.75rem; /* 28px */
+    }
+    
+    #immersive-date-display {
+        font-size: 2.25rem; /* text-4xl */
+        line-height: 2.5rem;
+        color: var(--text-color-secondary);
+        transition: color 0.3s ease;
+    }
+    #immersive-time-display {
+        font-size: 8rem; /* text-9xl */
+        line-height: 1;
+        font-weight: 700;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        font-variant-numeric: tabular-nums;
+        font-family: 'Inter', sans-serif;
+        text-shadow: 0 0 20px var(--accent-color);
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+    #immersive-greeting {
+        font-size: 1.875rem; /* text-3xl */
+        line-height: 2.25rem;
+        color: var(--text-color-secondary);
+        transition: color 0.3s ease;
+    }
+    
+    /* State when immersive view is active */
+    body.immersive-active #main-wrapper {
+        opacity: 0;
+        filter: blur(4px);
+        transform: scale(0.98);
+        pointer-events: none;
+        transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+    body.immersive-active #immersive-time-view {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
 
     @media (max-width: 1023px) {
         html, body {
@@ -855,7 +951,7 @@
 
                 <div id="right-column" class="lg:col-span-3 space-y-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="glass-card p-5 flex flex-col justify-center items-center">
+                        <div id="time-card" class="glass-card p-5 flex flex-col justify-center items-center cursor-pointer">
                             <div id="date-display" class="text-lg" style="color: var(--text-color-secondary);"></div>
                             <div id="time-display" class="text-6xl my-1" style="color: var(--text-color-primary);"></div>
                             <div id="greeting" class="text-sm" style="color: var(--text-color-secondary);"></div>
@@ -1087,6 +1183,20 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- [NEW] Immersive Time View -->
+    <div id="immersive-time-view">
+        <button id="exit-immersive-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                <path fill="currentColor" d="M384 128L448 128L448 544C448 561.7 462.3 576 480 576L512 576C529.7 576 544 561.7 544 544C544 526.3 529.7 512 512 512L512 128C512 92.7 483.3 64 448 64L352 64L352 64L192 64C156.7 64 128 92.7 128 128L128 512C110.3 512 96 526.3 96 544C96 561.7 110.3 576 128 576L352 576C369.7 576 384 561.7 384 544L384 128zM256 320C256 302.3 270.3 288 288 288C305.7 288 320 302.3 320 320C320 337.7 305.7 352 288 352C270.3 352 256 337.7 256 320z"/>
+            </svg>
+        </button>
+        <div class="flex flex-col items-center justify-center text-center">
+            <div id="immersive-date-display"></div>
+            <div id="immersive-time-display"></div>
+            <div id="immersive-greeting"></div>
         </div>
     </div>
     
@@ -3244,6 +3354,25 @@
             body.classList.add(themeToApply);
         }
 
+        // --- [NEW] Immersive Time View Logic ---
+        let immersiveTimeInterval = null;
+
+        function updateImmersiveTime() {
+            // We need to call the original updateTime to get the most up-to-date values,
+            // then copy them over. This avoids code duplication.
+            updateTime();
+            
+            const timeDisplay = document.getElementById('time-display').innerHTML;
+            const dateDisplay = document.getElementById('date-display').textContent;
+            const greeting = document.getElementById('greeting').textContent;
+            
+            // For 12h format, the time is in a span, so innerHTML is needed.
+            document.getElementById('immersive-time-display').innerHTML = timeDisplay;
+            document.getElementById('immersive-date-display').textContent = dateDisplay;
+            document.getElementById('immersive-greeting').textContent = greeting;
+        }
+
+
         // --- 交互事件监听 ---
         function setupEventListeners() {
             // --- Theme Settings Listeners ---
@@ -3486,6 +3615,13 @@
 
                         document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
+                    // Priority 0: Close immersive view
+                    if (document.body.classList.contains('immersive-active')) {
+                        // Programmatically click the exit button to ensure cleanup logic runs
+                        document.getElementById('exit-immersive-btn').click();
+                        return;
+                    }
+                    
                     // Priority 1: Close settings modal if it's open
                     if (document.body.classList.contains('settings-open')) {
                         closeSettings();
@@ -3823,6 +3959,53 @@
                         }, 300);
                     }, 3000);
                 }, 300);
+            });
+
+            // --- [NEW] Immersive Time Listeners ---
+            const immersiveView = document.getElementById('immersive-time-view');
+            const timeCard = document.getElementById('time-card');
+            const exitImmersiveBtn = document.getElementById('exit-immersive-btn');
+
+            const handleImmersiveMouseMove = (event) => {
+                const { clientX, clientY } = event;
+                const { innerWidth, innerHeight } = window;
+                if (clientX > innerWidth / 2 && clientY < innerHeight / 2) {
+                    exitImmersiveBtn.classList.add('visible');
+                } else {
+                    exitImmersiveBtn.classList.remove('visible');
+                }
+            };
+
+            const handleImmersiveMouseLeave = () => {
+                exitImmersiveBtn.classList.remove('visible');
+            };
+
+            timeCard.addEventListener('click', (event) => {
+                // Do not trigger if a sub-element that is a link was clicked
+                if (event.target.closest('a')) {
+                    return;
+                }
+                document.body.classList.add('immersive-active');
+                updateImmersiveTime(); // Initial population
+                if (immersiveTimeInterval) clearInterval(immersiveTimeInterval);
+                immersiveTimeInterval = setInterval(updateImmersiveTime, 1000);
+
+                // Add mouse listeners for the exit button
+                immersiveView.addEventListener('mousemove', handleImmersiveMouseMove);
+                immersiveView.addEventListener('mouseleave', handleImmersiveMouseLeave);
+            });
+
+            exitImmersiveBtn.addEventListener('click', () => {
+                document.body.classList.remove('immersive-active');
+                if (immersiveTimeInterval) {
+                    clearInterval(immersiveTimeInterval);
+                    immersiveTimeInterval = null;
+                }
+                
+                // Clean up button visibility and remove listeners
+                exitImmersiveBtn.classList.remove('visible');
+                immersiveView.removeEventListener('mousemove', handleImmersiveMouseMove);
+                immersiveView.removeEventListener('mouseleave', handleImmersiveMouseLeave);
             });
         }
 
