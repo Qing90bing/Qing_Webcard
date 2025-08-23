@@ -473,6 +473,27 @@
         visibility: visible;
     }
 
+    #bg-preview-error {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s, background-color 0.2s ease-in-out, backdrop-filter 0.2s ease-in-out;
+    }
+    #bg-preview-error p:first-child {
+        color: var(--accent-color);
+    }
+    #bg-preview-error p:last-child {
+        color: var(--text-color-primary);
+    }
+    #bg-preview-error:hover {
+        background-color: rgba(0,0,0,0.45);
+        backdrop-filter: blur(8px);
+    }
+    #bg-preview-error.visible {
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0s;
+    }
+
     /* --- [NEW] Weather Loader --- */
     #weather-content-wrapper {
         display: flex;
@@ -562,24 +583,24 @@
     }
 
     #bg-preview-download-btn.visible {
-        transform: scale(1) !important;
+        transform: scale(1);
     }
 
     #bg-preview-download-btn:hover {
-        transform: scale(1.1) !important;
+        transform: scale(1.1);
     }
 
     #bg-preview-refresh-btn.visible {
-        transform: scale(1) !important;
+        transform: scale(1);
     }
 
     #bg-preview-refresh-btn:hover {
-        transform: scale(1.1) !important;
+        transform: scale(1.1);
     }
 
     #bg-preview-download-btn:active,
     #bg-preview-refresh-btn:active {
-        transform: scale(1) !important;
+        transform: scale(1);
         transition: transform 0.1s;
     }
 
@@ -2816,6 +2837,34 @@
             }
         }
 
+        const showPreviewError = () => {
+            const errorContainer = document.getElementById('bg-preview-error');
+            const loader = document.getElementById('preview-loader');
+            const previewImg = document.getElementById('bg-preview-img');
+
+            if (!errorContainer || !loader || !previewImg) return;
+
+            loader.classList.remove('visible');
+            previewImg.classList.remove('breathing-effect');
+            
+            errorContainer.classList.remove('hidden');
+            setTimeout(() => {
+                errorContainer.classList.add('visible');
+            }, 10);
+        };
+
+        const hidePreviewError = () => {
+            const errorContainer = document.getElementById('bg-preview-error');
+            if (!errorContainer) return;
+
+            errorContainer.classList.remove('visible');
+            setTimeout(() => {
+                if (!errorContainer.classList.contains('visible')) {
+                    errorContainer.classList.add('hidden');
+                }
+            }, 300);
+        };
+        
         const showPreview = (displayUrl, originalUrl) => {
             const requestId = ++latestPreviewRequestId;
             const previewImg = document.getElementById('bg-preview-img');
@@ -2825,48 +2874,42 @@
 
             if (!previewImg || !loader) return;
 
-            // --- [NEW] Stop loading indicators ---
             previewImg.classList.remove('breathing-effect');
             loader.classList.remove('visible');
             
-            // Ensure action buttons are visible
             downloadBtn.classList.add('visible');
             refreshBtn.classList.add('visible');
 
-            currentBgUrl = originalUrl; // Store the original URL for the download fallback.
+            currentBgUrl = originalUrl;
 
-            // --- [NEW] Implement Fade-out, then Fade-in animation ---
             const preloader = new Image();
             preloader.src = displayUrl;
 
             preloader.onload = () => {
-                if (requestId !== latestPreviewRequestId) return; // Ignore outdated request
+                if (requestId !== latestPreviewRequestId) return;
 
-                // [FIX] Make the image visible before fading it in
                 previewImg.classList.remove('hidden');
-
-                // 1. Set transition time and fade out
                 previewImg.style.transition = 'opacity 0.2s ease-in-out';
                 previewImg.style.opacity = 0;
 
-                // 2. After fade-out, change src and fade back in
                 setTimeout(() => {
                     previewImg.src = preloader.src;
                     previewImg.style.opacity = 1;
-                }, 200); // Wait for fade-out to complete
+                }, 200);
             };
 
             preloader.onerror = () => {
                 if (requestId !== latestPreviewRequestId) return;
                 console.error(`Preview image failed to load: ${displayUrl}`);
-                // If new image fails, just stop loading and show the old image
-                previewImg.style.opacity = 1; 
+                showPreviewError();
             };
         };
 
         async function applyCurrentBackground() {
             const requestId = ++latestBgRequestId;
             const { source, specifier } = appSettings.background;
+
+            hidePreviewError();
 
             const stopSpinner = () => {
                 const refreshBtn = document.getElementById('bg-preview-refresh-btn');
@@ -2876,36 +2919,27 @@
                 }
             };
 
-            const hidePreview = () => {
+            const hideStaticPreviewElements = () => {
                 const container = document.getElementById('background-preview-container');
-                const previewImg = document.getElementById('bg-preview-img');
-                const loader = document.getElementById('preview-loader');
-
                 if (container) container.classList.remove('visible');
-                if (previewImg) previewImg.classList.remove('breathing-effect');
-                if (loader) loader.classList.remove('visible');
             };
             
             const handleError = (error, source) => {
-                if (requestId !== latestBgRequestId) return; // Ignore error from outdated request
+                if (requestId !== latestBgRequestId) return;
                 console.error(`Error fetching background from source: ${source}`, error);
                 stopSpinner();
-                const randomFallbackUrl = DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
-                backgroundFader.update(randomFallbackUrl, true);
-                hidePreview();
+                showPreviewError();
             };
 
             try {
                 const isDynamicSource = ['bing', 'anime', 'random'].includes(source);
                 
-                // --- [NEW] Immediate UI feedback for dynamic sources ---
                 if (isDynamicSource) {
                     const container = document.getElementById('background-preview-container');
                     const previewImg = document.getElementById('bg-preview-img');
                     const loader = document.getElementById('preview-loader');
 
                     if (container && previewImg && loader) {
-                        // Ensure the container is visible to show the loading state
                         if (!container.classList.contains('visible')) {
                              container.classList.add('visible');
                         }
@@ -2914,58 +2948,50 @@
                     }
                 }
 
-                let finalUrl; // The original URL of the image
-                let displayUrl; // The URL to be used for display (object URL for dynamic, same as finalUrl for static)
+                let finalUrl;
+                let displayUrl;
 
                 if (!isDynamicSource) {
-                    hidePreview();
+                    hideStaticPreviewElements();
                     finalUrl = (specifier && specifier !== 'random' && DEFAULT_BG_IMAGES.includes(specifier))
                         ? specifier
                         : DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
                     displayUrl = finalUrl;
+                    currentImageBlob = null; 
                 } else {
-                    // Step 1: Get the original dynamic URL
                     if (source === 'bing') {
                         const bingApiResponse = await fetch('https://cors.eu.org/https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN');
                         if (!bingApiResponse.ok) throw new Error('Bing API request failed');
                         const bingData = await bingApiResponse.json();
                         finalUrl = `https://www.bing.com${bingData.images[0].urlbase}_1920x1080.jpg`;
-                    } else { // anime or random
+                    } else {
                         const apiUrl = source === 'anime' 
-                            ? 'https://api.sretna.cn/api/anime.php' // 防挂 https://www.dmoe.cc/random.php
+                            ? 'https://api.sretna.cn/api/anime.php'
                             : 'https://imgapi.cn/api.php?zd=zsy&fl=fengjing&gs=images';
                         finalUrl = `${apiUrl}?v=${new Date().getTime()}`;
                     }
 
-                    // Step 2: Fetch the image data through the proxy, get a blob, and create an object URL
                     const imageResponse = await fetch(`https://cors.eu.org/${finalUrl}`);
                     if (!imageResponse.ok) throw new Error(`Failed to fetch image from proxy: ${finalUrl}`);
                     
                     const imageBlob = await imageResponse.blob();
-                    currentImageBlob = imageBlob; // Store the blob globally for download
+                    currentImageBlob = imageBlob;
                     const contentType = imageResponse.headers.get('content-type');
-                    const mimeToExt = {
-                        'image/jpeg': 'jpg',
-                        'image/png': 'png',
-                        'image/gif': 'gif',
-                        'image/bmp': 'bmp',
-                        'image/webp': 'webp'
-                    };
-                    currentImageExtension = mimeToExt[contentType] || 'jpg'; // Store the extension
+                    const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/webp': 'webp' };
+                    currentImageExtension = mimeToExt[contentType] || 'jpg';
 
                     displayUrl = URL.createObjectURL(imageBlob);
                 }
 
                 if (requestId !== latestBgRequestId) {
                     if (displayUrl.startsWith('blob:')) URL.revokeObjectURL(displayUrl);
-                    return; // Outdated request, abort.
+                    return;
                 }
 
-                // Step 3: Use the urls to update the UI
-                if (isDynamicSource) {
-                    showPreview(displayUrl, finalUrl); // Pass both URLs to showPreview
-                }
                 await backgroundFader.update(displayUrl, true);
+                if (isDynamicSource) {
+                    showPreview(displayUrl, finalUrl);
+                }
                 
                 stopSpinner();
 
@@ -2998,6 +3024,14 @@
                 defaultOptionsContainer.classList.add('open');
             } else {
                 defaultOptionsContainer.classList.remove('open');
+            }
+
+            // [FIX] Ensure preview container is visible if a dynamic source is active
+            const previewContainer = document.getElementById('background-preview-container');
+            if (['bing', 'anime', 'random'].includes(source)) {
+                previewContainer.classList.add('visible');
+            } else {
+                previewContainer.classList.remove('visible');
             }
         }
 
@@ -3113,6 +3147,12 @@
                         <div id="bg-preview-wrapper" class="relative w-full aspect-[16/9] rounded-lg overflow-hidden bg-white/5 transition-all duration-300 ease-in-out">
                             <img id="bg-preview-img" src="${DEFAULT_BG_IMAGES[0]}" alt="背景预览" class="w-full h-full object-cover hidden" crossorigin="anonymous">
                             <div id="preview-loader"></div>
+                            <div id="bg-preview-error" class="absolute inset-0 hidden grid place-items-center cursor-pointer rounded-lg transition-all bg-black/30 backdrop-blur-sm text-center">
+                                <div>
+                                    <p class="font-bold text-lg">图片加载失败</p>
+                                    <p class="mt-1 text-sm">请点击预览画面重试</p>
+                                </div>
+                            </div>
                             <a id="bg-preview-download-btn" href="#" download="background.jpg" title="保存该图片" class="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
                                 <i class="fas fa-download"></i>
                             </a>
@@ -3524,7 +3564,18 @@
             if (downloadBtn) {
                 downloadBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    downloadImage(); // Call the new function without arguments
+                    downloadImage();
+                });
+            }
+
+            const previewErrorContainer = document.getElementById('bg-preview-error');
+            if (previewErrorContainer) {
+                previewErrorContainer.addEventListener('click', () => {
+                    hidePreviewError();
+                    setTimeout(() => {
+                        // We call this again to retry loading a background.
+                        applyCurrentBackground();
+                    }, 300); // Wait for the fade-out transition to complete before retrying.
                 });
             }
 
@@ -3685,10 +3736,8 @@
 
             function closeSettings() {
                 document.body.classList.remove('settings-open');
-                const bgPreviewContainer = document.getElementById('background-preview-container');
-                if (bgPreviewContainer) {
-                    bgPreviewContainer.classList.remove('visible');
-                }
+                // The line that removed the 'visible' class from the preview container
+                // has been removed to prevent the re-animation issue.
             }
 
             openSettingsBtn.addEventListener('click', openSettings);
