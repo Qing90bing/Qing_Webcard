@@ -1173,7 +1173,23 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mt-6 text-center" style="color: var(--text-color-secondary);">
+                    <!-- [NEW] 今日人品 -->
+                    <div class="border-t border-white/10 pt-5 mt-5">
+                        <h2 class="text-xl font-semibold mb-2 flex items-center" style="color: var(--text-color-primary);">
+                            <svg class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M224 224C224 171 267 128 320 128C373 128 416 171 416 224C416 266.7 388.1 302.9 349.5 315.4C321.1 324.6 288 350.7 288 392L288 416C288 433.7 302.3 448 320 448C337.7 448 352 433.7 352 416L352 392C352 390.3 352.6 387.9 355.5 384.7C358.5 381.4 363.4 378.2 369.2 376.3C433.5 355.6 480 295.3 480 224C480 135.6 408.4 64 320 64C231.6 64 160 135.6 160 224C160 241.7 174.3 256 192 256C209.7 256 224 241.7 224 224zM320 576C342.1 576 360 558.1 360 536C360 513.9 342.1 496 320 496C297.9 496 280 513.9 280 536C280 558.1 297.9 576 320 576z"/></svg>
+                            今日人品
+                        </h2>
+                        <div id="luck-container" class="flex items-center justify-center min-h-[4rem] transition-all duration-500 ease-in-out">
+                            <button id="luck-button" class="bg-sky-500/80 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform active:scale-95 whitespace-nowrap flex-shrink-0">
+                                开盲盒
+                            </button>
+                            <div id="luck-result" class="text-center text-lg opacity-0 w-0 transition-all duration-500 ease-in-out" style="color: var(--text-color-primary);">
+                                <!-- Result will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto text-center" style="color: var(--text-color-secondary);">
                         <p id="site-runtime-display">正在计算...</p>
                     </div>
                 </div>
@@ -3490,6 +3506,182 @@
         }
 
 
+        // --- [NEW] 今日人品 功能逻辑 ---
+        const luckPhrases = {
+            good: ["今天一定是超常发挥的一天！","你就是天选之子，好运爆棚！","太强了，宇宙的能量都汇聚于你！","欧皇附体，所向披靡！","水逆退散，诸事皆宜！"],
+            neutral: ["是平常的一天呢，保持平常心。","运气平平，但努力可以创造奇迹。","不好不坏，也是一种安稳的幸福。","稳中向好，未来可期。","一份耕耘，一份收获。"],
+            bad: ["emm...今天可能适合躺平。","没关系，触底反弹，明天会更好！","风水轮流转，明天到你家。","今日不宜剧烈运动，适宜养精蓄锐。","先稳住，问题不大。"]
+        };
+        let dailyLuckData = null; // Stored as { date, value, phrase }
+        let luckGameState = 'initial'; // initial, result_shown, prompt_1, prompt_2, prompt_3, counting
+        let luckClickCount = 0;
+        let luckResetTimer = null;
+        let hasPlayedGameToday = false;
+
+        function displayLuckResult(data, isAnimated = true) {
+            const luckContainer = document.getElementById('luck-container');
+            const luckResult = document.getElementById('luck-result');
+            const luckButton = document.getElementById('luck-button');
+            
+            if (!luckContainer || !luckResult || !luckButton) return;
+
+            luckResult.innerHTML = `你今天的人品值是 <br/> <strong class="text-4xl font-bold text-sky-400">${data.value}!</strong> <br/> ${data.phrase}`;
+            
+            if (isAnimated) {
+                luckContainer.classList.remove('justify-center');
+                luckContainer.classList.add('justify-between');
+                
+                setTimeout(() => {
+                    luckResult.classList.remove('w-0', 'opacity-0');
+                    luckResult.classList.add('w-full', 'flex-grow', 'px-4');
+                }, 10);
+            } else {
+                luckContainer.classList.remove('justify-center');
+                luckContainer.classList.add('justify-between');
+                luckResult.classList.remove('w-0', 'opacity-0');
+                luckResult.classList.add('w-full', 'flex-grow', 'px-4');
+            }
+        }
+
+        function openBlindBox() {
+            const value = Math.floor(Math.random() * 101);
+            let phrase;
+            if (value > 80) {
+                phrase = luckPhrases.good[Math.floor(Math.random() * luckPhrases.good.length)];
+            } else if (value < 20) {
+                phrase = luckPhrases.bad[Math.floor(Math.random() * luckPhrases.bad.length)];
+            } else {
+                phrase = luckPhrases.neutral[Math.floor(Math.random() * luckPhrases.neutral.length)];
+            }
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            dailyLuckData = { date: todayStr, value, phrase };
+            
+            try {
+                localStorage.setItem('dailyLuckData', JSON.stringify(dailyLuckData));
+            } catch (e) {
+                console.error("Failed to save luck data to localStorage", e);
+            }
+
+            displayLuckResult(dailyLuckData, true);
+            luckGameState = 'result_shown';
+        }
+
+        function updateLuckResultText(text) {
+            const luckResult = document.getElementById('luck-result');
+            if(luckResult) {
+                luckResult.innerHTML = text;
+            }
+        }
+
+        function handleLuckClick() {
+            clearTimeout(luckResetTimer); // Reset the timer on every click
+
+            switch (luckGameState) {
+                case 'initial':
+                    openBlindBox();
+                    // The 'result_shown' state is set inside openBlindBox
+                    return; // Return early to not set the reset timer
+
+                case 'result_shown':
+                    if (hasPlayedGameToday) {
+                        luckGameState = 'counting';
+                        luckClickCount = 1;
+                        updateLuckResultText(`x${luckClickCount}`);
+                    } else {
+                        luckGameState = 'prompt_1';
+                        updateLuckResultText('你今天已经开过了，还开？');
+                        hasPlayedGameToday = true;
+                    }
+                    break;
+                    
+                case 'prompt_1':
+                    luckGameState = 'prompt_2';
+                    updateLuckResultText('还点？');
+                    break;
+
+                case 'prompt_2':
+                    luckGameState = 'prompt_3';
+                    updateLuckResultText('那你点吧');
+                    break;
+
+                case 'prompt_3':
+                    luckGameState = 'counting';
+                    luckClickCount = 1;
+                    updateLuckResultText(`x${luckClickCount}`);
+                    break;
+
+                case 'counting':
+                    luckClickCount++;
+                    updateLuckResultText(`x${luckClickCount}`);
+                    break;
+            }
+
+            // After any click that is not the very first one, set a timer to reset.
+            luckResetTimer = setTimeout(() => {
+                startCountdownAnimation();
+            }, 2000);
+        }
+
+        function startCountdownAnimation() {
+            let currentCount = luckClickCount;
+            // Don't animate if count is 0 or less
+            if (currentCount <= 0) {
+                displayLuckResult(dailyLuckData, false);
+                luckGameState = 'result_shown';
+                return;
+            }
+
+            // Clamp the count to a reasonable number to prevent excessively long animations
+            if (currentCount > 5) {
+                currentCount = 5;
+            }
+            
+            let delay = 200; // Initial delay
+
+            function countdownStep(i) {
+                if (i > 0) {
+                    updateLuckResultText(`x${i}`);
+                    setTimeout(() => countdownStep(i - 1), delay);
+                    delay += 100; // Increase delay for the next step, creating the "slow down" effect
+                } else {
+                    // Countdown finished, restore original result
+                    setTimeout(() => {
+                         displayLuckResult(dailyLuckData, false);
+                         luckGameState = 'result_shown';
+                    }, delay);
+                }
+            }
+
+            countdownStep(currentCount);
+        }
+
+        function setupLuckFeature() {
+            const luckButton = document.getElementById('luck-button');
+            if (!luckButton) return;
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            try {
+                const savedLuck = localStorage.getItem('dailyLuckData');
+                if (savedLuck) {
+                    const parsedLuck = JSON.parse(savedLuck);
+                    if (parsedLuck.date === todayStr) {
+                        dailyLuckData = parsedLuck;
+                        displayLuckResult(dailyLuckData, false);
+                        luckGameState = 'result_shown';
+                    } else {
+                        localStorage.removeItem('dailyLuckData');
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to parse luck data from localStorage", e);
+                localStorage.removeItem('dailyLuckData');
+            }
+
+            luckButton.addEventListener('click', handleLuckClick);
+        }
+
         // --- 交互事件监听 ---
         function setupEventListeners() {
             // --- Theme Settings Listeners ---
@@ -4157,6 +4349,7 @@
             // 1. Build the settings panel UI first, so other functions can find its elements.
             setupSettingsUI();
             setupEventListeners();
+            setupLuckFeature(); // Activate the new luck feature
 
             // 2. Pre-calculate the theme slider's correct position before it's ever shown.
             initializeThemeSlider();
