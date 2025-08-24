@@ -1179,7 +1179,7 @@
                             <svg class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M224 224C224 171 267 128 320 128C373 128 416 171 416 224C416 266.7 388.1 302.9 349.5 315.4C321.1 324.6 288 350.7 288 392L288 416C288 433.7 302.3 448 320 448C337.7 448 352 433.7 352 416L352 392C352 390.3 352.6 387.9 355.5 384.7C358.5 381.4 363.4 378.2 369.2 376.3C433.5 355.6 480 295.3 480 224C480 135.6 408.4 64 320 64C231.6 64 160 135.6 160 224C160 241.7 174.3 256 192 256C209.7 256 224 241.7 224 224zM320 576C342.1 576 360 558.1 360 536C360 513.9 342.1 496 320 496C297.9 496 280 513.9 280 536C280 558.1 297.9 576 320 576z"/></svg>
                             今日人品
                         </h2>
-                        <div id="luck-container" class="flex items-center justify-center min-h-[4rem] transition-all duration-500 ease-in-out">
+                        <div id="luck-container" class="flex items-center justify-center h-28 transition-all duration-500 ease-in-out">
                             <button id="luck-button" class="bg-sky-500/80 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform active:scale-95 whitespace-nowrap flex-shrink-0">
                                 开盲盒
                             </button>
@@ -3525,7 +3525,11 @@
             
             if (!luckContainer || !luckResult || !luckButton) return;
 
-            luckResult.innerHTML = `你今天的人品值是 <br/> <strong class="text-4xl font-bold text-sky-400">${data.value}!</strong> <br/> ${data.phrase}`;
+            luckResult.innerHTML = `
+                <p>你今天的人品值是</p>
+                <p class="text-4xl font-bold text-sky-400 leading-tight">${data.value}!</p>
+                <p>${data.phrase}</p>
+            `;
             
             if (isAnimated) {
                 luckContainer.classList.remove('justify-center');
@@ -3533,13 +3537,13 @@
                 
                 setTimeout(() => {
                     luckResult.classList.remove('w-0', 'opacity-0');
-                    luckResult.classList.add('w-full', 'flex-grow', 'px-4');
+                    luckResult.classList.add('w-full', 'flex-grow', 'px-4', 'flex', 'flex-col', 'justify-center');
                 }, 10);
             } else {
                 luckContainer.classList.remove('justify-center');
                 luckContainer.classList.add('justify-between');
                 luckResult.classList.remove('w-0', 'opacity-0');
-                luckResult.classList.add('w-full', 'flex-grow', 'px-4');
+                luckResult.classList.add('w-full', 'flex-grow', 'px-4', 'flex', 'flex-col', 'justify-center');
             }
         }
 
