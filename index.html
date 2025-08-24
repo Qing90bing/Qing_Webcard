@@ -420,6 +420,13 @@
     .luck-pop-anim {
         animation: luck-pop 0.2s ease-in-out;
     }
+    @keyframes fade-out-opacity-only-anim {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    .fade-out-opacity-only {
+        animation: fade-out-opacity-only-anim 0.3s ease-out forwards;
+    }
 
     /* --- [NEW] Blinking Colon Animation --- */
     @keyframes instant-blink {
@@ -3550,6 +3557,16 @@
             10: ["100分！完美！今天地球为你而转！", "这是什么神仙运气？快去拯救世界！", "系统提示：您的好运已溢出！", "我算出来了，你就是爽文/爽剧主角。"]
         };
         let dailyLuckData = null; // Stored as { date, value, phrase }
+        const luckMilestoneMessages = {
+            50: "手速不错，继续保持！",
+            100: "你已解锁「百连点击」成就！",
+            200: "鼠标：我当时害怕极了。",
+            500: "这就是单身20年的手速吗？",
+            1000: "你...莫非就是传说中的点赞狂魔？",
+            2000: "已通知吉尼斯世界纪录官方人员。",
+            5000: "停下！你的鼠标在冒烟了！",
+            10000: "您好，地球人，看来我们暴露了..."
+        };
         let luckGameState = 'initial'; // initial, result_shown, prompt_1, prompt_2, prompt_3, counting
         let luckClickCount = 0;
         let countdownAnimationHandle = null; // Add this to the global scope
@@ -3565,19 +3582,30 @@
             return 'text-gray-400';
         }
 
-        function displayLuckResult(data, isAnimated = true) {
+        function displayLuckResult(data, isAnimated = false) {
             const luckResult = document.getElementById('luck-result');
             if (!luckResult) return;
 
+            // Create a wrapper for the content to apply animation to it
+            const contentWrapper = document.createElement('div');
+            
             // Set content and color
             const colorClass = getScoreColorClass(data.value);
-            luckResult.innerHTML = `
+            contentWrapper.innerHTML = `
                 <p>你今天的人品值是</p>
                 <p class="text-4xl font-bold ${colorClass} leading-tight">${data.value}!</p>
                 <p class="min-w-0">${data.phrase}</p>
             `;
+
+            if (isAnimated) {
+                contentWrapper.classList.add('bounce-in');
+            }
             
-            // Add display properties THEN trigger the transition
+            // Clear the container and append the new animated content
+            luckResult.innerHTML = '';
+            luckResult.appendChild(contentWrapper);
+            
+            // Add display properties for the container and then make it visible
             luckResult.classList.add('flex', 'flex-col', 'justify-center', 'flex-1', 'min-w-0', 'relative');
             requestAnimationFrame(() => {
                 luckResult.classList.add('visible');
@@ -3652,13 +3680,26 @@
         }
 
         function updateCounter() {
-            const counterValue = document.getElementById('luck-counter-value');
-            if (counterValue) {
-                counterValue.textContent = luckClickCount;
-                // Re-trigger animation on the number span itself
-                counterValue.classList.remove('luck-pop-anim');
-                void counterValue.offsetWidth;
-                counterValue.classList.add('luck-pop-anim');
+            const milestoneMessage = luckMilestoneMessages[luckClickCount];
+            const luckResult = document.getElementById('luck-result');
+
+            if (milestoneMessage) {
+                updateLuckResultText(milestoneMessage);
+                luckResult.classList.remove('luck-pop-anim');
+                void luckResult.offsetWidth;
+                luckResult.classList.add('luck-pop-anim');
+            } else {
+                const counterValue = document.getElementById('luck-counter-value');
+                if (counterValue) {
+                    // Counter is already on screen, just update it
+                    counterValue.textContent = luckClickCount;
+                    counterValue.classList.remove('luck-pop-anim');
+                    void counterValue.offsetWidth;
+                    counterValue.classList.add('luck-pop-anim');
+                } else {
+                    // Counter is not on screen (e.g., after a milestone message), so recreate it
+                    displayCounter();
+                }
             }
         }
 
@@ -3740,13 +3781,28 @@
                     const nextDelay = getDelay(i - 1);
                     countdownAnimationHandle = setTimeout(() => countdownStep(i - 1), nextDelay);
                 } else {
-                    // Countdown finished, restore original result
-                    countdownAnimationHandle = setTimeout(() => {
-                         displayLuckResult(dailyLuckData, false);
-                         luckGameState = 'result_shown';
-                         luckClickCount = 0; // Reset for next time.
-                         countdownAnimationHandle = null; // Animation finished
-                    }, getDelay(0)); // Use the slowest delay for the final transition
+                    // Countdown finished. Animate out the counter, then show the result.
+                    const luckResult = document.getElementById('luck-result');
+                    const innerContent = luckResult.firstElementChild; // Use firstElementChild to get the actual DIV
+                    
+                    if (innerContent) {
+                        // Fade out the current content (the counter)
+                        innerContent.classList.add('fade-out-opacity-only');
+
+                        // After the fade-out, display the final result with a bounce
+                        countdownAnimationHandle = setTimeout(() => {
+                            displayLuckResult(dailyLuckData, true);
+                            luckGameState = 'result_shown';
+                            luckClickCount = 0;
+                            countdownAnimationHandle = null;
+                        }, 300); // Wait for fade-out (0.3s) to complete.
+                    } else {
+                        // Fallback if something goes wrong, just show the result.
+                        displayLuckResult(dailyLuckData, true);
+                        luckGameState = 'result_shown';
+                        luckClickCount = 0;
+                        countdownAnimationHandle = null;
+                    }
                 }
             }
 
