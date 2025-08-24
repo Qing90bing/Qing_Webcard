@@ -392,6 +392,35 @@
         animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
     }
 
+    #luck-result {
+        transition: max-width 0.5s ease-in-out, opacity 0.3s ease-in-out, margin-left 0.5s ease-in-out, padding 0.5s ease-in-out;
+        max-width: 0;
+        opacity: 0;
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 0;
+    }
+    #luck-result.visible {
+        max-width: 500px; /* A large enough value to not clip content */
+        opacity: 1;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        margin-left: 1rem;
+    }
+
+    /* --- [NEW] Luck Game Animations --- */
+    .luck-shake {
+        animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes luck-pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+    .luck-pop-anim {
+        animation: luck-pop 0.2s ease-in-out;
+    }
+
     /* --- [NEW] Blinking Colon Animation --- */
     @keyframes instant-blink {
         /* This creates a 50/50 blink effect */
@@ -1180,10 +1209,10 @@
                             今日人品
                         </h2>
                         <div id="luck-container" class="flex items-center justify-center h-28 transition-all duration-500 ease-in-out">
-                            <button id="luck-button" class="bg-sky-500/80 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform active:scale-95 whitespace-nowrap flex-shrink-0">
+                            <button id="luck-button" class="bg-sky-500/80 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-full transform active:scale-90 whitespace-nowrap flex-shrink-0" style="transition: transform 0.15s ease-out;">
                                 开盲盒
                             </button>
-                            <div id="luck-result" class="text-center text-lg opacity-0 w-0 transition-all duration-500 ease-in-out" style="color: var(--text-color-primary);">
+                            <div id="luck-result" class="text-center text-lg" style="color: var(--text-color-primary); overflow: hidden;">
                                 <!-- Result will be injected here -->
                             </div>
                         </div>
@@ -3507,56 +3536,82 @@
 
 
         // --- [NEW] 今日人品 功能逻辑 ---
-        const luckPhrases = {
-            good: ["今天一定是超常发挥的一天！","你就是天选之子，好运爆棚！","太强了，宇宙的能量都汇聚于你！","欧皇附体，所向披靡！","水逆退散，诸事皆宜！"],
-            neutral: ["是平常的一天呢，保持平常心。","运气平平，但努力可以创造奇迹。","不好不坏，也是一种安稳的幸福。","稳中向好，未来可期。","一份耕耘，一份收获。"],
-            bad: ["emm...今天可能适合躺平。","没关系，触底反弹，明天会更好！","风水轮流转，明天到你家。","今日不宜剧烈运动，适宜养精蓄锐。","先稳住，问题不大。"]
+        const luckTiers = {
+            0: ["是不是操作系统的锅？要不重启一下？", "今日不宜出门，建议和床锁死。", "你这运气，是不是忘给老天爷续费了？", "没事，重在参与，下次一定。"],
+            1: ["还好吗？要不要给你点一首《凉凉》？", "emm...今天可能只适合躺平。", "水逆本逆，万事小心！", "别担心，触底才能反弹！"],
+            2: ["运气值正在充值中，请稍后再试。", "今天的主线任务是：活着。", "一份耕耘，一份收获...但今天可能要加倍耕耘。", "建议：多喝热水，少做决定。"],
+            3: ["运气正在加载，但网速有点慢...", "有点崎岖，但问题不大，稳住！", "风水轮流转，明天就到你家。", "保持冷静，佛系面对一切。"],
+            4: ["不好不坏，也是一种安稳的幸福。", "运气平平，但努力可以创造奇迹。", "今天适合当个安静的美男子/女子。", "在？为什么不努力？就会怪运气？"],
+            5: ["及格了！又是平常的一天呢。", "稳中向好，未来可期。", "比上不足，比下有余，知足常乐。", "你的好运正在派送中，请耐心等待。"],
+            6: ["今天运气不错，可以尝试一些新东西。", "感觉良好，好像有什么好事要发生？", "万事开头难，但你今天开头不难。", "状态在线，宜积极向上。"],
+            7: ["好运正在向你招手！", "今天你就是自己的锦鲤！", "走，去买张彩票试试手气！", "心情不错，看什么都顺眼。"],
+            8: ["哇哦！是金色传说！", "欧气满满，可以出去“横”着走了。", "今天你是不是偷偷拜过谁了？", "水逆退散，诸事皆宜！"],
+            9: ["太强了，宇宙的能量都汇聚于你！", "你就是天选之子，好运爆棚！", "欧皇附体，所向披靡！", "建议直接去龙王那儿上班，别在这儿屈才了。"],
+            10: ["100分！完美！今天地球为你而转！", "这是什么神仙运气？快去拯救世界！", "系统提示：您的好运已溢出！", "我算出来了，你就是爽文/爽剧主角。"]
         };
         let dailyLuckData = null; // Stored as { date, value, phrase }
         let luckGameState = 'initial'; // initial, result_shown, prompt_1, prompt_2, prompt_3, counting
         let luckClickCount = 0;
+        let countdownAnimationHandle = null; // Add this to the global scope
         let luckResetTimer = null;
         let hasPlayedGameToday = false;
+        let resetClickCount = 0;
+        let resetClickTimer = null;
+
+        function getScoreColorClass(score) {
+            if (score >= 90) return 'text-amber-500';
+            if (score >= 70) return 'text-green-500';
+            if (score >= 40) return 'text-sky-400'; // Default accent color
+            return 'text-gray-400';
+        }
 
         function displayLuckResult(data, isAnimated = true) {
-            const luckContainer = document.getElementById('luck-container');
             const luckResult = document.getElementById('luck-result');
-            const luckButton = document.getElementById('luck-button');
-            
-            if (!luckContainer || !luckResult || !luckButton) return;
+            if (!luckResult) return;
 
+            // Set content and color
+            const colorClass = getScoreColorClass(data.value);
             luckResult.innerHTML = `
                 <p>你今天的人品值是</p>
-                <p class="text-4xl font-bold text-sky-400 leading-tight">${data.value}!</p>
-                <p>${data.phrase}</p>
+                <p class="text-4xl font-bold ${colorClass} leading-tight">${data.value}!</p>
+                <p class="min-w-0">${data.phrase}</p>
             `;
             
-            if (isAnimated) {
-                luckContainer.classList.remove('justify-center');
-                luckContainer.classList.add('justify-between');
-                
-                setTimeout(() => {
-                    luckResult.classList.remove('w-0', 'opacity-0');
-                    luckResult.classList.add('w-full', 'flex-grow', 'px-4', 'flex', 'flex-col', 'justify-center');
-                }, 10);
-            } else {
-                luckContainer.classList.remove('justify-center');
-                luckContainer.classList.add('justify-between');
-                luckResult.classList.remove('w-0', 'opacity-0');
-                luckResult.classList.add('w-full', 'flex-grow', 'px-4', 'flex', 'flex-col', 'justify-center');
+            // Add display properties THEN trigger the transition
+            luckResult.classList.add('flex', 'flex-col', 'justify-center', 'flex-1', 'min-w-0', 'relative');
+            requestAnimationFrame(() => {
+                luckResult.classList.add('visible');
+            });
+        }
+
+        function generateWeightedLuck() {
+            // Using Bates distribution (sum of n uniform variables) to approximate a normal distribution.
+            // n=4 provides a decent bell curve.
+            let x = 0;
+            for (let i = 0; i < 4; i++) {
+                x += Math.random();
             }
+            x = x / 4; // Now x is in [0, 1] with a peak at 0.5
+
+            // Apply a power function with k < 1 to shift the peak upwards, as requested.
+            // k=0.5 is tuned to produce a sub-60 score roughly 15-20% of the time.
+            const skewedX = Math.pow(x, 0.5);
+
+            // Scale to 0-100. Let's scale to 102 to make 100 a bit more reachable.
+            let finalValue = Math.floor(skewedX * 102);
+            
+            // Cap the value at 100 to handle any edge cases where the result might exceed 100.
+            if (finalValue > 100) {
+                finalValue = 100;
+            }
+            return finalValue;
         }
 
         function openBlindBox() {
-            const value = Math.floor(Math.random() * 101);
-            let phrase;
-            if (value > 80) {
-                phrase = luckPhrases.good[Math.floor(Math.random() * luckPhrases.good.length)];
-            } else if (value < 20) {
-                phrase = luckPhrases.bad[Math.floor(Math.random() * luckPhrases.bad.length)];
-            } else {
-                phrase = luckPhrases.neutral[Math.floor(Math.random() * luckPhrases.neutral.length)];
-            }
+            const value = generateWeightedLuck();
+            const tier = value === 100 ? 10 : Math.floor(value / 10);
+            const phrases = luckTiers[tier];
+            const phrase = phrases[Math.floor(Math.random() * phrases.length)];
             
             const todayStr = new Date().toISOString().split('T')[0];
             dailyLuckData = { date: todayStr, value, phrase };
@@ -3571,89 +3626,127 @@
             luckGameState = 'result_shown';
         }
 
-        function updateLuckResultText(text) {
+        function updateLuckResultText(text, animationClass = null) {
             const luckResult = document.getElementById('luck-result');
-            if(luckResult) {
-                luckResult.innerHTML = text;
+            if (!luckResult) return;
+            
+            luckResult.innerHTML = `<p>${text}</p>`;
+            
+            if (animationClass === 'luck-shake') {
+                luckResult.classList.add(animationClass);
+                luckResult.addEventListener('animationend', () => {
+                    luckResult.classList.remove(animationClass);
+                }, { once: true });
+            }
+        }
+
+        function displayCounter() {
+            const luckResult = document.getElementById('luck-result');
+            if (!luckResult) return;
+            luckResult.innerHTML = `
+                <div id="luck-counter-container" class="flex items-baseline justify-center" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
+                    <span class="text-2xl font-bold" style="color: var(--text-color-secondary);">x</span>
+                    <span id="luck-counter-value" class="text-5xl font-bold leading-none luck-pop-anim">${luckClickCount}</span>
+                </div>
+            `;
+        }
+
+        function updateCounter() {
+            const counterValue = document.getElementById('luck-counter-value');
+            if (counterValue) {
+                counterValue.textContent = luckClickCount;
+                // Re-trigger animation on the number span itself
+                counterValue.classList.remove('luck-pop-anim');
+                void counterValue.offsetWidth;
+                counterValue.classList.add('luck-pop-anim');
             }
         }
 
         function handleLuckClick() {
-            clearTimeout(luckResetTimer); // Reset the timer on every click
+            clearTimeout(luckResetTimer);
+            clearTimeout(countdownAnimationHandle); // NEW: Stop any countdown immediately
 
-            switch (luckGameState) {
-                case 'initial':
-                    openBlindBox();
-                    // The 'result_shown' state is set inside openBlindBox
-                    return; // Return early to not set the reset timer
-
-                case 'result_shown':
-                    if (hasPlayedGameToday) {
-                        luckGameState = 'counting';
-                        luckClickCount = 1;
-                        updateLuckResultText(`x${luckClickCount}`);
-                    } else {
-                        luckGameState = 'prompt_1';
-                        updateLuckResultText('你今天已经开过了，还开？');
-                        hasPlayedGameToday = true;
-                    }
-                    break;
-                    
-                case 'prompt_1':
-                    luckGameState = 'prompt_2';
-                    updateLuckResultText('还点？');
-                    break;
-
-                case 'prompt_2':
-                    luckGameState = 'prompt_3';
-                    updateLuckResultText('那你点吧');
-                    break;
-
-                case 'prompt_3':
-                    luckGameState = 'counting';
-                    luckClickCount = 1;
-                    updateLuckResultText(`x${luckClickCount}`);
-                    break;
-
-                case 'counting':
-                    luckClickCount++;
-                    updateLuckResultText(`x${luckClickCount}`);
-                    break;
+            if (luckGameState === 'initial') {
+                openBlindBox();
+                return; // No timer needed
             }
 
-            // After any click that is not the very first one, set a timer to reset.
+            if (luckGameState === 'result_shown') {
+                if (hasPlayedGameToday) {
+                    luckGameState = 'counting';
+                    luckClickCount = 1;
+                    displayCounter();
+                } else {
+                    luckGameState = 'prompt_1';
+                    updateLuckResultText('你今天已经开过了，还开？', 'luck-shake');
+                    hasPlayedGameToday = true;
+                }
+            } else if (luckGameState === 'prompt_1') {
+                luckGameState = 'prompt_2';
+                updateLuckResultText('还点？', 'luck-shake');
+            } else if (luckGameState === 'prompt_2') {
+                luckGameState = 'prompt_3';
+                updateLuckResultText('那你点吧', 'luck-shake');
+            } else if (luckGameState === 'prompt_3') {
+                luckGameState = 'counting';
+                luckClickCount = 1;
+                displayCounter();
+            } else if (luckGameState === 'counting') {
+                luckClickCount++;
+                updateCounter();
+            }
+
+            // Set the reset timer for all subsequent clicks
             luckResetTimer = setTimeout(() => {
-                startCountdownAnimation();
+                if (luckGameState === 'counting') {
+                    startCountdownAnimation();
+                } else {
+                    // This handles resetting from prompt states
+                    displayLuckResult(dailyLuckData, false);
+                    luckGameState = 'result_shown';
+                }
             }, 2000);
         }
 
         function startCountdownAnimation() {
+            clearTimeout(countdownAnimationHandle); // Clear any ongoing animation
             let currentCount = luckClickCount;
-            // Don't animate if count is 0 or less
+
             if (currentCount <= 0) {
                 displayLuckResult(dailyLuckData, false);
                 luckGameState = 'result_shown';
                 return;
             }
-
-            // Clamp the count to a reasonable number to prevent excessively long animations
-            if (currentCount > 5) {
-                currentCount = 5;
-            }
             
-            let delay = 200; // Initial delay
+            const counterValue = document.getElementById('luck-counter-value');
+            // Make sure the 'x' is visible, in case it was hidden by old logic
+            const counterX = document.querySelector('#luck-counter-container > span:first-child');
+            if (counterX && counterX.style.opacity === '0') {
+                counterX.style.opacity = 1;
+            }
+
+            function getDelay(num) {
+                if (num > 20) return 15;
+                if (num > 10) return 40;
+                if (num > 5) return 80;
+                return 150;
+            }
 
             function countdownStep(i) {
                 if (i > 0) {
-                    updateLuckResultText(`x${i}`);
-                    setTimeout(() => countdownStep(i - 1), delay);
-                    delay += 100; // Increase delay for the next step, creating the "slow down" effect
+                    if (counterValue) {
+                        counterValue.textContent = i;
+                    }
+                    const nextDelay = getDelay(i - 1);
+                    countdownAnimationHandle = setTimeout(() => countdownStep(i - 1), nextDelay);
                 } else {
                     // Countdown finished, restore original result
-                    setTimeout(() => {
+                    countdownAnimationHandle = setTimeout(() => {
                          displayLuckResult(dailyLuckData, false);
                          luckGameState = 'result_shown';
-                    }, delay);
+                         luckClickCount = 0; // Reset for next time.
+                         countdownAnimationHandle = null; // Animation finished
+                    }, getDelay(0)); // Use the slowest delay for the final transition
                 }
             }
 
@@ -4339,6 +4432,47 @@
                 immersiveView.removeEventListener('mousemove', handleImmersiveMouseMove);
                 immersiveView.removeEventListener('mouseleave', handleImmersiveMouseLeave);
             });
+
+            // --- [NEW] Hidden Reset Feature ---
+            const luckTitleIcon = document.querySelector('#time-capsule-card h2 svg');
+            if (luckTitleIcon) {
+                luckTitleIcon.addEventListener('click', () => {
+                    resetClickCount++;
+                    clearTimeout(resetClickTimer);
+                    resetClickTimer = setTimeout(() => {
+                        resetClickCount = 0;
+                    }, 3000);
+
+                    if (resetClickCount === 5) {
+                        resetClickCount = 0;
+                        clearTimeout(resetClickTimer);
+                        localStorage.removeItem('dailyLuckData');
+                        
+                        const luckResult = document.getElementById('luck-result');
+                        if (luckResult) {
+                            // Reset all JS state immediately
+                            luckGameState = 'initial';
+                            dailyLuckData = null;
+                            hasPlayedGameToday = false;
+                            luckClickCount = 0;
+                            clearTimeout(luckResetTimer);
+                            clearTimeout(countdownAnimationHandle);
+
+                            // Start the collapse animation
+                            luckResult.classList.remove('visible');
+
+                            // After the animation finishes, clean up the DOM properties
+                            setTimeout(() => {
+                                // Only clean up if another game hasn't started in the meantime
+                                if(luckGameState === 'initial') {
+                                    luckResult.classList.remove('flex', 'flex-col', 'justify-center', 'flex-1', 'min-w-0', 'relative');
+                                    luckResult.innerHTML = '';
+                                }
+                            }, 500);
+                        }
+                    }
+                });
+            }
         }
 
         // --- 页面加载时执行的函数 ---
