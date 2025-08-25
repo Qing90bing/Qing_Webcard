@@ -1225,7 +1225,7 @@
                             </div>
                             <!-- Weather View -->
                             <div id="weather-view" class="hidden">
-                                 <h2 class="text-xl font-semibold mb-4" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Pro v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--><path d="M32 400C32 479.5 96.5 544 176 544L480 544C550.7 544 608 486.7 608 416C608 364.4 577.5 319.9 533.5 299.7C540.2 286.6 544 271.7 544 256C544 203 501 160 448 160C430.3 160 413.8 164.8 399.6 173.1C375.5 127.3 327.4 96 272 96C192.5 96 128 160.5 128 240C128 248 128.7 255.9 129.9 263.5C73 282.7 32 336.6 32 400z"/></svg>天气信息</h2>
+                                 <h2 class="text-xl font-semibold mb-3" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Pro v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--><path d="M32 400C32 479.5 96.5 544 176 544L480 544C550.7 544 608 486.7 608 416C608 364.4 577.5 319.9 533.5 299.7C540.2 286.6 544 271.7 544 256C544 203 501 160 448 160C430.3 160 413.8 164.8 399.6 173.1C375.5 127.3 327.4 96 272 96C192.5 96 128 160.5 128 240C128 248 128.7 255.9 129.9 263.5C73 282.7 32 336.6 32 400z"/></svg>天气信息</h2>
                                  <div id="weather-content-wrapper" class="w-full rounded-md p-4 relative min-h-[140px]" style="background-color: var(--progress-bar-bg);">
                                     <div class="weather-hover-zone absolute top-0 left-0 w-1/2 h-full z-10"></div>
                                     <button id="weather-refresh-btn" title="手动刷新" class="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-white/60 hover:text-white icon-btn transition-all duration-200 active:scale-90 z-20 opacity-0 invisible"><i class="fas fa-sync-alt"></i></button>
@@ -4182,7 +4182,7 @@
             if (!luckResult) return;
             luckResult.innerHTML = `
                 <div id="luck-counter-container" class="flex items-baseline justify-center" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
-                    <span class="text-2xl font-bold" style="color: var(--text-color-secondary);">x</span>
+                    <span class="text-2xl font-bold" style="color: var(--text-color-secondary);">✕</span>
                     <span id="luck-counter-value" class="text-5xl font-bold leading-none luck-pop-anim">${luckClickCount}</span>
                 </div>
             `;
