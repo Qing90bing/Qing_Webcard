@@ -797,13 +797,16 @@
     }
     .theme-slider {
         background-color: var(--accent-color);
-        
+        border-radius: 0.8rem; /* Match parent container */
         box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         /* The magic bounce transition */
         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .setting-btn {
-        flex-grow: 1;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         padding: 0.5rem 0.5rem;
         background-color: transparent;
         color: var(--text-color-secondary);
@@ -3419,7 +3422,7 @@
                 container.innerHTML = `
                 <div class="setting-description text-center mb-3">选择主题，或跟随系统设置自动切换</div>
                     <div class="setting-btn-group w-full relative">
-                        <div class="theme-slider absolute h-full rounded-xl transition-all duration-300"></div>
+                        <div class="theme-slider absolute h-full transition-all duration-300"></div>
                         <button class="setting-btn relative z-10" data-theme="system"><i class="fas fa-desktop fa-fw mr-2"></i>跟随系统</button>
                         <button class="setting-btn relative z-10" data-theme="light"><i class="fas fa-sun fa-fw mr-2"></i>日间模式</button>
                         <button class="setting-btn relative z-10" data-theme="dark"><i class="fas fa-moon fa-fw mr-2"></i>夜间模式</button>
