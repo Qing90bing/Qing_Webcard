@@ -594,12 +594,11 @@
 
     /* --- Settings UI Styles --- */
     #background-preview-container {
-        transition: max-height 0.35s ease-in-out, opacity 0.3s ease-in-out, margin-top 0.3s ease-in-out;
         max-height: 0;
         opacity: 0;
         overflow: hidden;
     }
-    #background-preview-container.visible {
+    body.settings-open #background-preview-container.visible {
         max-height: 400px;
         opacity: 1;
         margin-top: 0.75rem;
