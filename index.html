@@ -907,6 +907,36 @@
         opacity: 1;
     }
 
+    #custom-bg-input.invalid {
+        border-color: #ef4444 !important;
+        animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    #custom-bg-input-error {
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        transform: translateY(-4px);
+        opacity: 0;
+    }
+    #custom-bg-input-error.visible {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    #custom-bg-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px var(--accent-color-highlight);
+    }
+    #custom-bg-input {
+        transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    #custom-bg-input::placeholder {
+        transition: color 0.3s ease-in-out;
+        color: var(--text-color-tertiary);
+    }
+    #custom-bg-input.invalid::placeholder {
+        color: #ef4444; /* red-500 */
+    }
+
     /* --- [NEW] Hitokoto Settings Styles --- */
     #hitokoto-custom-options {
         max-height: 0;
@@ -1389,6 +1419,7 @@
             { date: "0512", name: "护士节", start: 1912 },
             { date: "0601", name: "儿童节", start: 1949 },
             { date: "0701", name: "建党节", start: 1921 },
+            { date: "0707", name: "七七事变", start: 1937 },
             { date: "0801", name: "建军节", start: 1927 },
             { date: "0815", name: "日本投降日", start: 1945 },
             { date: "0903", name: "抗战胜利纪念日", start: 1945 },
@@ -2253,7 +2284,9 @@
         let appSettings = {
             background: {
                 source: 'default',
-                specifier: 'random'
+                specifier: 'random',
+                customUrl: null,
+                customType: 'unknown' // 'image', 'api', or 'unknown'
             },
             theme: 'system', // 'system', 'light', 'dark'
             timeFormat: '24h', // '12h' or '24h'
@@ -3043,33 +3076,101 @@
             };
 
             try {
+                const { source, specifier, customUrl, customType } = appSettings.background;
                 const isDynamicSource = ['bing', 'anime', 'random'].includes(source);
+                const shouldShowPreview = isDynamicSource || source === 'custom';
                 
-                if (isDynamicSource) {
+                if (shouldShowPreview) {
                     const container = document.getElementById('background-preview-container');
                     const previewImg = document.getElementById('bg-preview-img');
                     const loader = document.getElementById('preview-loader');
+                    const refreshBtn = document.getElementById('bg-preview-refresh-btn');
 
-                    if (container && previewImg && loader) {
-                        if (!container.classList.contains('visible')) {
-                             container.classList.add('visible');
-                        }
+                    if (container) container.classList.add('visible');
+
+                    if (previewImg && loader) {
                         previewImg.classList.add('breathing-effect');
                         loader.classList.add('visible');
                     }
+                    
+                    // Logic for refresh button visibility
+                    const showRefresh = isDynamicSource || (source === 'custom' && customType === 'api');
+                    if (refreshBtn) {
+                        // Use a class to control visibility for animation purposes
+                        refreshBtn.classList.toggle('visible', showRefresh);
+                    }
+                } else {
+                    hideStaticPreviewElements();
                 }
 
                 let finalUrl;
                 let displayUrl;
 
-                if (!isDynamicSource) {
-                    hideStaticPreviewElements();
+                if (source === 'custom') {
+                    if (!customUrl) {
+                        stopSpinner();
+                        const errContainer = document.getElementById('bg-preview-error');
+                        if (errContainer) {
+                           const firstP = errContainer.querySelector('p:first-child');
+                           const secondP = errContainer.querySelector('p:last-child');
+                           if (firstP) firstP.textContent = '未提供链接';
+                           if (secondP) secondP.textContent = '请在上方输入自定义链接并保存';
+                        }
+                        showPreviewError();
+                        return;
+                    }
+
+                    if (customType === 'image') {
+                        finalUrl = customUrl;
+                        displayUrl = finalUrl;
+                        currentImageBlob = null;
+                    } else { // API - Now with robust content-type checking
+                        const apiResponse = await fetch(`https://cors.eu.org/${customUrl.split('?')[0]}?v=${new Date().getTime()}`);
+                        if (!apiResponse.ok) throw new Error(`Custom API fetch failed with status: ${apiResponse.status}`);
+                        
+                        const contentType = apiResponse.headers.get('content-type');
+
+                        if (contentType && contentType.includes('application/json')) {
+                            const data = await apiResponse.json();
+                            let imageUrl;
+                            const target = Array.isArray(data) ? data[Math.floor(Math.random() * data.length)] : data;
+
+                            if (typeof target === 'object' && target !== null) {
+                                imageUrl = target.url || target.image || target.img_url;
+                            }
+
+                            if (!imageUrl) throw new Error('Could not find a valid image URL in JSON API response.');
+                            
+                            finalUrl = imageUrl;
+                            const imageResponse = await fetch(`https://cors.eu.org/${finalUrl}`);
+                            if (!imageResponse.ok) throw new Error(`Failed to fetch image from API's URL: ${finalUrl}`);
+                            
+                            const imageBlob = await imageResponse.blob();
+                            currentImageBlob = imageBlob;
+                            const imageContentType = imageResponse.headers.get('content-type');
+                            const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/webp': 'webp' };
+                            currentImageExtension = mimeToExt[imageContentType] || 'jpg';
+                            displayUrl = URL.createObjectURL(imageBlob);
+
+                        } else if (contentType && contentType.startsWith('image/')) {
+                            // This is a direct image API
+                            finalUrl = customUrl;
+                            const imageBlob = await apiResponse.blob();
+                            currentImageBlob = imageBlob;
+                            const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/webp': 'webp' };
+                            currentImageExtension = mimeToExt[contentType] || 'jpg';
+                            displayUrl = URL.createObjectURL(imageBlob);
+                        } else {
+                            throw new Error(`Unsupported API response content-type: ${contentType}`);
+                        }
+                    }
+                } else if (source === 'default') {
                     finalUrl = (specifier && specifier !== 'random' && DEFAULT_BG_IMAGES.includes(specifier))
                         ? specifier
                         : DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
                     displayUrl = finalUrl;
                     currentImageBlob = null; 
-                } else {
+                } else { // bing, anime, random
                     if (source === 'bing') {
                         const bingApiResponse = await fetch('https://cors.eu.org/https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN');
                         if (!bingApiResponse.ok) throw new Error('Bing API request failed');
@@ -3095,12 +3196,12 @@
                 }
 
                 if (requestId !== latestBgRequestId) {
-                    if (displayUrl.startsWith('blob:')) URL.revokeObjectURL(displayUrl);
+                    if (displayUrl && displayUrl.startsWith('blob:')) URL.revokeObjectURL(displayUrl);
                     return;
                 }
 
                 await backgroundFader.update(displayUrl, true);
-                if (isDynamicSource) {
+                if (shouldShowPreview) {
                     showPreview(displayUrl, finalUrl);
                 }
                 
@@ -3137,9 +3238,23 @@
                 defaultOptionsContainer.classList.remove('open');
             }
 
-            // [FIX] Ensure preview container is visible if a dynamic source is active
+            // --- [NEW] Update Custom URL Input ---
+            const customBgInputWrapper = document.getElementById('custom-bg-input-wrapper');
+            const customBgInput = document.getElementById('custom-bg-input');
+            if (customBgInputWrapper && customBgInput) {
+                if (source === 'custom') {
+                    customBgInputWrapper.style.maxHeight = '80px';
+                    customBgInputWrapper.classList.add('mt-2');
+                    customBgInput.value = appSettings.background.customUrl || '';
+                } else {
+                    customBgInputWrapper.style.maxHeight = '0';
+                    customBgInputWrapper.classList.remove('mt-2');
+                }
+            }
+
+            // Preview container should be visible for all dynamic sources, including custom
             const previewContainer = document.getElementById('background-preview-container');
-            if (['bing', 'anime', 'random'].includes(source)) {
+            if (['bing', 'anime', 'random', 'custom'].includes(source)) {
                 previewContainer.classList.add('visible');
             } else {
                 previewContainer.classList.remove('visible');
@@ -3215,7 +3330,8 @@
                     { value: 'default', label: '默认图片', description: '随机选择一张内置图片作为背景' },
                     { value: 'bing', label: '每日一Bing', description: '展示 Bing 搜索的每日壁纸' },
                     { value: 'anime', label: '随机动漫', description: '从公共动漫图库随机加载一张高清壁纸' },
-                    { value: 'random', label: '随机图片', description: '从公共图库中随机加载一张风景图' }
+                    { value: 'random', label: '随机图片', description: '从公共图库中随机加载一张风景图' },
+                    { value: 'custom', label: '自定义来源', description: '使用单个图片链接或公共图库API' } // 测试使用 https://www.loliapi.com/acg/
                 ];
 
                 let bgSettingsHTML = '';
@@ -3233,6 +3349,27 @@
                         </div>
                     `;
                 });
+
+                // --- [NEW] Custom Background Input Area ---
+                const customBgInputHTML = `
+                    <div id="custom-bg-input-wrapper" class="pl-2 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
+                        <div class="relative flex items-center">
+                            <input type="text" id="custom-bg-input" placeholder="输入图片或API链接" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); color: var(--text-color-primary); border-color: var(--separator-color); padding-right: 5.5rem;">
+                            <div class="absolute right-1 flex items-center justify-end h-full w-14">
+                                <div id="custom-bg-btn-group" class="flex items-center space-x-1">
+                                    <button id="clear-custom-bg-btn" title="清空" class="p-1 rounded-full text-gray-400 hover:text-white transition-all relative w-8 h-8">
+                                        <i class="fas fa-times w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></i>
+                                    </button>
+                                    <button id="save-custom-bg-btn" title="保存" class="p-1 rounded-full text-gray-400 hover:text-white transition-all relative w-8 h-8">
+                                        <i class="fas fa-save w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 opacity-100 flex items-center justify-center"></i>
+                                        <i class="fas fa-check w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 opacity-0 flex items-center justify-center" style="color: var(--status-today);"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="custom-bg-input-error" class="text-xs mt-1 pl-1 hidden" style="color: #ef4444;"></div>
+                    </div>
+                `;
                 
                 let defaultOptionsHTML = `
                     <div id="default-bg-options">
@@ -3250,7 +3387,7 @@
                 });
                 defaultOptionsHTML += `</div></div>`;
 
-                bgSettingsContainer.innerHTML = bgSettingsHTML + defaultOptionsHTML;
+                bgSettingsContainer.innerHTML = bgSettingsHTML + customBgInputHTML + defaultOptionsHTML;
 
                 // --- [NEW] Add background preview area ---
                 const previewHTML = `
@@ -3366,7 +3503,7 @@
                             </label>
                         </div>
                     </div>
-                    <div id="manual-city-input-wrapper" class="mt-2 pl-4 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
+                    <div id="manual-city-input-wrapper" class="mt-2 pl-2 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
                         <div class="relative flex items-center">
                             <input type="text" id="weather-city-input" placeholder="输入城市后回车 (例如: 北京)" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); color: var(--text-color-primary); border-color: var(--separator-color);">
                             <button id="save-city-btn" title="保存" class="absolute right-1 p-1 rounded-full text-gray-400 hover:text-white">
@@ -4152,6 +4289,8 @@
             const bgRadioButtons = document.querySelectorAll('input[name="background-source"]');
             const defaultOptionsContainer = document.getElementById('default-bg-options');
 
+            const customBgInputWrapper = document.getElementById('custom-bg-input-wrapper');
+
             bgRadioButtons.forEach(radio => {
                 radio.addEventListener('change', () => {
                     const source = radio.value;
@@ -4159,12 +4298,22 @@
 
                     if (source === 'default') {
                         defaultOptionsContainer.classList.add('open');
-                        // When switching to default, immediately apply the currently selected default image
-                        applyCurrentBackground();
                     } else {
                         defaultOptionsContainer.classList.remove('open');
-                        applyCurrentBackground();
                     }
+
+                    if (source === 'custom') {
+                        customBgInputWrapper.style.maxHeight = '80px';
+                        customBgInputWrapper.classList.add('mt-2');
+                    } else {
+                        customBgInputWrapper.style.maxHeight = '0';
+                        customBgInputWrapper.classList.remove('mt-2');
+                    }
+
+                    // When a source is selected, apply the background.
+                    // The applyCurrentBackground function will handle logic for new/empty custom URLs.
+                    applyCurrentBackground();
+                    
                     saveSettings();
                 });
             });
@@ -4387,12 +4536,6 @@
 
             openSettingsBtn.addEventListener('click', openSettings);
             closeSettingsBtn.addEventListener('click', closeSettings);
-
-            settingsOverlay.addEventListener('click', (e) => {
-                if (e.target === settingsOverlay) {
-                    closeSettings();
-                }
-            });
 
                         document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
@@ -4653,6 +4796,82 @@
             document.getElementById('weather-refresh-btn').addEventListener('click', () => {
                 setWeatherSpinner(true);
                 fetchAndDisplayWeather();
+            });
+
+            // --- [NEW] Custom Background Input Listeners ---
+            const customBgInput = document.getElementById('custom-bg-input');
+            const saveCustomBgBtn = document.getElementById('save-custom-bg-btn');
+            const clearCustomBgBtn = document.getElementById('clear-custom-bg-btn');
+            const customBgError = document.getElementById('custom-bg-input-error');
+            const btnGroup = document.getElementById('custom-bg-btn-group');
+            const confirmIcon = document.getElementById('confirm-custom-bg-icon');
+
+            const saveCustomBg = () => {
+                if (saveCustomBgBtn.disabled) return; // Prevent spam-clicking
+
+                const url = customBgInput.value.trim();
+                const originalPlaceholder = "输入图片或API链接";
+                
+                if (!url || !url.startsWith('http')) {
+                    customBgInput.classList.add('invalid');
+                    customBgInput.value = ''; // Clear input to show placeholder
+                    customBgInput.placeholder = '无效链接，请重新输入';
+                    
+                    // Restore after a delay
+                    setTimeout(() => {
+                        customBgInput.classList.remove('invalid');
+                        customBgInput.placeholder = originalPlaceholder;
+                    }, 2500);
+                    return;
+                }
+
+                appSettings.background.customUrl = url;
+                appSettings.background.source = 'custom';
+                
+                const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url);
+                appSettings.background.customType = isImage ? 'image' : 'api';
+
+                saveSettings();
+                applyCurrentBackground();
+
+                // --- New Save Button Animation ---
+                saveCustomBgBtn.disabled = true;
+                const saveIcon = saveCustomBgBtn.querySelector('.fa-save');
+                const checkIcon = saveCustomBgBtn.querySelector('.fa-check');
+
+                if (saveIcon && checkIcon) {
+                    saveIcon.style.opacity = '0';
+                    checkIcon.style.opacity = '1';
+
+                    setTimeout(() => {
+                        saveIcon.style.opacity = '1';
+                        checkIcon.style.opacity = '0';
+                        saveCustomBgBtn.disabled = false;
+                    }, 2000);
+                }
+            };
+            
+            customBgInput.addEventListener('focus', () => {
+                if (customBgInput.classList.contains('invalid')) {
+                    customBgInput.classList.remove('invalid');
+                    customBgInput.placeholder = "输入图片或API链接";
+                }
+            });
+
+            saveCustomBgBtn.addEventListener('click', saveCustomBg);
+            customBgInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveCustomBg();
+                }
+            });
+
+            clearCustomBgBtn.addEventListener('click', () => {
+                customBgInput.value = '';
+                appSettings.background.customUrl = null;
+                appSettings.background.customType = 'unknown';
+                saveSettings();
+                customBgInput.focus();
             });
 
             // --- [NEW] Hitokoto Settings Listeners ---
