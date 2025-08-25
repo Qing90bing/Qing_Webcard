@@ -1082,6 +1082,62 @@
         top: 0;
         left: 50%;
     }
+
+    /* --- [NEW] Link Card Slider Styles --- */
+    #link-slider-container {
+        position: relative;
+        padding-bottom: 0rem; /* Make space for the absolute positioned dots */
+    }
+    .slider-wrapper {
+        overflow: hidden;
+        cursor: grab;
+    }
+    .slider-wrapper.grabbing {
+        cursor: grabbing;
+    }
+    .slider-track {
+        display: flex;
+        gap: 1rem; /* Corresponds to the old `gap-4` */
+        /* `transition` will be controlled by JS for snapping */
+    }
+    .card-slide {
+        flex-shrink: 0;
+        width: calc((100% - 2 * 1rem) / 3); /* Default for 3 cards, gap-4 is 1rem */
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .slider-dots {
+        position: absolute;
+        bottom: -0.9rem;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem; /* 8px */
+    }
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .dot:hover {
+        background-color: rgba(255, 255, 255, 0.6);
+    }
+    .dot.active {
+        background-color: rgba(255, 255, 255, 1);
+    }
+    body.theme-light .dot {
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+    body.theme-light .dot:hover {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+    body.theme-light .dot.active {
+        background-color: rgba(0, 0, 0, 1);
+    }
     </style>
 </head>
 <body>
@@ -1180,23 +1236,28 @@
                             <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                             网站列表
                         </h2>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu" style="color: var(--text-color-primary);">
-                                <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                <span class="font-medium">博客</span>
-                            </a>
-                            <a href="https://qing90bing.github.io/Qing_Music/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu" style="color: var(--text-color-primary);">
-                                <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
-                                <span class="font-medium">音乐</span>
-                            </a>
-                            <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu" style="color: var(--text-color-primary);">
-                                <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                                <span class="font-medium">起始页</span>
-                            </a>
-                            <a href="https://qing90bing.github.io/Qing_Lab/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu" style="color: var(--text-color-primary);">
-                                <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M96 24c0-13.3 10.7-24 24-24L328 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 169.6 120.7 211.2c4.8 8.4 7.3 17.9 7.3 27.6 0 30.7-24.9 55.6-55.6 55.6L55.6 512c-30.7 0-55.6-24.9-55.6-55.6 0-9.7 2.5-19.2 7.3-27.6L128 217.6 128 48 120 48c-13.3 0-24-10.7-24-24zm80 24l0 176c0 4.2-1.1 8.3-3.2 11.9l-38.9 68.1 180.1 0-38.9-68.1c-2.1-3.6-3.2-7.7-3.2-11.9l0-176-96 0zM106.5 352L49 452.6c-.7 1.1-1 2.4-1 3.8 0 4.2 3.4 7.6 7.6 7.6l336.8 0c4.2 0 7.6-3.4 7.6-7.6 0-1.3-.3-2.6-1-3.8l-57.5-100.6-235 0z"/></svg>
-                                <span class="font-medium">实验项目</span>
-                            </a>
+                        <div id="link-slider-container">
+                            <div class="slider-wrapper">
+                                <div class="slider-track">
+                                    <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
+                                        <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <span class="font-medium">博客</span>
+                                    </a>
+                                    <a href="https://qing90bing.github.io/Qing_Music/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
+                                        <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
+                                        <span class="font-medium">音乐</span>
+                                    </a>
+                                    <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
+                                        <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                        <span class="font-medium">起始页</span>
+                                    </a>
+                                    <a href="https://qing90bing.github.io/Qing_Lab/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
+                                        <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M96 24c0-13.3 10.7-24 24-24L328 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 169.6 120.7 211.2c4.8 8.4 7.3 17.9 7.3 27.6 0 30.7-24.9 55.6-55.6 55.6L55.6 512c-30.7 0-55.6-24.9-55.6-55.6 0-9.7 2.5-19.2 7.3-27.6L128 217.6 128 48 120 48c-13.3 0-24-10.7-24-24zm80 24l0 176c0 4.2-1.1 8.3-3.2 11.9l-38.9 68.1 180.1 0-38.9-68.1c-2.1-3.6-3.2-7.7-3.2-11.9l0-176-96 0zM106.5 352L49 452.6c-.7 1.1-1 2.4-1 3.8 0 4.2 3.4 7.6 7.6 7.6l336.8 0c4.2 0 7.6-3.4 7.6-7.6 0-1.3-.3-2.6-1-3.8l-57.5-100.6-235 0z"/></svg>
+                                        <span class="font-medium">实验项目</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="slider-dots"></div>
                         </div>
                     </div>
                 </div>
@@ -4278,6 +4339,189 @@
             luckButton.addEventListener('click', handleLuckClick);
         }
 
+        // --- [NEW] Card Slider Logic ---
+        function createCardSlider(containerSelector) {
+            const container = document.querySelector(containerSelector);
+            if (!container) return;
+
+            const wrapper = container.querySelector('.slider-wrapper');
+            const track = container.querySelector('.slider-track');
+            const slides = Array.from(container.querySelectorAll('.card-slide'));
+            const dotsContainer = container.querySelector('.slider-dots');
+
+            if (!wrapper || !track || !slides.length || !dotsContainer) {
+                console.error('Slider missing required elements.');
+                return;
+            }
+
+            let state = {
+                slidesToShow: 3,
+                slidesToScroll: 3,
+                totalSlides: slides.length,
+                currentPage: 0,
+                totalPages: 1,
+                isDragging: false,
+                startX: 0,
+                currentTranslate: 0,
+                startTranslate: 0,
+                lastX: 0,
+                velocity: 0,
+                animationFrame: null,
+            };
+
+            const FRICTION = 0.92;
+            const THRESHOLD = 50; // Min distance in px to trigger a slide
+
+            function updateSliderConfig() {
+                const screenWidth = window.innerWidth;
+                if (screenWidth < 640) { // Tailwind's `sm` breakpoint
+                    state.slidesToShow = 1;
+                    state.slidesToScroll = 1;
+                } else if (screenWidth < 768) { // Tailwind's `md` breakpoint
+                    state.slidesToShow = 2;
+                    state.slidesToScroll = 2;
+                } else {
+                    state.slidesToShow = 3;
+                    state.slidesToScroll = 3;
+                }
+                state.totalPages = Math.ceil(state.totalSlides / state.slidesToScroll);
+            }
+
+            function applySlideWidths() {
+                const gap = 16; // 1rem, from `gap-4`
+                const slideWidth = (wrapper.offsetWidth - (gap * (state.slidesToShow - 1))) / state.slidesToShow;
+                slides.forEach(slide => {
+                    slide.style.width = `${slideWidth}px`;
+                });
+            }
+
+            function createDots() {
+                dotsContainer.innerHTML = '';
+                if (state.totalPages <= 1) {
+                    container.style.display = 'none'; // Hide the whole thing
+                    return;
+                }
+                container.style.display = '';
+
+                for (let i = 0; i < state.totalPages; i++) {
+                    const dot = document.createElement('button');
+                    dot.classList.add('dot');
+                    dot.setAttribute('data-page', i);
+                    dot.addEventListener('click', () => goToPage(i));
+                    dotsContainer.appendChild(dot);
+                }
+            }
+
+            function updateDots() {
+                const dots = dotsContainer.querySelectorAll('.dot');
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === state.currentPage);
+                });
+            }
+            
+            function goToPage(page, animated = true) {
+                state.currentPage = Math.max(0, Math.min(page, state.totalPages - 1));
+                const newTranslate = -state.currentPage * wrapper.offsetWidth;
+
+                if (animated) {
+                    track.style.transition = `transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1)`;
+                    track.style.transform = `translateX(${newTranslate}px)`;
+                } else {
+                    track.style.transition = 'none';
+                    track.style.transform = `translateX(${newTranslate}px)`;
+                }
+
+                state.currentTranslate = newTranslate;
+                updateDots();
+            }
+
+            function onDragStart(event) {
+                event.preventDefault();
+                state.isDragging = true;
+                state.startX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX;
+                state.startTranslate = state.currentTranslate;
+                state.lastX = state.startX;
+                state.velocity = 0;
+                
+                track.style.transition = 'none';
+                wrapper.classList.add('grabbing');
+                
+                cancelAnimationFrame(state.animationFrame);
+                state.animationFrame = requestAnimationFrame(updateVelocity);
+            }
+
+            function onDragMove(event) {
+                if (!state.isDragging) return;
+                const currentX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX;
+                const dx = currentX - state.startX;
+                state.currentTranslate = state.startTranslate + dx;
+                track.style.transform = `translateX(${state.currentTranslate}px)`;
+            }
+            
+            function updateVelocity() {
+                const now = performance.now();
+                const currentX = state.lastX;
+                const dx = currentX - state.lastX;
+                const dt = now - (state.lastTime || now);
+                state.lastTime = now;
+                
+                if (dt > 0) {
+                    state.velocity = (dx / dt) * 10; // Scale up for more oomph
+                }
+                state.lastX = currentX;
+                state.animationFrame = requestAnimationFrame(updateVelocity);
+            }
+
+            function onDragEnd() {
+                if (!state.isDragging) return;
+                state.isDragging = false;
+                wrapper.classList.remove('grabbing');
+                cancelAnimationFrame(state.animationFrame);
+
+                const dragDistance = state.currentTranslate - state.startTranslate;
+                const targetPage = state.currentPage;
+
+                if (Math.abs(dragDistance) > THRESHOLD) {
+                    // Move to next/prev page
+                    const direction = dragDistance < 0 ? 1 : -1;
+                    goToPage(state.currentPage + direction);
+                } else {
+                    // Snap back to current page
+                    goToPage(state.currentPage);
+                }
+            }
+
+            function init() {
+                updateSliderConfig();
+                applySlideWidths();
+                createDots();
+                goToPage(0, false); // Initialize position
+
+                wrapper.addEventListener('mousedown', onDragStart);
+                document.addEventListener('mousemove', onDragMove);
+                document.addEventListener('mouseup', onDragEnd);
+                wrapper.addEventListener('mouseleave', onDragEnd);
+
+                wrapper.addEventListener('touchstart', onDragStart, { passive: true });
+                wrapper.addEventListener('touchmove', onDragMove, { passive: true });
+                wrapper.addEventListener('touchend', onDragEnd);
+                wrapper.addEventListener('touchcancel', onDragEnd);
+            }
+
+            const resizeObserver = new ResizeObserver(() => {
+                const oldTotalPages = state.totalPages;
+                updateSliderConfig();
+                applySlideWidths();
+                if (state.totalPages !== oldTotalPages) {
+                    createDots();
+                }
+                goToPage(state.currentPage, false);
+            });
+            resizeObserver.observe(container);
+
+            init();
+        }
+
         // --- 交互事件监听 ---
         function setupEventListeners() {
             // --- Theme Settings Listeners ---
@@ -5096,6 +5340,9 @@
                     cachedRightColumnHeight = rightColumn.offsetHeight;
                 }
             }, 100);
+
+            // --- [NEW] Initialize Card Slider ---
+            createCardSlider('#link-slider-container');
             
             setInterval(updateTime, 1000);
             setInterval(updateSiteRuntime, 1000);
