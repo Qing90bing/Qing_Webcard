@@ -3691,25 +3691,47 @@
                 let y = origin.y;
                 let rot = 0;
                 const rotSpeed = rand(PARTICLE_CONFIG.rotationSpeed.min, PARTICLE_CONFIG.rotationSpeed.max);
-                let fadeStartTime = null;
+                
+                // [JULES] MODIFICATION: Add fade-in variables
+                const FADE_IN_DURATION = 200; // ms
+                const creationTime = Date.now();
+                let fadeOutStartTime = null;
+
                 function frame() {
                     vy += PARTICLE_CONFIG.gravity;
                     x += vx;
                     y += vy;
                     rot += rotSpeed;
                     particle.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rot}deg)`;
+
+                    // [JULES] MODIFICATION: Combined fade-in and fade-out logic
+                    const lifeTime = Date.now() - creationTime;
+                    let opacity = 1;
+
+                    // Calculate fade-in
+                    if (lifeTime < FADE_IN_DURATION) {
+                        opacity = lifeTime / FADE_IN_DURATION;
+                    }
+
+                    // Calculate fade-out
                     const groundLevel = particleContainer.clientHeight * 0.9;
-                    if (y > groundLevel && fadeStartTime === null) fadeStartTime = Date.now();
-                    if (fadeStartTime !== null) {
-                        const elapsedTime = Date.now() - fadeStartTime;
-                        const progress = elapsedTime / PARTICLE_CONFIG.fadeOutDuration;
-                        if (progress < 1) {
-                            particle.style.opacity = 1 - progress;
+                    if (y > groundLevel && fadeOutStartTime === null) {
+                        fadeOutStartTime = Date.now();
+                    }
+
+                    if (fadeOutStartTime !== null) {
+                        const fadeOutElapsedTime = Date.now() - fadeOutStartTime;
+                        const fadeOutProgress = fadeOutElapsedTime / PARTICLE_CONFIG.fadeOutDuration;
+                        if (fadeOutProgress < 1) {
+                            // Apply the lower of the two opacities
+                            opacity = Math.min(opacity, 1 - fadeOutProgress);
                         } else {
                             if (particle.parentNode) particle.parentNode.removeChild(particle);
-                            return;
+                            return; // End animation
                         }
                     }
+                    
+                    particle.style.opacity = opacity;
                     requestAnimationFrame(frame);
                 }
                 requestAnimationFrame(frame);
@@ -3723,13 +3745,11 @@
                     return { x: particleContainer.clientWidth / 2, y: particleContainer.clientHeight / 2 };
                 }
                 
-                // Calculate position relative to the particle container
                 const containerRect = particleContainer.getBoundingClientRect();
                 const resultRect = luckResultEl.getBoundingClientRect();
                 
-                // If the result div has no width, it means it's hidden. 
-                // In the mini-game, the result div is hidden and the button is visible.
-                // We should then originate from the button's center.
+                // If the result div has no width, it means it's hidden (e.g. in the clicker game phase).
+                // In this case, we should originate from the button's center.
                 if (resultRect.width === 0) {
                      const buttonRect = luckButtonEl.getBoundingClientRect();
                      return {
@@ -3738,10 +3758,16 @@
                     };
                 }
 
-                // Default to the center of the visible result text
+                // [JULES] MODIFICATION: Pinpoint the number for a more precise origin.
+                // Try to find the specific number element (the one with the large text).
+                const numberEl = luckResultEl.querySelector('.text-4xl');
+                // Use the number's bounding box if it exists, otherwise fall back to the whole container's box.
+                const targetRect = numberEl ? numberEl.getBoundingClientRect() : resultRect;
+                
+                // Return the calculated center of the target element, relative to the particle container.
                 return {
-                    x: (resultRect.left - containerRect.left) + resultRect.width / 2,
-                    y: (resultRect.top - containerRect.top) + resultRect.height / 2
+                    x: (targetRect.left - containerRect.left) + targetRect.width / 2,
+                    y: (targetRect.top - containerRect.top) + targetRect.height / 2
                 };
             }
 
