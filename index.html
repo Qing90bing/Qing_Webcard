@@ -1087,10 +1087,12 @@
     #link-slider-container {
         position: relative;
         padding-bottom: 0rem; /* Make space for the absolute positioned dots */
+        margin: 0 -0.5rem;
     }
     .slider-wrapper {
         overflow: hidden;
         cursor: grab;
+        padding: 0.5rem;
     }
     .slider-wrapper.grabbing {
         cursor: grabbing;
@@ -1104,11 +1106,15 @@
         flex-shrink: 0;
         width: calc((100% - 2 * 1rem) / 3); /* Default for 3 cards, gap-4 is 1rem */
         transition: transform 0.2s ease-in-out;
+        position: relative;
+    }
+    .card-slide:hover {
+        z-index: 10;
     }
 
     .slider-dots {
         position: absolute;
-        bottom: -0.9rem;
+        bottom: -0.6rem;
         left: 0;
         right: 0;
         display: flex;
@@ -1197,7 +1203,7 @@
                         <div id="main-card-view-wrapper">
                             <!-- GitHub View -->
                             <div id="github-view">
-                                <h2 class="text-xl font-semibold mb-4" style="color: var(--text-color-primary);">
+                                <h2 class="text-xl font-semibold mb-3" style="color: var(--text-color-primary);">
                                    <svg class="inline-block w-6 h-6 mr-2 -mt-1" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
                                    GitHub 贡献图
                                 </h2>
@@ -1232,7 +1238,7 @@
                             </div>
                         </div>
 
-                        <h2 class="text-xl font-semibold mb-4 mt-4" style="color: var(--text-color-primary);">
+                        <h2 class="text-xl font-semibold mb-1 mt-4" style="color: var(--text-color-primary);">
                             <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                             网站列表
                         </h2>
@@ -4354,6 +4360,8 @@
                 return;
             }
 
+            let hasDragged = false;
+
             let state = {
                 slidesToShow: 3,
                 slidesToScroll: 3,
@@ -4374,13 +4382,10 @@
 
             function updateSliderConfig() {
                 const screenWidth = window.innerWidth;
-                if (screenWidth < 640) { // Tailwind's `sm` breakpoint
-                    state.slidesToShow = 1;
-                    state.slidesToScroll = 1;
-                } else if (screenWidth < 768) { // Tailwind's `md` breakpoint
+                if (screenWidth < 768) { // On mobile and small tablets, show 2 cards
                     state.slidesToShow = 2;
                     state.slidesToScroll = 2;
-                } else {
+                } else { // On larger screens, show 3 cards
                     state.slidesToShow = 3;
                     state.slidesToScroll = 3;
                 }
@@ -4389,7 +4394,11 @@
 
             function applySlideWidths() {
                 const gap = 16; // 1rem, from `gap-4`
-                const slideWidth = (wrapper.offsetWidth - (gap * (state.slidesToShow - 1))) / state.slidesToShow;
+                const style = window.getComputedStyle(wrapper);
+                const paddingLeft = parseFloat(style.paddingLeft);
+                const paddingRight = parseFloat(style.paddingRight);
+                const contentWidth = wrapper.clientWidth - paddingLeft - paddingRight;
+                const slideWidth = (contentWidth - (gap * (state.slidesToShow - 1))) / state.slidesToShow;
                 slides.forEach(slide => {
                     slide.style.width = `${slideWidth}px`;
                 });
@@ -4421,7 +4430,17 @@
             
             function goToPage(page, animated = true) {
                 state.currentPage = Math.max(0, Math.min(page, state.totalPages - 1));
-                const newTranslate = -state.currentPage * wrapper.offsetWidth;
+                
+                const gap = 16;
+                const style = window.getComputedStyle(wrapper);
+                const paddingLeft = parseFloat(style.paddingLeft);
+                const paddingRight = parseFloat(style.paddingRight);
+                const contentWidth = wrapper.clientWidth - paddingLeft - paddingRight;
+                
+                // Since slidesToScroll is always equal to slidesToShow, the total distance
+                // to scroll for one page is the width of the content area plus one gap.
+                const scrollAmount = contentWidth + gap;
+                const newTranslate = -state.currentPage * scrollAmount;
 
                 if (animated) {
                     track.style.transition = `transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1)`;
@@ -4436,6 +4455,7 @@
             }
 
             function onDragStart(event) {
+                hasDragged = false;
                 event.preventDefault();
                 state.isDragging = true;
                 state.startX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX;
@@ -4454,6 +4474,9 @@
                 if (!state.isDragging) return;
                 const currentX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX;
                 const dx = currentX - state.startX;
+                if (Math.abs(dx) > 10) {
+                    hasDragged = true;
+                }
                 state.currentTranslate = state.startTranslate + dx;
                 track.style.transform = `translateX(${state.currentTranslate}px)`;
             }
@@ -4497,6 +4520,14 @@
                 createDots();
                 goToPage(0, false); // Initialize position
 
+                slides.forEach(slide => {
+                    slide.addEventListener('click', (e) => {
+                        if (hasDragged) {
+                            e.preventDefault();
+                        }
+                    });
+                });
+
                 wrapper.addEventListener('mousedown', onDragStart);
                 document.addEventListener('mousemove', onDragMove);
                 document.addEventListener('mouseup', onDragEnd);
@@ -4506,6 +4537,30 @@
                 wrapper.addEventListener('touchmove', onDragMove, { passive: true });
                 wrapper.addEventListener('touchend', onDragEnd);
                 wrapper.addEventListener('touchcancel', onDragEnd);
+
+                let lastWheelTime = 0;
+                const wheelThrottle = 500; // 500ms delay between wheel scrolls
+
+                wrapper.addEventListener('wheel', (event) => {
+                    // Ignore wheel events that are more horizontal than vertical
+                    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    const now = Date.now();
+                    if (now - lastWheelTime < wheelThrottle) {
+                        return;
+                    }
+                    lastWheelTime = now;
+
+                    const direction = event.deltaY > 0 ? 1 : -1;
+                    const newPage = state.currentPage + direction;
+
+                    if (newPage >= 0 && newPage < state.totalPages) {
+                        goToPage(newPage);
+                    }
+                }, { passive: false });
             }
 
             const resizeObserver = new ResizeObserver(() => {
