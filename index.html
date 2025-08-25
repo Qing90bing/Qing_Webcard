@@ -993,6 +993,64 @@
     #hitokoto-save-btn:active {
         transform: scale(0.97);
     }
+
+    /* --- Particle Animation Styles --- */
+    #luck-container {
+        position: relative; /* Ensure the container is a positioning context for particles */
+    }
+    #particle-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        /* overflow: hidden; */ /* FIX: Removed to allow particles to fly out */
+        /* z-index: 10; */ /* FIX: Removed to ensure particles are behind text/buttons */
+    }
+    .particle {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform: translate(-50%, -50%); 
+        pointer-events: none;
+        will-change: transform, opacity;
+    }
+    .particle.circle {
+        border-radius: 50%;
+    }
+    .particle.square {
+        border-radius: 0;
+    }
+    .particle.triangle {
+        background-color: transparent !important;
+    }
+    .particle.star {
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        background-color: var(--star-color);
+    }
+    .particle.heart {
+        position: relative;
+        transform: rotate(-45deg) translate(-50%, -50%);
+        background-color: transparent;
+    }
+    .particle.heart::before,
+    .particle.heart::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: inherit;
+    }
+    .particle.heart::before {
+        top: -50%;
+        left: 0;
+    }
+    .particle.heart::after {
+        top: 0;
+        left: 50%;
+    }
     </style>
 </head>
 <body>
@@ -1216,6 +1274,7 @@
                             今日人品
                         </h2>
                         <div id="luck-container" class="flex items-center justify-center h-28 transition-all duration-500 ease-in-out">
+                            <div id="particle-container"></div>
                             <button id="luck-button" class="bg-sky-500/80 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-full transform active:scale-90 whitespace-nowrap flex-shrink-0" style="transition: transform 0.15s ease-out;">
                                 开盲盒
                             </button>
@@ -3582,14 +3641,136 @@
             return 'text-gray-400';
         }
 
+        // --- Inlined Particle Animation Logic ---
+        const particleEffects = (() => {
+            const PARTICLE_CONFIG = {
+                shapes: ['circle', 'square', 'triangle', 'heart', 'star'],
+                colors: ['#FF69B4', '#87CEEB', '#FFFACD', '#98FB98', '#E6E6FA', '#FFA500', '#DC143C', '#20B2AA', '#FFD700'],
+                size: { min: 8, max: 15 },
+                gravity: 0.08,
+                // 1. Lowered particle height by reducing initial upward velocity
+                initialVelocity: { x_range: [-2.5, 2.5], y_range: [-3.5, -5.5] },
+                rotationSpeed: { min: -2, max: 2 },
+                fadeOutDuration: 500,
+            };
+            let particleContainer;
+            const rand = (min, max) => Math.random() * (max - min) + min;
+
+            function createParticleElement() {
+                const particle = document.createElement('div');
+                const shape = PARTICLE_CONFIG.shapes[Math.floor(Math.random() * PARTICLE_CONFIG.shapes.length)];
+                const color = PARTICLE_CONFIG.colors[Math.floor(Math.random() * PARTICLE_CONFIG.colors.length)];
+                const size = rand(PARTICLE_CONFIG.size.min, PARTICLE_CONFIG.size.max);
+                particle.classList.add('particle', shape);
+                if (shape === 'triangle') {
+                    particle.style.width = '0';
+                    particle.style.height = '0';
+                    particle.style.borderLeft = `${size / 2}px solid transparent`;
+                    particle.style.borderRight = `${size / 2}px solid transparent`;
+                    particle.style.borderBottom = `${size}px solid ${color}`;
+                } else if (shape === 'heart') {
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.backgroundColor = color;
+                } else if (shape === 'star') {
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.setProperty('--star-color', color);
+                } else {
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.backgroundColor = color;
+                }
+                return particle;
+            }
+
+            function animateParticle(particle, origin) {
+                const vx = rand(PARTICLE_CONFIG.initialVelocity.x_range[0], PARTICLE_CONFIG.initialVelocity.x_range[1]);
+                let vy = rand(PARTICLE_CONFIG.initialVelocity.y_range[0], PARTICLE_CONFIG.initialVelocity.y_range[1]);
+                let x = origin.x;
+                let y = origin.y;
+                let rot = 0;
+                const rotSpeed = rand(PARTICLE_CONFIG.rotationSpeed.min, PARTICLE_CONFIG.rotationSpeed.max);
+                let fadeStartTime = null;
+                function frame() {
+                    vy += PARTICLE_CONFIG.gravity;
+                    x += vx;
+                    y += vy;
+                    rot += rotSpeed;
+                    particle.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rot}deg)`;
+                    const groundLevel = particleContainer.clientHeight * 0.9;
+                    if (y > groundLevel && fadeStartTime === null) fadeStartTime = Date.now();
+                    if (fadeStartTime !== null) {
+                        const elapsedTime = Date.now() - fadeStartTime;
+                        const progress = elapsedTime / PARTICLE_CONFIG.fadeOutDuration;
+                        if (progress < 1) {
+                            particle.style.opacity = 1 - progress;
+                        } else {
+                            if (particle.parentNode) particle.parentNode.removeChild(particle);
+                            return;
+                        }
+                    }
+                    requestAnimationFrame(frame);
+                }
+                requestAnimationFrame(frame);
+            }
+
+            // 2. Corrected particle origin calculation
+            function getParticleOrigin() {
+                const luckResultEl = document.getElementById('luck-result');
+                const luckButtonEl = document.getElementById('luck-button');
+                if (!luckResultEl || !luckButtonEl) {
+                    return { x: particleContainer.clientWidth / 2, y: particleContainer.clientHeight / 2 };
+                }
+                
+                // Calculate position relative to the particle container
+                const containerRect = particleContainer.getBoundingClientRect();
+                const resultRect = luckResultEl.getBoundingClientRect();
+                
+                // If the result div has no width, it means it's hidden. 
+                // In the mini-game, the result div is hidden and the button is visible.
+                // We should then originate from the button's center.
+                if (resultRect.width === 0) {
+                     const buttonRect = luckButtonEl.getBoundingClientRect();
+                     return {
+                        x: (buttonRect.left - containerRect.left) + buttonRect.width / 2,
+                        y: (buttonRect.top - containerRect.top) + buttonRect.height / 2
+                    };
+                }
+
+                // Default to the center of the visible result text
+                return {
+                    x: (resultRect.left - containerRect.left) + resultRect.width / 2,
+                    y: (resultRect.top - containerRect.top) + resultRect.height / 2
+                };
+            }
+
+            return {
+                init: () => {
+                    particleContainer = document.getElementById('particle-container');
+                    if (!particleContainer) console.error('Particle container #particle-container not found!');
+                },
+                triggerSingleParticle: () => {
+                    if (!particleContainer) return;
+                    const particle = createParticleElement();
+                    particleContainer.appendChild(particle);
+                    const origin = getParticleOrigin();
+                    animateParticle(particle, origin);
+                },
+                triggerBurstEffect: (count = 20) => {
+                    if (!particleContainer) return;
+                    for (let i = 0; i < count; i++) {
+                        setTimeout(() => particleEffects.triggerSingleParticle(), i * 15);
+                    }
+                }
+            };
+        })();
+
         function displayLuckResult(data, isAnimated = false) {
             const luckResult = document.getElementById('luck-result');
             if (!luckResult) return;
 
-            // Create a wrapper for the content to apply animation to it
             const contentWrapper = document.createElement('div');
-            
-            // Set content and color
             const colorClass = getScoreColorClass(data.value);
             contentWrapper.innerHTML = `
                 <p>你今天的人品值是</p>
@@ -3599,13 +3780,15 @@
 
             if (isAnimated) {
                 contentWrapper.classList.add('bounce-in');
+                // 3. Delayed burst animation
+                setTimeout(() => {
+                    particleEffects.triggerBurstEffect(20);
+                }, 500);
             }
             
-            // Clear the container and append the new animated content
             luckResult.innerHTML = '';
             luckResult.appendChild(contentWrapper);
             
-            // Add display properties for the container and then make it visible
             luckResult.classList.add('flex', 'flex-col', 'justify-center', 'flex-1', 'min-w-0', 'relative');
             requestAnimationFrame(() => {
                 luckResult.classList.add('visible');
@@ -3683,6 +3866,8 @@
             const milestoneMessage = luckMilestoneMessages[luckClickCount];
             const luckResult = document.getElementById('luck-result');
 
+            particleEffects.triggerSingleParticle();
+
             if (milestoneMessage) {
                 updateLuckResultText(milestoneMessage);
                 luckResult.classList.remove('luck-pop-anim');
@@ -3691,13 +3876,11 @@
             } else {
                 const counterValue = document.getElementById('luck-counter-value');
                 if (counterValue) {
-                    // Counter is already on screen, just update it
                     counterValue.textContent = luckClickCount;
                     counterValue.classList.remove('luck-pop-anim');
                     void counterValue.offsetWidth;
                     counterValue.classList.add('luck-pop-anim');
                 } else {
-                    // Counter is not on screen (e.g., after a milestone message), so recreate it
                     displayCounter();
                 }
             }
@@ -3791,14 +3974,15 @@
 
                         // After the fade-out, display the final result with a bounce
                         countdownAnimationHandle = setTimeout(() => {
-                            displayLuckResult(dailyLuckData, true);
+                            // FIX: Set isAnimated to false to prevent re-bursting
+                            displayLuckResult(dailyLuckData, false); 
                             luckGameState = 'result_shown';
                             luckClickCount = 0;
                             countdownAnimationHandle = null;
                         }, 300); // Wait for fade-out (0.3s) to complete.
                     } else {
                         // Fallback if something goes wrong, just show the result.
-                        displayLuckResult(dailyLuckData, true);
+                        displayLuckResult(dailyLuckData, false);
                         luckGameState = 'result_shown';
                         luckClickCount = 0;
                         countdownAnimationHandle = null;
@@ -4544,6 +4728,7 @@
             setupSettingsUI();
             setupEventListeners();
             setupLuckFeature(); // Activate the new luck feature
+            particleEffects.init(); // Initialize particle system
 
             // 2. Pre-calculate the theme slider's correct position before it's ever shown.
             initializeThemeSlider();
