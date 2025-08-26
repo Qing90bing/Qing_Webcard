@@ -115,6 +115,7 @@
 
         .icon-btn:hover {
             background-color: var(--icon-hover-bg);
+            transition: all 0.3s ease;
         }
 
         /* Override for settings window to disable hover effect */
@@ -206,7 +207,7 @@
             transform: scale(0.9);
             visibility: hidden;
             pointer-events: none;
-        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0s linear 0.2s, background-color 0.2s ease;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0s linear 0.2s, background-color 0.2s ease;
         }
         #back-to-today-btn:hover {
             opacity: 0.85 !important;
@@ -216,7 +217,7 @@
             transform: scale(1);
             visibility: visible;
             pointer-events: auto;
-        transition-delay: 0s;
+            transition-delay: 0s;
         }
 
         #main-wrapper {
@@ -4181,7 +4182,7 @@
             const luckResult = document.getElementById('luck-result');
             if (!luckResult) return;
             luckResult.innerHTML = `
-                <div id="luck-counter-container" class="flex items-baseline justify-center" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
+                <div id="luck-counter-container" class="flex items-center justify-center" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
                     <span class="text-2xl font-bold" style="color: var(--text-color-secondary);">✕</span>
                     <span id="luck-counter-value" class="text-5xl font-bold leading-none luck-pop-anim">${luckClickCount}</span>
                 </div>
