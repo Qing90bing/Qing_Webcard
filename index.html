@@ -78,7 +78,7 @@
         /* :focus-visible is a modern pseudo-class that applies focus styles only when appropriate (e.g., keyboard navigation). */
         *:focus-visible {
             outline: none;
-            box-shadow: 0 0 0 3px var(--accent-color-highlight);
+            box-shadow: 0 0 0 3px var(--accent-color);
         }
 
         /* 背景图片容器 */
@@ -122,7 +122,7 @@
         }
 
         .icon-btn:hover {
-            background-color: var(--icon-hover-bg);
+            background-color: var(--accent-color-highlight);
             transition: all 0.3s ease;
         }
 
@@ -606,6 +606,10 @@
         word-break: break-all;
     }
 
+    .themed-hover-bg:hover {
+        background-color: var(--accent-color-highlight);
+    }
+
     /* [NEW] Custom Native Scrollbar for Commit List */
     #recent-commits-container::-webkit-scrollbar {
         width: 8px;
@@ -708,7 +712,10 @@
         opacity: 0;
         visibility: hidden;
         transform: scale(0.95);
-        transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+        transition: opacity 0.2s, visibility 0.2s, transform 0.2s, background-color 0.2s;
+    }
+    #refresh-commits-btn:hover:not(:disabled) {
+        background-color: var(--accent-color-highlight);
     }
     #commit-history-panel:hover #refresh-commits-btn:not(:disabled) {
         opacity: 1;
@@ -1553,7 +1560,7 @@
                                 <h3 class="text-lg font-semibold flex items-center" style="color: var(--text-color-primary);">
                                     <i class="fas fa-history mr-2"></i>更新日志
                                 </h3>
-                                <button id="refresh-commits-btn" title="刷新" class="p-2 rounded-full text-gray-400 hover:text-white transition-colors duration-200">
+                                <button id="refresh-commits-btn" title="刷新" class="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-color-secondary)] hover:text-[var(--text-color-primary)] transition-colors duration-200">
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
                             </div>
@@ -4851,7 +4858,7 @@
                             authorHTML += `</span>`;
 
                             commitsHTML += `
-                                <a href="${url}" target="_blank" class="block p-2 rounded-lg hover:bg-white/10 transition-colors duration-200">
+                                <a href="${url}" target="_blank" class="block p-2 rounded-lg themed-hover-bg transition-colors duration-200">
                                     <p class="font-semibold commit-message-text" style="color: var(--text-color-primary);" title="${message}">${message}</p>
                                     <div class="text-xs mt-1 flex justify-between items-center" style="color: var(--text-color-tertiary);">
                                         ${authorHTML}
@@ -4873,7 +4880,7 @@
                             <div class="timeline-item">
                                 <div class="timeline-node"></div>
                                 <div class="timeline-content">
-                                    <a href="https://github.com/Qing90bing/Qing_Webcard/commits" target="_blank" class="inline-flex items-center text-sm font-semibold p-2 rounded-lg hover:bg-white/10 transition-colors duration-200" style="color: var(--accent-color);">
+                                    <a href="https://github.com/Qing90bing/Qing_Webcard/commits" target="_blank" class="inline-flex items-center text-sm font-semibold p-2 rounded-lg themed-hover-bg transition-colors duration-200" style="color: var(--accent-color);">
                                         前往 Github 查看更多
                                         <i class="fas fa-external-link-alt ml-2 fa-xs"></i>
                                     </a>
