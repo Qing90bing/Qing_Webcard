@@ -127,7 +127,8 @@
         }
 
         /* Override for settings window to disable hover effect */
-        #settings-window.glass-card:hover {
+        #settings-window.glass-card:hover,
+        #developer-settings-window.glass-card:hover {
             background: var(--card-bg-color);
             border: 1px solid var(--card-border-color);
         }
@@ -158,6 +159,23 @@
         }
         .bounce-in {
             animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* [REVISED] Logo Click Animation */
+        @keyframes logo-click-bounce {
+            0% {
+                transform: scale3d(1, 1, 1);
+            }
+            50% {
+                transform: scale3d(0.8, 0.8, 1);
+            }
+            100% {
+                transform: scale3d(1, 1, 1);
+            }
+        }
+        .logo-click-bounce-anim {
+            transform-origin: center;
+            animation: logo-click-bounce 0.3s ease-out;
         }
 
         /* 进度条样式 */
@@ -261,6 +279,50 @@
             transition-delay: 0s;
         }
         body.settings-open #settings-window {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        #developer-icon-container {
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+            margin-top: 0;
+            transition: height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out;
+        }
+        #developer-icon-container.visible {
+            height: 2rem; /* h-8 */
+            opacity: 1;
+            margin-top: 0.5rem; /* mt-2 */
+        }
+
+        /* --- [NEW] Developer Settings Modal States --- */
+        #developer-settings-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s;
+        }
+        #developer-settings-window {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease-in-out;
+            height: 680px;
+            max-height: 85vh;
+        }
+        body.developer-settings-open #main-wrapper {
+            opacity: 0;
+            pointer-events: none;
+        }
+        body.developer-settings-open #bg-wrapper {
+            transform: scale(1);
+            filter: blur(16px);
+        }
+        body.developer-settings-open #developer-settings-overlay {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0s;
+        }
+        body.developer-settings-open #developer-settings-window {
             transform: scale(1);
             opacity: 1;
         }
@@ -1550,12 +1612,19 @@
                     <div class="flex-1 flex gap-2">
                         <!-- Left Column -->
                         <div class="flex flex-col items-center justify-center w-1/3">
-                            <img src="favicon.svg" alt="Website Icon" class="w-24 h-24">
+                            <img id="about-card-logo" src="favicon.svg" alt="Website Icon" class="w-24 h-24 cursor-pointer">
                             <p class="mt-4 font-semibold flex items-center justify-center" style="color: var(--text-color-primary);">V1.0.0<span class="ml-2 rounded-md bg-sky-500/90 px-2 py-0.5 text-xs font-bold text-white">Beta</span></p>
                             
                             <p class="mt-2 text-sm text-center px-2" style="color: var(--text-color-secondary);">
                                 一个简约的个人主页项目🎈
                             </p>
+
+                            <!-- [NEW] Developer Icon Placeholder -->
+                            <div id="developer-icon-container">
+                                <div id="developer-icon" title="开发者选项" class="w-8 h-8 mx-auto cursor-pointer text-gray-400 hover:text-white transition-colors">
+                                    <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M64 160C64 124.7 92.7 96 128 96L512 96C547.3 96 576 124.7 576 160L576 400L512 400L512 160L128 160L128 400L64 400L64 160zM0 467.2C0 456.6 8.6 448 19.2 448L620.8 448C631.4 448 640 456.6 640 467.2C640 509.6 605.6 544 563.2 544L76.8 544C34.4 544 0 509.6 0 467.2zM281 273L250 304L281 335C290.4 344.4 290.4 359.6 281 368.9C271.6 378.2 256.4 378.3 247.1 368.9L199.1 320.9C189.7 311.5 189.7 296.3 199.1 287L247.1 239C256.5 229.6 271.7 229.6 281 239C290.3 248.4 290.4 263.6 281 272.9zM393 239L441 287C450.4 296.4 450.4 311.6 441 320.9L393 368.9C383.6 378.3 368.4 378.3 359.1 368.9C349.8 359.5 349.7 344.3 359.1 335L390.1 304L359.1 273C349.7 263.6 349.7 248.4 359.1 239.1C368.5 229.8 383.7 229.7 393 239.1z"/></svg>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Right Column -->
@@ -1636,6 +1705,45 @@
         </div>
     </div>
 
+    <!-- [NEW] Developer Settings Modal -->
+    <div id="developer-settings-overlay" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4" style="z-index: 60;">
+        <div id="developer-settings-window" class="glass-card w-full max-w-2xl p-5 flex flex-col">
+            <!-- Header -->
+            <div class="flex justify-between items-center ">
+                <h2 class="text-xl font-semibold flex items-center" style="color: var(--text-color-primary);">
+                    <svg fill="currentColor" class="inline-block w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M64 160C64 124.7 92.7 96 128 96L512 96C547.3 96 576 124.7 576 160L576 400L512 400L512 160L128 160L128 400L64 400L64 160zM0 467.2C0 456.6 8.6 448 19.2 448L620.8 448C631.4 448 640 456.6 640 467.2C640 509.6 605.6 544 563.2 544L76.8 544C34.4 544 0 509.6 0 467.2zM281 273L250 304L281 335C290.4 344.4 290.4 359.6 281 368.9C271.6 378.2 256.4 378.3 247.1 368.9L199.1 320.9C189.7 311.5 189.7 296.3 199.1 287L247.1 239C256.5 229.6 271.7 229.6 281 239C290.3 248.4 290.4 263.6 281 272.9zM393 239L441 287C450.4 296.4 450.4 311.6 441 320.9L393 368.9C383.6 378.3 368.4 378.3 359.1 368.9C349.8 359.5 349.7 344.3 359.1 335L390.1 304L359.1 273C349.7 263.6 349.7 248.4 359.1 239.1C368.5 229.8 383.7 229.7 393 239.1z"/></svg>
+                    开发者选项
+                </h2>
+                <button id="close-developer-settings-btn" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                    <i class="fas fa-times fa-lg w-6 h-6 flex items-center justify-center"></i>
+                </button>
+            </div>
+            <!-- Content -->
+            <div class="flex-grow flex-1 min-h-0" data-simplebar>
+                <div class="space-y-6 p-3">
+                    <div class="setting-section">
+                        <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);">
+                            <i class="fas fa-toggle-on fa-fw w-5 h-5 mr-2"></i>总开关
+                        </h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center p-2">
+                                <div>
+                                    <span class="font-medium">开启开发者选项</span>
+                                    <div class="setting-description">总开关，控制所有开发者功能</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="dev-options-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Future developer options will go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- [NEW] Immersive Time View -->
     <div id="immersive-time-view">
         <button id="exit-immersive-btn">
@@ -1706,6 +1814,7 @@
         let isFetchingWeather = false; // Lock to prevent multiple weather requests
         let cachedCommitsHTML = null;
         let areCommitsCached = false;
+        let aboutCardHasAnimated = false;
 
         // --- [NEW] Reusable Cross-fade Logic ---
         function createCrossfader(layers) {
@@ -2559,6 +2668,10 @@
             hitokoto: {
                 mode: 'default', // 'default' or 'custom'
                 categories: ['a'] // Array of selected category codes
+            },
+            developer: {
+                masterSwitchEnabled: true, // Master switch for the entire feature
+                uiToggleState: true        // State of the toggle in the UI
             }
         };
 
@@ -3159,6 +3272,7 @@
                         ...parsedSettings,
                         background: { ...appSettings.background, ...(parsedSettings.background || {}) },
                         weather: { ...appSettings.weather, ...(parsedSettings.weather || {}) },
+                        developer: { ...appSettings.developer, ...(parsedSettings.developer || {}) },
                     };
 
                     // Backward compatibility: If old setting `view: 'weather'` exists, but new `weather.source` doesn't, default it.
@@ -3930,6 +4044,13 @@
             }
         }
 
+        function updateDeveloperSettingsUI() {
+            const devToggle = document.getElementById('dev-options-toggle');
+            if (devToggle) {
+                devToggle.checked = appSettings.developer.uiToggleState;
+            }
+        }
+
         function updateSettingsUI() {
             updateBgSettingsUI();
             // updateThemeSettingsUI(); // This is now handled by a dedicated initializer
@@ -3937,6 +4058,7 @@
             updateViewToggleUI();
             updateHitokotoSettingsUI();
             updateImmersiveBlinkUI();
+            updateDeveloperSettingsUI();
         }
 
         // --- [NEW] View (GitHub/Weather) Management ---
@@ -5244,18 +5366,23 @@
                 if (e.key === 'Escape') {
                     // Priority 0: Close immersive view
                     if (document.body.classList.contains('immersive-active')) {
-                        // Programmatically click the exit button to ensure cleanup logic runs
                         document.getElementById('exit-immersive-btn').click();
                         return;
                     }
                     
-                    // Priority 1: Close settings modal if it's open
+                    // Priority 1: Close developer settings modal if it's open
+                    if (document.body.classList.contains('developer-settings-open')) {
+                        closeDeveloperSettings();
+                        return;
+                    }
+
+                    // Priority 2: Close settings modal if it's open
                     if (document.body.classList.contains('settings-open')) {
                         closeSettings();
                         return;
                     }
 
-                    // Priority 2: Close holiday list card if it's open
+                    // Priority 3: Close holiday list card if it's open
                     if (!holidayListCard.classList.contains('hidden')) {
                         holidayListCard.classList.add('hidden');
                         rightColumn.classList.remove('hidden');
@@ -5263,7 +5390,7 @@
                         return;
                     }
 
-                    // Priority 3: Close time capsule card if it's open
+                    // Priority 4: Close time capsule card if it's open
                     if (!timeCapsuleCard.classList.contains('hidden')) {
                         timeCapsuleCard.classList.add('hidden');
                         rightColumn.classList.remove('hidden');
@@ -5272,6 +5399,74 @@
                     }
                 }
             });
+
+            // --- [NEW] Developer Mode Logic ---
+            let logoClickCount = 0;
+            let logoClickTimer = null;
+
+            const aboutCardLogo = document.getElementById('about-card-logo');
+            const developerIconContainer = document.getElementById('developer-icon-container');
+            const developerIcon = document.getElementById('developer-icon');
+            const developerSettingsOverlay = document.getElementById('developer-settings-overlay');
+            const closeDeveloperSettingsBtn = document.getElementById('close-developer-settings-btn');
+
+            const openDeveloperSettings = () => {
+                updateDeveloperSettingsUI(); // Update the UI from the latest settings state
+                document.body.classList.add('developer-settings-open');
+            };
+            const closeDeveloperSettings = () => document.body.classList.remove('developer-settings-open');
+
+            if (aboutCardLogo) {
+                aboutCardLogo.addEventListener('click', () => {
+                    // Re-trigger animation for a satisfying click feel
+                    aboutCardLogo.classList.remove('logo-click-bounce-anim');
+                    void aboutCardLogo.offsetWidth; // Force reflow to restart animation
+                    aboutCardLogo.classList.add('logo-click-bounce-anim');
+
+                    // [FIX] Check the master switch to see if the feature is enabled at all
+                    if (!appSettings.developer.masterSwitchEnabled) return;
+
+                    clearTimeout(logoClickTimer);
+                    logoClickCount++;
+
+                    if (logoClickCount >= 5) {
+                        if (!developerIconContainer.classList.contains('visible')) {
+                            developerIconContainer.classList.add('visible');
+                            // [NEW] Save unlock state
+                            try {
+                                localStorage.setItem('developerModeUnlocked', 'true');
+                            } catch (e) {
+                                console.error("Failed to save to localStorage", e);
+                            }
+                        }
+                        // [FIX] When re-unlocking, always reset the toggle's state to ON.
+                        appSettings.developer.uiToggleState = true;
+                        saveSettings();
+
+                        logoClickCount = 0;
+                        clearTimeout(logoClickTimer); // Stop timer once icon is shown
+                    } else {
+                        logoClickTimer = setTimeout(() => {
+                            logoClickCount = 0;
+                        }, 1500); // 1.5-second window for consecutive clicks
+                    }
+                });
+            }
+
+            if (developerIcon) developerIcon.addEventListener('click', openDeveloperSettings);
+            if (closeDeveloperSettingsBtn) closeDeveloperSettingsBtn.addEventListener('click', closeDeveloperSettings);
+            if (developerSettingsOverlay) {
+                developerSettingsOverlay.addEventListener('click', (e) => {
+                    if (e.target === developerSettingsOverlay) closeDeveloperSettings();
+                });
+            }
+
+            // [FIX] Remove the click animation class after it finishes to prevent re-playing on show/hide
+            if (aboutCardLogo) {
+                aboutCardLogo.addEventListener('animationend', () => {
+                    aboutCardLogo.classList.remove('logo-click-bounce-anim');
+                });
+            }
             // --- End Settings Modal Logic ---
 
             const animateRightColumnIn = () => {
@@ -5328,9 +5523,11 @@
                     timeCapsuleCard.classList.add('hidden');
                     holidayListCard.classList.add('hidden');
                     aboutCard.classList.remove('hidden');
-                    aboutCard.classList.remove('bounce-in'); // Ensure animation can re-trigger
-                    void aboutCard.offsetWidth; // Force reflow
-                    aboutCard.classList.add('bounce-in');
+                    
+                    if (!aboutCardHasAnimated) {
+                        aboutCard.classList.add('bounce-in');
+                        aboutCardHasAnimated = true;
+                    }
 
                     const commitsContainer = document.getElementById('recent-commits-container');
                     if (commitsContainer && !SimpleBar.instances.get(commitsContainer)) {
@@ -5806,6 +6003,29 @@
                     }
                 });
             }
+
+            // --- [NEW] Developer Options Toggle Listener ---
+            const devOptionsToggle = document.getElementById('dev-options-toggle');
+            if (devOptionsToggle) {
+                devOptionsToggle.addEventListener('change', () => {
+                    const isEnabled = devOptionsToggle.checked;
+                    appSettings.developer.uiToggleState = isEnabled;
+                    saveSettings();
+
+                    if (!isEnabled) {
+                        // If the toggle is turned OFF, reset the unlocked state and hide the icon.
+                        try {
+                            localStorage.setItem('developerModeUnlocked', 'false');
+                            const developerIconContainer = document.getElementById('developer-icon-container');
+                            if (developerIconContainer) {
+                                developerIconContainer.classList.remove('visible');
+                            }
+                        } catch (e) {
+                            console.error("Failed to update localStorage", e);
+                        }
+                    }
+                });
+            }
         }
 
         // --- 页面加载时执行的函数 ---
@@ -5822,6 +6042,18 @@
             setupEventListeners();
             setupLuckFeature(); // Activate the new luck feature
             particleEffects.init(); // Initialize particle system
+
+            // [NEW] Check for persisted developer mode unlock
+            try {
+                if (localStorage.getItem('developerModeUnlocked') === 'true') {
+                    const developerIconContainer = document.getElementById('developer-icon-container');
+                    if (developerIconContainer) {
+                        developerIconContainer.classList.add('visible');
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to read developerModeUnlocked from localStorage", e);
+            }
 
             // 2. Pre-calculate the theme slider's correct position before it's ever shown.
             initializeThemeSlider();
