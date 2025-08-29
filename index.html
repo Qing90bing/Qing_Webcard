@@ -296,6 +296,22 @@
             margin-top: 0.5rem; /* mt-2 */
         }
 
+        /* [FIX] Developer icon color should be theme-dependent. */
+        #developer-icon {
+            color: var(--text-color-secondary);
+            transition: color 0.2s ease-in-out;
+        }
+        #developer-icon:hover {
+            color: var(--text-color-primary);
+        }
+        body.new-year-active #developer-icon {
+            color: var(--accent-color);
+        }
+        body.new-year-active #developer-icon:hover {
+            /* In NY theme, primary text is a light cream color, providing a nice hover effect */
+            color: var(--text-color-primary); 
+        }
+
         /* --- [NEW] Developer Settings Modal States --- */
         #developer-settings-overlay {
             opacity: 0;
@@ -418,6 +434,49 @@
         pointer-events: auto;
     }
 
+    /* --- [NEW] New Year Theme --- */
+    /* [REVISED] Dark Mode New Year Theme */
+    body.new-year-active.theme-dark {
+        --card-bg-color: rgba(80, 20, 20, 0.65); /* Deep maroon */
+        --card-border-color: rgba(220, 38, 38, 0.3); /* Crimson border */
+        --card-hover-bg-color: rgba(80, 20, 20, 0.75);
+        --card-hover-border-color: rgba(220, 38, 38, 0.5);
+        --text-color-primary: #fff7e6; /* Creamy white */
+        --text-color-secondary: #ffdab9; /* Peach puff for secondary text */
+        --text-color-tertiary: #e53e3e; /* A slightly softer red for tertiary */
+        --accent-color: #dc2626; /* Ruby red */
+        --accent-color-highlight: rgba(220, 38, 38, 0.25);
+    }
+
+    /* [REVISED] Light Mode New Year Theme */
+    body.new-year-active.theme-light {
+        --card-bg-color: rgba(255, 247, 247, 0.8); /* Very light, almost creamy red tint */
+        --card-border-color: rgba(190, 30, 30, 0.25);
+        --card-hover-bg-color: rgba(255, 247, 247, 0.9);
+        --card-hover-border-color: rgba(190, 30, 30, 0.4);
+        --text-color-primary: #9b2c2c; /* Deep maroon text */
+        --text-color-secondary: #c53030; /* Strong red for secondary */
+        --text-color-tertiary: #e53e3e;
+        --accent-color: #c53030; /* Main crimson accent */
+        --accent-color-highlight: rgba(197, 48, 48, 0.1);
+    }
+
+    /* [FIX] Toggle Switch Styles for New Year Theme */
+    body.new-year-active .toggle-slider {
+        background-color: rgba(120, 50, 50, 0.5); /* Muted maroon for 'off' state */
+    }
+
+    body.new-year-active input:checked + .toggle-slider {
+        background-color: var(--accent-color); /* Use the theme's accent color for 'on' state */
+    }
+    
+    #new-year-music-btn.spin i {
+        animation: spin 1.5s linear infinite;
+    }
+    #new-year-music-btn:active {
+        transform: scale(0.9);
+    }
+
     @media (max-width: 1023px) {
         html, body {
             height: auto;
@@ -461,6 +520,39 @@
     #year-input.invalid {
         border-color: #ef4444 !important; /* red-500, a consistent error color */
         animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    #luck-button {
+        background-color: var(--accent-color);
+        opacity: 0.9;
+        transition: transform 0.15s ease-out, opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    }
+    #luck-button:hover {
+        opacity: 1;
+    }
+
+    /* --- [NEW] New Year Theme UI Consistency --- */
+    /* Ensure settings highlights and buttons match the theme's accent color. */
+    body.new-year-active #luck-button {
+        background-color: var(--accent-color);
+    }
+
+    body.new-year-active .setting-radio-input:checked + .setting-radio-label {
+        background-color: var(--accent-color-highlight);
+        border-color: var(--accent-color);
+    }
+
+    body.new-year-active .setting-radio-input:checked + .setting-radio-label .custom-radio-button {
+        border-color: var(--accent-color);
+    }
+
+    body.new-year-active .setting-radio-input:checked + .setting-radio-label .custom-radio-button::after {
+        background-color: var(--accent-color);
+    }
+
+    body.new-year-active .hitokoto-checkbox-input:checked + .hitokoto-checkbox-label .custom-checkbox {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
     }
 
     #luck-result {
@@ -867,8 +959,8 @@
         display: none; /* Hide original radio button */
     }
     .setting-radio-input:checked + .setting-radio-label {
-        background-color: rgba(56, 189, 248, 0.15);
-        border-color: rgba(56, 189, 248, 0.5);
+        background-color: var(--accent-color-highlight);
+        border-color: var(--accent-color);
     }
     .custom-radio-button {
         width: 1.25em;
@@ -883,13 +975,13 @@
         flex-shrink: 0;
     }
     .setting-radio-input:checked + .setting-radio-label .custom-radio-button {
-        border-color: #38bdf8; /* sky-500 */
+        border-color: var(--accent-color);
     }
     .custom-radio-button::after {
         content: '';
         width: 0.75em;
         height: 0.75em;
-        background-color: #38bdf8; /* sky-500 */
+        background-color: var(--accent-color);
         border-radius: 50%;
         transform: scale(0);
         transition: transform 0.15s ease-in-out;
@@ -948,7 +1040,7 @@
         transform: scale(0.98);
     }
     .thumb-item.active {
-        border-color: #38bdf8; /* sky-500 */
+        border-color: var(--accent-color);
     }
     .thumb-item img {
         width: 100%;
@@ -1581,7 +1673,7 @@
                         </h2>
                         <div id="luck-container" class="flex items-center justify-center h-28 transition-all duration-500 ease-in-out">
                             <div id="particle-container"></div>
-                            <button id="luck-button" class="bg-sky-500/80 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-full transform active:scale-90 whitespace-nowrap flex-shrink-0" style="transition: transform 0.15s ease-out;">
+                            <button id="luck-button" class="text-white font-bold py-2 px-6 rounded-full transform active:scale-90 whitespace-nowrap flex-shrink-0">
                                 开盲盒
                             </button>
 
@@ -1621,7 +1713,7 @@
 
                             <!-- [NEW] Developer Icon Placeholder -->
                             <div id="developer-icon-container">
-                                <div id="developer-icon" title="开发者选项" class="w-8 h-8 mx-auto cursor-pointer text-gray-400 hover:text-white transition-colors">
+                                <div id="developer-icon" title="开发者选项" class="w-8 h-8 mx-auto cursor-pointer">
                                     <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M64 160C64 124.7 92.7 96 128 96L512 96C547.3 96 576 124.7 576 160L576 400L512 400L512 160L128 160L128 400L64 400L64 160zM0 467.2C0 456.6 8.6 448 19.2 448L620.8 448C631.4 448 640 456.6 640 467.2C640 509.6 605.6 544 563.2 544L76.8 544C34.4 544 0 509.6 0 467.2zM281 273L250 304L281 335C290.4 344.4 290.4 359.6 281 368.9C271.6 378.2 256.4 378.3 247.1 368.9L199.1 320.9C189.7 311.5 189.7 296.3 199.1 287L247.1 239C256.5 229.6 271.7 229.6 281 239C290.3 248.4 290.4 263.6 281 272.9zM393 239L441 287C450.4 296.4 450.4 311.6 441 320.9L393 368.9C383.6 378.3 368.4 378.3 359.1 368.9C349.8 359.5 349.7 344.3 359.1 335L390.1 304L359.1 273C349.7 263.6 349.7 248.4 359.1 239.1C368.5 229.8 383.7 229.7 393 239.1z"/></svg>
                                 </div>
                             </div>
@@ -1738,6 +1830,24 @@
                             </div>
                         </div>
                     </div>
+                    <!-- [NEW] New Year Theme Toggle -->
+                    <div class="setting-section">
+                        <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);">
+                            <i class="fas fa-gifts fa-fw w-5 h-5 mr-2"></i>节日主题
+                        </h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center p-2">
+                                <div>
+                                    <span class="font-medium">强制开启新年主题</span>
+                                    <div class="setting-description">用于测试新年主题的背景和音乐</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="force-new-year-theme-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Future developer options will go here -->
                 </div>
             </div>
@@ -1757,6 +1867,12 @@
             <div id="immersive-greeting"></div>
         </div>
     </div>
+
+    <!-- [NEW] New Year Theme Audio & Controls -->
+    <audio id="new-year-audio" preload="auto" src="Wishing_you_prosperity_Liu_Dehua.mp3"></audio>
+    <button id="new-year-music-btn" title="静音/播放" class="hidden fixed bottom-5 right-5 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all duration-300 z-50">
+        <i class="fas fa-volume-mute"></i>
+    </button>
     
     <script>
         // --- 初始状态和常量 ---
@@ -2660,6 +2776,7 @@
             timeFormat: '24h', // '12h' or '24h'
             immersiveBlinkingColon: false,
             view: 'github', // 'github' or 'weather'
+    musicMuted: true, // [NEW] Mute state for New Year music
             weather: {
                 source: 'auto', // 'auto' or 'manual'
                 city: null, // User-overridden city
@@ -2671,9 +2788,120 @@
             },
             developer: {
                 masterSwitchEnabled: true, // Master switch for the entire feature
-                uiToggleState: true        // State of the toggle in the UI
+        uiToggleState: true,       // State of the toggle in the UI
+        forceNewYearTheme: false // [NEW] Developer toggle for New Year theme
+            },
+            newYearTheme: {
+                backgroundEnabled: true
             }
         };
+
+// --- [NEW] New Year Theme Logic ---
+function isNewYearPeriod() {
+    const today = new Date();
+    const lunarDate = new Dianaday(today);
+
+    // Case 1: It's the first lunar month, from day 1 to day 10.
+    if (lunarDate.month === 1 && lunarDate.day >= 1 && lunarDate.day <= 10) {
+        return true;
+    }
+
+    // Case 2: It's the last day of the 12th lunar month (New Year's Eve).
+    if (lunarDate.month === 12) {
+        const daysInLastMonth = monthDays(lunarDate.year, 12);
+        if (lunarDate.day === daysInLastMonth) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+let newYearMusicIntroPlayed = false;
+const NY_MUSIC_LOOP_START = 85.16; // 01:25:16
+const NY_MUSIC_LOOP_END = 173.20;   // 02:53:20
+
+function stopNewYearMusic() {
+    const audio = document.getElementById('new-year-audio');
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+}
+
+function updateMusicButtonIcon() {
+    const musicBtn = document.getElementById('new-year-music-btn');
+    if (!musicBtn) return;
+    const icon = musicBtn.querySelector('i');
+    if (appSettings.musicMuted) {
+        icon.classList.remove('fa-volume-up');
+        icon.classList.add('fa-volume-mute');
+    } else {
+        icon.classList.remove('fa-volume-mute');
+        icon.classList.add('fa-volume-up');
+    }
+}
+
+function handleNewYearMusic() {
+    const audio = document.getElementById('new-year-audio');
+    if (!audio) return;
+
+    audio.muted = appSettings.musicMuted;
+    updateMusicButtonIcon();
+
+    if (!appSettings.musicMuted) {
+        newYearMusicIntroPlayed = false; // Reset intro flag
+        audio.currentTime = 0;
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.error("新年音乐自动播放失败:", error);
+                // If autoplay fails, show a 'play' icon to prompt user interaction
+                const musicBtnIcon = document.querySelector('#new-year-music-btn i');
+                if(musicBtnIcon) {
+                    musicBtnIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
+                    musicBtnIcon.classList.add('fa-play');
+                }
+            });
+        }
+    } else {
+        stopNewYearMusic();
+    }
+}
+
+function applyNewYearMode() {
+    const body = document.body;
+    const musicBtn = document.getElementById('new-year-music-btn');
+
+    const isThemeAvailable = isNewYearPeriod() || appSettings.developer.forceNewYearTheme;
+    const isThemeEnabledByUser = appSettings.newYearTheme.backgroundEnabled;
+    const shouldBeActive = isThemeAvailable && isThemeEnabledByUser;
+
+    const isCurrentlyActive = body.classList.contains('new-year-active');
+
+    if (shouldBeActive) {
+        // --- Activate or Keep Active ---
+        musicBtn.classList.remove('hidden');
+        if (!isCurrentlyActive) {
+            // It needs to be turned ON
+            body.classList.add('new-year-active');
+            backgroundFader.update('new_year_bg.svg', true);
+            handleNewYearMusic();
+        }
+        // If it's already active, do nothing to prevent re-renders.
+    } else {
+        // --- Deactivate or Keep Inactive ---
+        musicBtn.classList.add('hidden');
+        stopNewYearMusic();
+        if (isCurrentlyActive) {
+            // It needs to be turned OFF
+            body.classList.remove('new-year-active');
+            applyCurrentBackground();
+        }
+        // If it's already inactive, do nothing.
+    }
+}
+
 
         const WEATHER_TIPS = {
             spring: {
@@ -3273,6 +3501,7 @@
                         background: { ...appSettings.background, ...(parsedSettings.background || {}) },
                         weather: { ...appSettings.weather, ...(parsedSettings.weather || {}) },
                         developer: { ...appSettings.developer, ...(parsedSettings.developer || {}) },
+                        newYearTheme: { ...appSettings.newYearTheme, ...(parsedSettings.newYearTheme || {}) },
                     };
 
                     // Backward compatibility: If old setting `view: 'weather'` exists, but new `weather.source` doesn't, default it.
@@ -3423,6 +3652,11 @@
         };
 
         async function applyCurrentBackground() {
+            // [FIX] Add a guard clause to prevent overriding the active New Year theme.
+            if (document.body.classList.contains('new-year-active') && appSettings.newYearTheme.backgroundEnabled) {
+                return; // Do nothing if the New Year background should be showing.
+            }
+
             const requestId = ++latestBgRequestId;
             const { source, specifier } = appSettings.background;
 
@@ -3707,7 +3941,21 @@
                     { value: 'custom', label: '自定义来源', description: '使用单个图片链接或公共图库API' } // 测试使用 https://www.loliapi.com/acg/
                 ];
 
-                let bgSettingsHTML = '';
+                let bgSettingsHTML = `
+                    <div id="new-year-bg-toggle-section" class="hidden">
+                        <div class="flex justify-between items-center p-2">
+                            <div>
+                                <span class="font-medium">启用新年节日背景</span>
+                                <div class="setting-description">关闭后将恢复您选择的常规背景</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="new-year-bg-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="border-t border-[var(--separator-color)] my-4"></div>
+                    </div>
+                `;
                 bgOptions.forEach(option => {
                     bgSettingsHTML += `
                         <div>
@@ -4046,8 +4294,13 @@
 
         function updateDeveloperSettingsUI() {
             const devToggle = document.getElementById('dev-options-toggle');
+            const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
+
             if (devToggle) {
                 devToggle.checked = appSettings.developer.uiToggleState;
+            }
+            if (forceNewYearToggle) {
+                forceNewYearToggle.checked = appSettings.developer.forceNewYearTheme;
             }
         }
 
@@ -4059,6 +4312,20 @@
             updateHitokotoSettingsUI();
             updateImmersiveBlinkUI();
             updateDeveloperSettingsUI();
+
+            // Logic for New Year background toggle
+            const newYearBgToggleSection = document.getElementById('new-year-bg-toggle-section');
+            const newYearBgToggle = document.getElementById('new-year-bg-toggle');
+            const shouldThemeBeActive = isNewYearPeriod() || appSettings.developer.forceNewYearTheme;
+
+            if (newYearBgToggleSection && newYearBgToggle) {
+                if (shouldThemeBeActive) {
+                    newYearBgToggleSection.classList.remove('hidden');
+                    newYearBgToggle.checked = appSettings.newYearTheme.backgroundEnabled;
+                } else {
+                    newYearBgToggleSection.classList.add('hidden');
+                }
+            }
         }
 
         // --- [NEW] View (GitHub/Weather) Management ---
@@ -5361,8 +5628,11 @@
 
             openSettingsBtn.addEventListener('click', openSettings);
             closeSettingsBtn.addEventListener('click', closeSettings);
+            settingsOverlay.addEventListener('click', (e) => {
+                if (e.target === settingsOverlay) closeSettings();
+            });
 
-                        document.addEventListener('keydown', (e) => {
+            document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     // Priority 0: Close immersive view
                     if (document.body.classList.contains('immersive-active')) {
@@ -5382,7 +5652,13 @@
                         return;
                     }
 
-                    // Priority 3: Close holiday list card if it's open
+                    // [USER FEEDBACK] Priority 3: Close "About" card if it's open
+                    if (!aboutCard.classList.contains('hidden')) {
+                        toggleAboutCard();
+                        return;
+                    }
+
+                    // Priority 4: Close holiday list card if it's open
                     if (!holidayListCard.classList.contains('hidden')) {
                         holidayListCard.classList.add('hidden');
                         rightColumn.classList.remove('hidden');
@@ -5390,7 +5666,7 @@
                         return;
                     }
 
-                    // Priority 4: Close time capsule card if it's open
+                    // Priority 5: Close time capsule card if it's open
                     if (!timeCapsuleCard.classList.contains('hidden')) {
                         timeCapsuleCard.classList.add('hidden');
                         rightColumn.classList.remove('hidden');
@@ -5455,11 +5731,6 @@
 
             if (developerIcon) developerIcon.addEventListener('click', openDeveloperSettings);
             if (closeDeveloperSettingsBtn) closeDeveloperSettingsBtn.addEventListener('click', closeDeveloperSettings);
-            if (developerSettingsOverlay) {
-                developerSettingsOverlay.addEventListener('click', (e) => {
-                    if (e.target === developerSettingsOverlay) closeDeveloperSettings();
-                });
-            }
 
             // [FIX] Remove the click animation class after it finishes to prevent re-playing on show/hide
             if (aboutCardLogo) {
@@ -6004,26 +6275,104 @@
                 });
             }
 
-            // --- [NEW] Developer Options Toggle Listener ---
+            // --- [REVISED] Developer Options Toggle Listener ---
             const devOptionsToggle = document.getElementById('dev-options-toggle');
             if (devOptionsToggle) {
                 devOptionsToggle.addEventListener('change', () => {
                     const isEnabled = devOptionsToggle.checked;
                     appSettings.developer.uiToggleState = isEnabled;
-                    saveSettings();
+                    const developerIconContainer = document.getElementById('developer-icon-container');
 
-                    if (!isEnabled) {
-                        // If the toggle is turned OFF, reset the unlocked state and hide the icon.
+                    if (isEnabled) {
+                        // When turned ON, just ensure the icon is marked as visible for the next time the 'About' panel is opened.
+                        // This fixes the bug where the icon would disappear.
+                        if (developerIconContainer) {
+                            developerIconContainer.classList.add('visible');
+                        }
+                    } else {
+                        // When turned OFF, perform all reset actions as requested.
+                        // 1. Reset sub-settings in the settings object.
+                        appSettings.developer.forceNewYearTheme = false;
+                        
+                        // 2. Update the UI of all sub-settings to reflect the change.
+                        const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
+                        if (forceNewYearToggle) {
+                            forceNewYearToggle.checked = false;
+                        }
+                        
+                        // 3. Apply changes triggered by settings reset (e.g., turn off NY theme).
+                        applyNewYearMode(); 
+                        
+                        // 4. Hide the developer icon in the 'About' panel.
+                        if (developerIconContainer) {
+                            developerIconContainer.classList.remove('visible');
+                        }
+
+                        // 5. Remove the unlock flag from localStorage to re-lock the feature.
                         try {
-                            localStorage.setItem('developerModeUnlocked', 'false');
-                            const developerIconContainer = document.getElementById('developer-icon-container');
-                            if (developerIconContainer) {
-                                developerIconContainer.classList.remove('visible');
-                            }
+                            localStorage.removeItem('developerModeUnlocked');
                         } catch (e) {
-                            console.error("Failed to update localStorage", e);
+                            console.error("Failed to remove from localStorage", e);
+                        }
+
+                        // 6. Close the developer settings window immediately.
+                        closeDeveloperSettings();
+                    }
+                    
+                    saveSettings(); // Save all settings changes.
+                });
+            }
+
+            // --- [NEW] New Year Theme Event Listeners ---
+            const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
+            if (forceNewYearToggle) {
+                forceNewYearToggle.addEventListener('change', () => {
+                    appSettings.developer.forceNewYearTheme = forceNewYearToggle.checked;
+                    saveSettings();
+                    applyNewYearMode();
+                });
+            }
+
+            const musicBtn = document.getElementById('new-year-music-btn');
+            if (musicBtn) {
+                musicBtn.addEventListener('click', () => {
+                    appSettings.musicMuted = !appSettings.musicMuted;
+                    saveSettings();
+                    const audio = document.getElementById('new-year-audio');
+                    if (audio) {
+                        audio.muted = appSettings.musicMuted;
+                        if (!appSettings.musicMuted && audio.paused) {
+                            audio.play().catch(e => console.error("Music play failed on manual unmute:", e));
                         }
                     }
+                    updateMusicButtonIcon();
+                });
+            }
+
+            const newYearAudio = document.getElementById('new-year-audio');
+            if (newYearAudio) {
+                newYearAudio.addEventListener('timeupdate', () => {
+                    if (newYearAudio.paused) return;
+
+                    if (!newYearMusicIntroPlayed) {
+                        if (newYearAudio.currentTime >= NY_MUSIC_LOOP_END) {
+                            newYearMusicIntroPlayed = true;
+                            newYearAudio.currentTime = NY_MUSIC_LOOP_START;
+                        }
+                    } else {
+                        if (newYearAudio.currentTime >= NY_MUSIC_LOOP_END) {
+                            newYearAudio.currentTime = NY_MUSIC_LOOP_START;
+                        }
+                    }
+                });
+            }
+
+            const newYearBgToggle = document.getElementById('new-year-bg-toggle');
+            if (newYearBgToggle) {
+                newYearBgToggle.addEventListener('change', () => {
+                    appSettings.newYearTheme.backgroundEnabled = newYearBgToggle.checked;
+                    saveSettings();
+                    applyNewYearMode(); // Re-evaluate the whole theme state
                 });
             }
         }
@@ -6064,6 +6413,7 @@
             applyCurrentBackground();
             applyCurrentView();
             updateSettingsUI();
+            applyNewYearMode(); // [NEW] Apply New Year theme on load
 
             // 3. Initial data fetches and updates.
             updateTime();
