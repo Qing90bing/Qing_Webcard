@@ -3653,7 +3653,10 @@ function applyNewYearMode() {
 
         async function applyCurrentBackground() {
             // [FIX] Add a guard clause to prevent overriding the active New Year theme.
-            if (document.body.classList.contains('new-year-active') && appSettings.newYearTheme.backgroundEnabled) {
+            // This check is now based on settings state, not DOM state, to avoid race conditions on page load.
+            const isThemeAvailable = isNewYearPeriod() || (appSettings.developer && appSettings.developer.forceNewYearTheme);
+            const isThemeEnabledByUser = appSettings.newYearTheme && appSettings.newYearTheme.backgroundEnabled;
+            if (isThemeAvailable && isThemeEnabledByUser) {
                 return; // Do nothing if the New Year background should be showing.
             }
 
