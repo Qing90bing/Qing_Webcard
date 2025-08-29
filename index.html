@@ -476,8 +476,18 @@
         border: none;
         padding: 0;
         cursor: pointer;
-        transition: transform 0.2s ease-in-out;
+        /* [MODIFIED] Add opacity, visibility and transform for smooth transition */
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.9);
+        transition: opacity 0.3s ease, visibility 0s linear 0.3s, transform 0.3s ease;
         /* position: fixed 由 Tailwind 的 'fixed' class 提供，它同样能为子元素创建定位上下文。 */
+    }
+    #new-year-music-btn.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+        transition-delay: 0s;
     }
     #new-year-music-btn:hover {
         transform: scale(1.1);
@@ -1833,6 +1843,17 @@
 
             </main>
         </div>
+        <!-- [NEW] New Year Theme Audio & Controls -->
+        <audio id="new-year-audio" preload="auto" src="Wishing_you_prosperity_Liu_Dehua.mp3"></audio>
+        <button id="new-year-music-btn" title="播放/暂停音乐" class="fixed bottom-4 right-4 w-16 h-16 z-50">
+            <div class="music-player-vinyl">
+                <img src="https://s21.ax1x.com/2025/08/30/pVckhWT.jpg" alt="Album Art" class="album-art">
+            </div>
+            <div class="vinyl-overlay">
+                <i class="fas fa-play icon-play"></i>
+                <i class="fas fa-pause icon-pause"></i>
+            </div>
+        </button>
     </div>
 
     <!-- Settings Modal -->
@@ -1963,18 +1984,6 @@
         </div>
     </div>
 
-    <!-- [NEW] New Year Theme Audio & Controls -->
-    <audio id="new-year-audio" preload="auto" src="Wishing_you_prosperity_Liu_Dehua.mp3"></audio>
-    <button id="new-year-music-btn" title="播放/暂停音乐" class="hidden fixed bottom-4 right-4 w-16 h-16 transition-transform duration-300 z-50">
-        <div class="music-player-vinyl">
-            <img src="https://s21.ax1x.com/2025/08/30/pVckhWT.jpg" alt="Album Art" class="album-art">
-        </div>
-        <div class="vinyl-overlay">
-            <i class="fas fa-play icon-play"></i>
-            <i class="fas fa-pause icon-pause"></i>
-        </div>
-    </button>
-    
     <script>
         // --- 初始状态和常量 ---
         const DEFAULT_BG_IMAGES = [
@@ -2942,7 +2951,7 @@ function applyNewYearMode() {
 
     if (shouldBeActive) {
         // --- Activate or Keep Active ---
-        musicBtn.classList.remove('hidden');
+        musicBtn.classList.add('visible'); // [MODIFIED] Use 'visible' class for transition
         musicBtn.classList.add('is-paused'); // Set initial state
         if (!isCurrentlyActive) {
             // It needs to be turned ON
@@ -2953,7 +2962,7 @@ function applyNewYearMode() {
         // If it's already active, do nothing to prevent re-renders.
     } else {
         // --- Deactivate or Keep Inactive ---
-        musicBtn.classList.add('hidden');
+        musicBtn.classList.remove('visible'); // [MODIFIED] Use 'visible' class for transition
         stopNewYearMusic();
         if (isCurrentlyActive) {
             // It needs to be turned OFF
