@@ -470,11 +470,106 @@
         background-color: var(--accent-color); /* Use the theme's accent color for 'on' state */
     }
     
-    #new-year-music-btn.spin i {
-        animation: spin 1.5s linear infinite;
+    /* --- [REVISED] Vinyl Music Player Styles --- */
+    #new-year-music-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out;
+        /* position: fixed 由 Tailwind 的 'fixed' class 提供，它同样能为子元素创建定位上下文。 */
+    }
+    #new-year-music-btn:hover {
+        transform: scale(1.1);
     }
     #new-year-music-btn:active {
-        transform: scale(0.9);
+         transform: scale(1.05);
+         transition-duration: 0.1s;
+    }
+
+    .music-player-vinyl {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: #111;
+        background-image: repeating-radial-gradient(circle at center, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        /* [FIX] 直接应用动画，并将其初始状态设置为暂停 */
+        animation: spin 4s linear infinite;
+        animation-play-state: paused;
+    }
+    
+    /* Vinyl Highlight Effect */
+    .music-player-vinyl::after {
+        content: '';
+        position: absolute;
+        top: -10%;
+        left: -10%;
+        width: 120%;
+        height: 120%;
+        background: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%);
+        transform: rotate(-30deg);
+        pointer-events: none;
+    }
+
+    /* [FIX] 使用 animation-play-state 来控制旋转，而不是添加/移除整个动画 */
+    #new-year-music-btn.is-playing .music-player-vinyl {
+        animation-play-state: running;
+    }
+
+    .album-art {
+        width: 60%; /* Resized */
+        height: 60%; /* Resized */
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    }
+
+    .vinyl-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem; /* 20px, 进一步缩小图标以获得更精致的外观 */
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        pointer-events: none; /* Let clicks pass through to the button */
+    }
+
+    #new-year-music-btn:hover .vinyl-overlay,
+    #new-year-music-btn.is-paused .vinyl-overlay {
+        opacity: 1;
+    }
+    
+    /* Icon Styles & Transition */
+    .vinyl-overlay .icon-play,
+    .vinyl-overlay .icon-pause {
+        position: absolute;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        transform: scale(0.8);
+    }
+
+    #new-year-music-btn.is-paused .icon-play {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    #new-year-music-btn.is-playing .icon-pause {
+        opacity: 1;
+        transform: scale(1);
     }
 
     @media (max-width: 1023px) {
@@ -1870,8 +1965,14 @@
 
     <!-- [NEW] New Year Theme Audio & Controls -->
     <audio id="new-year-audio" preload="auto" src="Wishing_you_prosperity_Liu_Dehua.mp3"></audio>
-    <button id="new-year-music-btn" title="静音/播放" class="hidden fixed bottom-5 right-5 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all duration-300 z-50">
-        <i class="fas fa-volume-mute"></i>
+    <button id="new-year-music-btn" title="播放/暂停音乐" class="hidden fixed bottom-4 right-4 w-16 h-16 transition-transform duration-300 z-50">
+        <div class="music-player-vinyl">
+            <img src="https://s21.ax1x.com/2025/08/30/pVckhWT.jpg" alt="Album Art" class="album-art">
+        </div>
+        <div class="vinyl-overlay">
+            <i class="fas fa-play icon-play"></i>
+            <i class="fas fa-pause icon-pause"></i>
+        </div>
     </button>
     
     <script>
@@ -2776,7 +2877,6 @@
             timeFormat: '24h', // '12h' or '24h'
             immersiveBlinkingColon: false,
             view: 'github', // 'github' or 'weather'
-    musicMuted: true, // [NEW] Mute state for New Year music
             weather: {
                 source: 'auto', // 'auto' or 'manual'
                 city: null, // User-overridden city
@@ -2829,45 +2929,6 @@ function stopNewYearMusic() {
     }
 }
 
-function updateMusicButtonIcon() {
-    const musicBtn = document.getElementById('new-year-music-btn');
-    if (!musicBtn) return;
-    const icon = musicBtn.querySelector('i');
-    if (appSettings.musicMuted) {
-        icon.classList.remove('fa-volume-up');
-        icon.classList.add('fa-volume-mute');
-    } else {
-        icon.classList.remove('fa-volume-mute');
-        icon.classList.add('fa-volume-up');
-    }
-}
-
-function handleNewYearMusic() {
-    const audio = document.getElementById('new-year-audio');
-    if (!audio) return;
-
-    audio.muted = appSettings.musicMuted;
-    updateMusicButtonIcon();
-
-    if (!appSettings.musicMuted) {
-        newYearMusicIntroPlayed = false; // Reset intro flag
-        audio.currentTime = 0;
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.error("新年音乐自动播放失败:", error);
-                // If autoplay fails, show a 'play' icon to prompt user interaction
-                const musicBtnIcon = document.querySelector('#new-year-music-btn i');
-                if(musicBtnIcon) {
-                    musicBtnIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
-                    musicBtnIcon.classList.add('fa-play');
-                }
-            });
-        }
-    } else {
-        stopNewYearMusic();
-    }
-}
 
 function applyNewYearMode() {
     const body = document.body;
@@ -2882,11 +2943,12 @@ function applyNewYearMode() {
     if (shouldBeActive) {
         // --- Activate or Keep Active ---
         musicBtn.classList.remove('hidden');
+        musicBtn.classList.add('is-paused'); // Set initial state
         if (!isCurrentlyActive) {
             // It needs to be turned ON
             body.classList.add('new-year-active');
             backgroundFader.update('new_year_bg.svg', true);
-            handleNewYearMusic();
+            // Music is not auto-played, user must click.
         }
         // If it's already active, do nothing to prevent re-renders.
     } else {
@@ -6338,18 +6400,27 @@ function applyNewYearMode() {
 
             const musicBtn = document.getElementById('new-year-music-btn');
             if (musicBtn) {
+                const audio = document.getElementById('new-year-audio');
+
                 musicBtn.addEventListener('click', () => {
-                    appSettings.musicMuted = !appSettings.musicMuted;
-                    saveSettings();
-                    const audio = document.getElementById('new-year-audio');
-                    if (audio) {
-                        audio.muted = appSettings.musicMuted;
-                        if (!appSettings.musicMuted && audio.paused) {
-                            audio.play().catch(e => console.error("Music play failed on manual unmute:", e));
-                        }
+                    if (!audio) return;
+                    if (audio.paused) {
+                        audio.play().catch(e => console.error("Music play failed on click:", e));
+                    } else {
+                        audio.pause();
                     }
-                    updateMusicButtonIcon();
                 });
+
+                if (audio) {
+                    audio.addEventListener('play', () => {
+                        musicBtn.classList.add('is-playing');
+                        musicBtn.classList.remove('is-paused');
+                    });
+                    audio.addEventListener('pause', () => {
+                        musicBtn.classList.remove('is-playing');
+                        musicBtn.classList.add('is-paused');
+                    });
+                }
             }
 
             const newYearAudio = document.getElementById('new-year-audio');
