@@ -1644,7 +1644,7 @@
         transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
         pointer-events: none; /* Prevent interaction when hidden */
     }
-    #blur-setting-container.disabled #blur-slider-overlay {
+    body.settings-open #blur-setting-container.disabled #blur-slider-overlay {
         opacity: 1;
         visibility: visible;
         pointer-events: auto; /* Allow interaction when visible */
@@ -1662,7 +1662,7 @@
         transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
         pointer-events: none; /* Prevent interaction when hidden */
     }
-    #main-background-settings-wrapper.disabled #background-settings-overlay {
+    body.settings-open #main-background-settings-wrapper.disabled #background-settings-overlay {
         opacity: 1;
         visibility: visible;
         pointer-events: auto; /* Allow interaction when visible */
@@ -5953,10 +5953,21 @@ function applyNewYearMode() {
                 updateSettingsUI(); // Refresh UI to match saved settings
                 const settingsWindow = document.getElementById('settings-window');
                 
-                // [REMOVED] The problematic height calculation is gone.
-                // The height is now controlled by CSS for consistency.
+                // [FIX] Temporarily disable transitions on overlays to prevent animation on panel open
+                const overlay1 = document.getElementById('background-settings-overlay');
+                const overlay2 = document.getElementById('blur-slider-overlay');
+
+                if (overlay1) overlay1.style.transition = 'none';
+                if (overlay2) overlay2.style.transition = 'none';
 
                 document.body.classList.add('settings-open');
+                
+                // Restore transitions after the panel has appeared.
+                setTimeout(() => {
+                    if (overlay1) overlay1.style.transition = '';
+                    if (overlay2) overlay2.style.transition = '';
+                }, 300);
+
 
                 // Initialize SimpleBar on the content area if it hasn't been already
                 if (!settingsSimpleBar) {
