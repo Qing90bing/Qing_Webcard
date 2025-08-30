@@ -1650,6 +1650,24 @@
         pointer-events: auto; /* Allow interaction when visible */
         transition-delay: 0s;
     }
+
+    /* --- [NEW] Background Settings Disabled State --- */
+    #main-background-settings-wrapper.disabled #main-background-settings-content {
+        filter: blur(4px);
+        pointer-events: none;
+    }
+    #background-settings-overlay {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+        pointer-events: none; /* Prevent interaction when hidden */
+    }
+    #main-background-settings-wrapper.disabled #background-settings-overlay {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto; /* Allow interaction when visible */
+        transition-delay: 0s;
+    }
     </style>
 </head>
 <body>
@@ -3105,6 +3123,11 @@ function applyNewYearMode() {
 
     const isCurrentlyActive = body.classList.contains('new-year-active');
 
+    const bgSettingsWrapper = document.getElementById('main-background-settings-wrapper');
+    if (bgSettingsWrapper) {
+        bgSettingsWrapper.classList.toggle('disabled', shouldBeActive);
+    }
+
     if (shouldBeActive) {
         // --- Activate or Keep Active ---
         musicBtn.classList.add('visible'); // [MODIFIED] Use 'visible' class for transition
@@ -4172,7 +4195,7 @@ function applyNewYearMode() {
                     { value: 'custom', label: '自定义来源', description: '使用单个图片链接或公共图库API' } // 测试使用 https://www.loliapi.com/acg/
                 ];
 
-                let bgSettingsHTML = `
+                const newYearToggleHTML = `
                     <div id="new-year-bg-toggle-section" class="hidden">
                         <div class="flex justify-between items-center p-2">
                             <div>
@@ -4187,8 +4210,13 @@ function applyNewYearMode() {
                         <div class="border-t border-[var(--separator-color)] my-4"></div>
                     </div>
                 `;
+
+                let mainBgSettingsHTML = `<div id="main-background-settings-wrapper" class="relative">`;
+                mainBgSettingsHTML += `<div id="main-background-settings-content">`;
+
+                let radioOptionsHTML = '';
                 bgOptions.forEach(option => {
-                    bgSettingsHTML += `
+                    radioOptionsHTML += `
                         <div>
                             <input type="radio" id="bg-radio-${option.value}" name="background-source" value="${option.value}" class="setting-radio-input">
                             <label for="bg-radio-${option.value}" class="setting-radio-label">
@@ -4202,7 +4230,6 @@ function applyNewYearMode() {
                     `;
                 });
 
-                // --- [NEW] Custom Background Input Area ---
                 const customBgInputHTML = `
                     <div id="custom-bg-input-wrapper" class="pl-2 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
                         <div class="relative flex items-center">
@@ -4239,9 +4266,6 @@ function applyNewYearMode() {
                 });
                 defaultOptionsHTML += `</div></div>`;
 
-                bgSettingsContainer.innerHTML = bgSettingsHTML + customBgInputHTML + defaultOptionsHTML;
-
-                // --- [NEW] Add background preview area ---
                 const previewHTML = `
                     <div id="background-preview-container">
                         <div id="bg-preview-wrapper" class="relative w-full aspect-[16/9] rounded-lg overflow-hidden bg-white/5 transition-all duration-300 ease-in-out">
@@ -4262,7 +4286,20 @@ function applyNewYearMode() {
                         </div>
                     </div>
                 `;
-                bgSettingsContainer.insertAdjacentHTML('beforeend', previewHTML);
+                
+                mainBgSettingsHTML += radioOptionsHTML + customBgInputHTML + defaultOptionsHTML + previewHTML;
+                mainBgSettingsHTML += `</div>`; // closes main-background-settings-content
+
+                mainBgSettingsHTML += `
+                    <div id="background-settings-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-sm font-bold cursor-not-allowed p-4 text-center">
+                        <i class="fas fa-lock mr-2"></i>
+                        <span>春节主题已激活，如要使用背景功能请关闭春节主题</span>
+                    </div>
+                `;
+
+                mainBgSettingsHTML += `</div>`; // closes main-background-settings-wrapper
+                
+                bgSettingsContainer.innerHTML = newYearToggleHTML + mainBgSettingsHTML;
             }
 
             // --- 2. Theme Mode Settings ---
