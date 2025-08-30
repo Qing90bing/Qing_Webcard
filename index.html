@@ -91,6 +91,46 @@
             box-shadow: 0 0 0 3px var(--accent-color);
         }
 
+        /* --- [NEW] Custom Selection Styles --- */
+        ::selection {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* --- [NEW] Custom Tooltip Styles --- */
+        .tooltip-container {
+            position: relative;
+        }
+
+        .tooltip-container::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 110%; /* Position above the element */
+            left: 50%;
+            transform: translateX(-50%);
+            
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 7px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+
+        .tooltip-container:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
         /* 背景图片容器 */
         #bg-wrapper {
             position: fixed;
@@ -1739,10 +1779,10 @@
                         <div class="mt-8">
                             <p class="text-sm " style="color: var(--text-color-secondary);">与我联系:</p>
                             <div class="flex items-center gap-2">
-                                <a href="https://github.com/Qing90bing" target="_blank" title="GitHub" class="p-2 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+<a href="https://github.com/Qing90bing" target="_blank" data-tooltip="GitHub" class="tooltip-container p-2 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                     <i class="fa-brands fa-github fa-xl"></i>
                                 </a>
-                                <a href="mailto:1879495519@qq.com" target="_blank" title="Email" class="p-2 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+<a href="mailto:1879495519@qq.com" target="_blank" data-tooltip="Email" class="tooltip-container p-2 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                     <i class="fa-solid fa-envelope fa-xl"></i>
                                 </a>
                             </div>
@@ -1792,7 +1832,7 @@
                                  <h2 class="text-xl font-semibold mb-3" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Pro v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--><path d="M32 400C32 479.5 96.5 544 176 544L480 544C550.7 544 608 486.7 608 416C608 364.4 577.5 319.9 533.5 299.7C540.2 286.6 544 271.7 544 256C544 203 501 160 448 160C430.3 160 413.8 164.8 399.6 173.1C375.5 127.3 327.4 96 272 96C192.5 96 128 160.5 128 240C128 248 128.7 255.9 129.9 263.5C73 282.7 32 336.6 32 400z"/></svg>天气信息</h2>
                                  <div id="weather-content-wrapper" class="w-full rounded-md p-4 relative min-h-[140px]" style="background-color: var(--progress-bar-bg);">
                                     <div class="weather-hover-zone absolute top-0 left-0 w-1/2 h-full z-10"></div>
-                                    <button id="weather-refresh-btn" title="手动刷新" class="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-white/60 hover:text-white icon-btn transition-all duration-200 active:scale-90 z-20 opacity-0 invisible"><i class="fas fa-sync-alt"></i></button>
+                                    <button id="weather-refresh-btn" data-tooltip="手动刷新" class="tooltip-container absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-white/60 hover:text-white icon-btn transition-all duration-200 active:scale-90 z-20 opacity-0 invisible"><i class="fas fa-sync-alt"></i></button>
                                     <div id="weather-loader"></div>
                                     <div id="weather-data-container">
                                         <!-- Weather content will be injected here -->
@@ -1837,8 +1877,8 @@
                     <div class="flex justify-between items-center">
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);"><svg fill="currentColor" class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm128 0v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H336zM64 400v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H208zm112 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H336c-8.8 0-16 7.2-16 16z"/></svg>节日倒数列表</h2>
                         <div class="flex items-center gap-3">
-                            <button id="back-to-today-btn" title="回到今天" class="w-8 h-8 rounded-full transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
-                            <button id="close-holiday-list" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="back-to-today-btn" data-tooltip="回到今天" class="tooltip-container w-8 h-8 rounded-full transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
+                            <button id="close-holiday-list" data-tooltip="关闭" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -1846,21 +1886,21 @@
                     <div class="flex justify-center items-center h-8 relative">
                         <!-- Display Mode -->
                         <div id="year-display-controls" class="flex items-center gap-4 text-lg">
-                            <button id="prev-year" title="上一年" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="prev-year" data-tooltip="上一年" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
                             <span id="holiday-list-year" class="font-bold w-16 text-center cursor-pointer" style="color: var(--text-color-primary);"></span>
-                            <button id="next-year" title="下一年" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="next-year" data-tooltip="下一年" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
                         <!-- Edit Mode -->
                         <div id="year-edit-controls" class="hidden flex items-center gap-2 text-lg">
                             <input type="text" id="year-input" class="font-bold w-20 text-center rounded-md border focus:ring-0 px-1 py-0.5 text-lg" style="background-color: var(--card-bg-color); color: var(--text-color-primary); border-color: var(--separator-color); outline: none;">
-                            <button id="confirm-year-btn" title="确认" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--status-today);">
+                            <button id="confirm-year-btn" data-tooltip="确认" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--status-today);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             </button>
-                            <button id="cancel-year-btn" title="取消" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: #ef4444;">
+                            <button id="cancel-year-btn" data-tooltip="取消" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: #ef4444;">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -1883,10 +1923,10 @@
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);"><svg fill="currentColor" class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M0 32C0 14.3 14.3 0 32 0H64 320h32c17.7 0 32 14.3 32 32s-14.3 32-32 32V75c0 42.4-16.9 83.1-46.9 113.1L237.3 256l67.9 67.9c30 30 46.9 70.7 46.9 113.1v11c17.7 0 32 14.3 32 32s-14.3 32-32 32H320 64 32c-17.7 0-32-14.3-32-32s14.3-32 32-32V437c0-42.4 16.9-83.1 46.9-113.1L146.7 256 78.9 188.1C48.9 158.1 32 117.4 32 75V64C14.3 64 0 49.7 0 32zM96 64V75c0 25.5 10.1 49.9 28.1 67.9L192 210.7l67.9-67.9c18-18 28.1-42.4 28.1-67.9V64H96zm0 384H288V437c0-25.5-10.1-49.9-28.1-67.9L192 301.3l-67.9 67.9c-18 18-28.1 42.4-28.1 67.9v11z"/></svg>时光胶囊</h2>
                         <div class="flex items-center gap-4">
-                            <button id="open-settings-btn" title="设置" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="open-settings-btn" data-tooltip="设置" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <i class="fas fa-gear fa-lg w-6 h-6 flex items-center justify-center"></i>
                             </button>
-                            <button id="close-time-capsule" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                            <button id="close-time-capsule" data-tooltip="关闭" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -1963,7 +2003,7 @@
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);">
                             <i class="fas fa-info-circle inline-block w-6 h-6 mr-2 -mt-1"></i>关于
                         </h2>
-                        <button id="close-about-card" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                        <button id="close-about-card" data-tooltip="关闭" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
@@ -1981,7 +2021,7 @@
 
                             <!-- [NEW] Developer Icon Placeholder -->
                             <div id="developer-icon-container">
-                                <div id="developer-icon" title="开发者选项" class="w-8 h-8 mx-auto cursor-pointer">
+                                <div id="developer-icon" data-tooltip="开发者选项" class="tooltip-container w-8 h-8 mx-auto cursor-pointer">
                                     <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M64 160C64 124.7 92.7 96 128 96L512 96C547.3 96 576 124.7 576 160L576 400L512 400L512 160L128 160L128 400L64 400L64 160zM0 467.2C0 456.6 8.6 448 19.2 448L620.8 448C631.4 448 640 456.6 640 467.2C640 509.6 605.6 544 563.2 544L76.8 544C34.4 544 0 509.6 0 467.2zM281 273L250 304L281 335C290.4 344.4 290.4 359.6 281 368.9C271.6 378.2 256.4 378.3 247.1 368.9L199.1 320.9C189.7 311.5 189.7 296.3 199.1 287L247.1 239C256.5 229.6 271.7 229.6 281 239C290.3 248.4 290.4 263.6 281 272.9zM393 239L441 287C450.4 296.4 450.4 311.6 441 320.9L393 368.9C383.6 378.3 368.4 378.3 359.1 368.9C349.8 359.5 349.7 344.3 359.1 335L390.1 304L359.1 273C349.7 263.6 349.7 248.4 359.1 239.1C368.5 229.8 383.7 229.7 393 239.1z"/></svg>
                                 </div>
                             </div>
@@ -1993,7 +2033,7 @@
                                 <h3 class="text-lg font-semibold flex items-center" style="color: var(--text-color-primary);">
                                     <i class="fas fa-history mr-2"></i>更新日志
                                 </h3>
-                                <button id="refresh-commits-btn" title="刷新" class="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-color-secondary)] hover:text-[var(--text-color-primary)] transition-colors duration-200">
+                                <button id="refresh-commits-btn" data-tooltip="刷新" class="tooltip-container w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-color-secondary)] hover:text-[var(--text-color-primary)] transition-colors duration-200">
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
                             </div>
@@ -2008,7 +2048,7 @@
         </div>
         <!-- [NEW] New Year Theme Audio & Controls -->
         <audio id="new-year-audio" preload="auto" src="Wishing_you_prosperity_Liu_Dehua.mp3"></audio>
-        <button id="new-year-music-btn" title="播放/暂停音乐" class="fixed bottom-4 right-4 w-16 h-16 z-50">
+        <button id="new-year-music-btn" data-tooltip="播放/暂停音乐" class="tooltip-container fixed bottom-4 right-4 w-16 h-16 z-50">
             <div class="music-player-vinyl">
                 <img src="https://s21.ax1x.com/2025/08/30/pVckhWT.jpg" alt="Album Art" class="album-art">
             </div>
@@ -2025,7 +2065,7 @@
             <!-- Header -->
             <div class="flex justify-between items-center ">
                 <h2 class="text-xl font-semibold flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg>设置</h2>
-                <button id="close-settings-btn" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                <button id="close-settings-btn" data-tooltip="关闭" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                     <i class="fas fa-times fa-lg w-6 h-6 flex items-center justify-center"></i>
                 </button>
             </div>
@@ -2147,7 +2187,7 @@
                     <svg fill="currentColor" class="inline-block w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M64 160C64 124.7 92.7 96 128 96L512 96C547.3 96 576 124.7 576 160L576 400L512 400L512 160L128 160L128 400L64 400L64 160zM0 467.2C0 456.6 8.6 448 19.2 448L620.8 448C631.4 448 640 456.6 640 467.2C640 509.6 605.6 544 563.2 544L76.8 544C34.4 544 0 509.6 0 467.2zM281 273L250 304L281 335C290.4 344.4 290.4 359.6 281 368.9C271.6 378.2 256.4 378.3 247.1 368.9L199.1 320.9C189.7 311.5 189.7 296.3 199.1 287L247.1 239C256.5 229.6 271.7 229.6 281 239C290.3 248.4 290.4 263.6 281 272.9zM393 239L441 287C450.4 296.4 450.4 311.6 441 320.9L393 368.9C383.6 378.3 368.4 378.3 359.1 368.9C349.8 359.5 349.7 344.3 359.1 335L390.1 304L359.1 273C349.7 263.6 349.7 248.4 359.1 239.1C368.5 229.8 383.7 229.7 393 239.1z"/></svg>
                     开发者选项
                 </h2>
-                <button id="close-developer-settings-btn" title="关闭" class="p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
+                <button id="close-developer-settings-btn" data-tooltip="关闭" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                     <i class="fas fa-times fa-lg w-6 h-6 flex items-center justify-center"></i>
                 </button>
             </div>
@@ -4330,10 +4370,10 @@ function applyNewYearMode() {
                             <input type="text" id="custom-bg-input" placeholder="输入图片或API链接" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); color: var(--text-color-primary); border-color: var(--separator-color); padding-right: 5.5rem;">
                             <div class="absolute right-1 flex items-center justify-end h-full w-14">
                                 <div id="custom-bg-btn-group" class="flex items-center space-x-1">
-                                    <button id="clear-custom-bg-btn" title="清空" class="p-1 rounded-full text-gray-400 hover:text-white transition-all relative w-8 h-8">
+                                    <button id="clear-custom-bg-btn" data-tooltip="清空" class="tooltip-container p-1 rounded-full text-gray-400 hover:text-white transition-all relative w-8 h-8">
                                         <i class="fas fa-times w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></i>
                                     </button>
-                                    <button id="save-custom-bg-btn" title="保存" class="p-1 rounded-full text-gray-400 hover:text-white transition-all relative w-8 h-8">
+                                    <button id="save-custom-bg-btn" data-tooltip="保存" class="tooltip-container p-1 rounded-full text-gray-400 hover:text-white transition-all relative w-8 h-8">
                                         <i class="fas fa-save w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 opacity-100 flex items-center justify-center"></i>
                                         <i class="fas fa-check w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 opacity-0 flex items-center justify-center" style="color: var(--status-today);"></i>
                                     </button>
@@ -4371,10 +4411,10 @@ function applyNewYearMode() {
                                     <p class="mt-1 text-sm">请点击预览画面重试</p>
                                 </div>
                             </div>
-                            <a id="bg-preview-download-btn" href="#" download="background.jpg" title="保存该图片" class="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
+                            <a id="bg-preview-download-btn" href="#" download="background.jpg" data-tooltip="保存该图片" class="tooltip-container absolute bottom-2 right-2 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
                                 <i class="fas fa-download"></i>
                             </a>
-                            <button id="bg-preview-refresh-btn" title="换一张" class="absolute bottom-2 right-12 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
+                            <button id="bg-preview-refresh-btn" data-tooltip="换一张" class="tooltip-container absolute bottom-2 right-12 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
                                 <i class="fas fa-sync-alt"></i>
                             </button>
                         </div>
@@ -4489,7 +4529,7 @@ function applyNewYearMode() {
                     <div id="manual-city-input-wrapper" class="mt-2 pl-2 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
                         <div class="relative flex items-center">
                             <input type="text" id="weather-city-input" placeholder="输入城市后回车 (例如: 北京)" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); color: var(--text-color-primary); border-color: var(--separator-color);">
-                            <button id="save-city-btn" title="保存" class="absolute right-1 p-1 rounded-full text-gray-400 hover:text-white">
+                            <button id="save-city-btn" data-tooltip="保存" class="tooltip-container absolute right-1 p-1 rounded-full text-gray-400 hover:text-white">
                                 <i class="fas fa-save w-5 h-5 flex items-center justify-center"></i>
                             </button>
                             <div id="confirm-city-icon" class="absolute right-1 p-1 hidden opacity-0" style="color: var(--status-today);">
@@ -4568,7 +4608,7 @@ function applyNewYearMode() {
                                     </div>
                                 </div>
                                 <div class="flex-shrink-0">
-                                    <button id="hitokoto-save-btn" title="保存" class="p-2 rounded-full icon-btn transition-all active:scale-95 relative w-9 h-9">
+                                    <button id="hitokoto-save-btn" data-tooltip="保存" class="tooltip-container p-2 rounded-full icon-btn transition-all active:scale-95 relative w-9 h-9">
                                         <i class="fas fa-save fa-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300"></i>
                                         <div id="hitokoto-confirm-icon" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-300" style="color: var(--status-today);">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -5657,7 +5697,7 @@ function applyNewYearMode() {
                             `;
 
                             if (avatarUrl) {
-                                authorHTML += `<img src="${avatarUrl}" class="w-4 h-4 rounded-full mr-2 commit-avatar" alt="${authorName}'s avatar" title="${authorName}" onload="this.classList.add('loaded')">`;
+                                authorHTML += `<img src="${avatarUrl}" class="tooltip-container w-4 h-4 rounded-full mr-2 commit-avatar" alt="${authorName}'s avatar" data-tooltip="${authorName}" onload="this.classList.add('loaded')">`;
                             }
                             
                             authorHTML += `<span>${authorName}</span>`;
@@ -5666,7 +5706,7 @@ function applyNewYearMode() {
 
                             commitsHTML += `
                                 <a href="${url}" target="_blank" class="block p-2 rounded-lg themed-hover-bg transition-colors duration-200">
-                                    <p class="font-semibold commit-message-text" style="color: var(--text-color-primary);" title="${message}">${message}</p>
+                                    <p class="tooltip-container font-semibold commit-message-text" style="color: var(--text-color-primary);" data-tooltip="${message}">${message}</p>
                                     <div class="text-xs mt-1 flex justify-between items-center" style="color: var(--text-color-tertiary);">
                                         ${authorHTML}
                                         <span>${timeAgo}</span>
