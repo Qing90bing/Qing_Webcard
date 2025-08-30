@@ -371,6 +371,46 @@
             opacity: 1;
         }
 
+        /* --- [NEW] Reset Confirmation Modal States --- */
+        body.reset-confirm-open #settings-window {
+            /* Keep the settings window visible but slightly blurred/scaled back */
+            filter: blur(4px);
+            transform: scale(0.98);
+            transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+        }
+        #reset-confirm-overlay {
+            /* Transitions are handled by Tailwind's hidden class and the rules below */
+        }
+        body.reset-confirm-open #reset-confirm-overlay {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0s;
+        }
+        #reset-confirm-window {
+            /* This is the modal panel itself */
+            transform: scale(0.95);
+            opacity: 0;
+            height: 220px; /* [FIX] Set fixed height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* [FIX] Combine transitions to include hover effects from .glass-card */
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease-in-out;
+        }
+
+        #reset-confirm-state, #reset-success-state {
+            transition: opacity 0.2s ease-in-out;
+        }
+        body.reset-confirm-open #reset-confirm-window {
+            transform: scale(1);
+            opacity: 1;
+        }
+        /* Remove the bounce-in animation from the base class if it was applied, as we use transitions now */
+        #reset-confirm-window.bounce-in {
+            animation: none;
+        }
+
+
     /* --- [NEW] Immersive Time View --- */
     #immersive-time-view {
         position: fixed;
@@ -2077,6 +2117,22 @@
                             <!-- Hitokoto settings will be dynamically inserted here -->
                         </div>
                     </div>
+
+                    <!-- [NEW] Reset Settings Section -->
+                    <div class="setting-section">
+                        <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><i class="fas fa-undo fa-fw w-5 h-5 mr-2"></i>重置</h3>
+                        <div class="p-2">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="font-medium">重置所有设置</span>
+                                    <div class="setting-description">将所有自定义设置恢复为出厂默认值。此操作不可撤销。</div>
+                                </div>
+                                <button id="reset-settings-btn" class="px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-200 bg-red-600 hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800">
+                                    重置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2135,6 +2191,34 @@
                     </div>
                     <!-- Future developer options will go here -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [NEW] Reset Confirmation Modal -->
+    <div id="reset-confirm-overlay" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 hidden" style="z-index: 70;">
+        <div id="reset-confirm-window" class="glass-card w-full max-w-md p-6 flex flex-col">
+            <!-- State 1: Confirmation -->
+            <div id="reset-confirm-state">
+                <h2 class="text-xl font-semibold flex items-center" style="color: var(--text-color-primary);">
+                    <i class="fas fa-exclamation-triangle fa-fw w-5 h-5 mr-2 text-amber-400"></i>确认重置？
+                </h2>
+                <p class="text-base my-4" style="color: var(--text-color-secondary);">
+                    此操作将清除所有本地保存的设置并恢复为默认值。该过程**不可逆**，您确定要继续吗？
+                </p>
+                <div class="flex justify-end gap-4 mt-4">
+                    <button id="cancel-reset-btn" class="px-4 py-2 rounded-lg font-semibold transition-colors duration-200 bg-gray-500/20 hover:bg-gray-500/40">取消</button>
+                    <button id="confirm-reset-btn" class="px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-200 bg-red-600 hover:bg-red-700">确认重置</button>
+                </div>
+            </div>
+            <!-- State 2: Success Message -->
+            <div id="reset-success-state" class="hidden text-center">
+                <h2 class="text-xl font-semibold flex items-center justify-center" style="color: var(--text-color-primary);">
+                    <i class="fas fa-check-circle fa-fw w-5 h-5 mr-2 text-green-400"></i>重置成功！
+                </h2>
+                <p class="text-base my-4" style="color: var(--text-color-secondary);">
+                    页面即将自动刷新...
+                </p>
             </div>
         </div>
     </div>
@@ -6763,6 +6847,89 @@ function applyNewYearMode() {
                     appSettings.newYearTheme.backgroundEnabled = newYearBgToggle.checked;
                     saveSettings();
                     applyNewYearMode(); // Re-evaluate the whole theme state
+                });
+            }
+
+            // --- [NEW] Reset Settings Logic ---
+            const resetSettingsBtn = document.getElementById('reset-settings-btn');
+            const resetConfirmOverlay = document.getElementById('reset-confirm-overlay');
+            const cancelResetBtn = document.getElementById('cancel-reset-btn');
+            const confirmResetBtn = document.getElementById('confirm-reset-btn');
+            const resetConfirmState = document.getElementById('reset-confirm-state');
+            const resetSuccessState = document.getElementById('reset-success-state');
+
+            const openResetModal = () => {
+                // Ensure the modal is in the correct initial state when opening
+                resetConfirmState.classList.remove('hidden');
+                resetSuccessState.classList.add('hidden');
+                if(confirmResetBtn) confirmResetBtn.disabled = false;
+                if(cancelResetBtn) cancelResetBtn.disabled = false;
+
+                if (resetConfirmOverlay) {
+                    resetConfirmOverlay.classList.remove('hidden');
+                    setTimeout(() => {
+                        document.body.classList.add('reset-confirm-open');
+                    }, 10); 
+                }
+            };
+
+            const closeResetModal = () => {
+                document.body.classList.remove('reset-confirm-open');
+            };
+            
+            if (resetConfirmOverlay) {
+                resetConfirmOverlay.addEventListener('transitionend', (event) => {
+                    if (event.propertyName === 'opacity' && !document.body.classList.contains('reset-confirm-open')) {
+                        resetConfirmOverlay.classList.add('hidden');
+                    }
+                });
+            }
+
+            if (resetSettingsBtn) {
+                resetSettingsBtn.addEventListener('click', openResetModal);
+            }
+            if (cancelResetBtn) {
+                cancelResetBtn.addEventListener('click', closeResetModal);
+            }
+            if (resetConfirmOverlay) {
+                resetConfirmOverlay.addEventListener('click', (e) => {
+                    if (e.target === resetConfirmOverlay) {
+                        closeResetModal();
+                    }
+                });
+            }
+            if (confirmResetBtn) {
+                confirmResetBtn.addEventListener('click', () => {
+                    // Disable buttons immediately to prevent multiple clicks
+                    confirmResetBtn.disabled = true;
+                    if(cancelResetBtn) cancelResetBtn.disabled = true;
+
+                    // 1. Fade out the confirmation content
+                    if(resetConfirmState) resetConfirmState.style.opacity = '0';
+
+                    // 2. After fade-out, switch content and fade in success message
+                    setTimeout(() => {
+                        if(resetConfirmState) resetConfirmState.classList.add('hidden');
+                        
+                        if(resetSuccessState) {
+                            resetSuccessState.style.opacity = '0'; // Start transparent
+                            resetSuccessState.classList.remove('hidden');
+                            
+                            // A tiny delay to allow the browser to apply display:block before transitioning opacity
+                            setTimeout(() => {
+                                resetSuccessState.style.opacity = 1;
+                            }, 20);
+                        }
+
+                        // 3. Perform the actual reset
+                        localStorage.removeItem('qing-homepage-settings');
+                        localStorage.removeItem('developerModeUnlocked');
+
+                        // 4. Reload the page after showing the success message
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    }, 250); // This duration should match the CSS transition
                 });
             }
         }
