@@ -16,6 +16,7 @@
         /* --- CSS Variables and Theming --- */
         body.theme-dark {
             --immersive-bg-color: #111827;
+            --solid-card-bg-color: #1e293b; /* slate-800 */
             --icon-hover-bg: rgba(255, 255, 255, 0.1);
             --bg-color: #0d1a26;
             --card-bg-color: rgba(30, 41, 59, 0.75);
@@ -38,6 +39,7 @@
         }
         body.theme-light {
             --immersive-bg-color: #f9fafb;
+            --solid-card-bg-color: #f1f5f9; /* slate-100 */
             --icon-hover-bg: rgba(0, 0, 0, 0.08);
             --bg-color: #0d1a26; /* slate-100 */
             --card-bg-color: rgba(255, 255, 255, 0.75);
@@ -108,17 +110,35 @@
         }
 
         .glass-card {
-            background: var(--card-bg-color);
+            background-color: var(--card-bg-color);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-radius: 1rem;
             border: 1px solid var(--card-border-color);
-            transition: all 0.3s ease;
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
         }
         
         .glass-card:hover {
-            background: var(--card-hover-bg-color);
+            background-color: var(--card-hover-bg-color);
             border: 1px solid var(--card-hover-border-color);
+        }
+
+        /* --- [NEW] Solid Card Style for Disabled Glass Effect --- */
+        body.glass-effect-disabled .glass-card {
+            background-color: var(--solid-card-bg-color);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        
+        body.glass-effect-disabled .glass-card:hover {
+            background-color: var(--solid-card-bg-color);
+            border-color: var(--card-hover-border-color);
+        }
+
+        body.glass-effect-disabled #settings-window.glass-card:hover,
+        body.glass-effect-disabled #developer-settings-window.glass-card:hover {
+            background-color: var(--solid-card-bg-color);
+            border: 1px solid var(--card-border-color);
         }
 
         .icon-btn:hover {
@@ -129,7 +149,7 @@
         /* Override for settings window to disable hover effect */
         #settings-window.glass-card:hover,
         #developer-settings-window.glass-card:hover {
-            background: var(--card-bg-color);
+            background-color: var(--card-bg-color);
             border: 1px solid var(--card-border-color);
         }
 
@@ -1901,6 +1921,28 @@
                         </div>
                     </div>
 
+                    <!-- [NEW] Appearance Settings -->
+                    <div class="setting-section">
+                        <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);">
+                            <svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor"><path d="M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM288 368c-61.9 0-112-50.1-112-112s50.1-112 112-112 112 50.1 112 112-50.1 112-112 112zm0-200c-48.6 0-88 39.4-88 88s39.4 88 88 88 88-39.4 88-88-39.4-88-88-88z"/></svg>
+                            外观设置
+                        </h3>
+                        <div id="appearance-settings-content">
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center p-2">
+                                    <div>
+                                        <span class="font-medium">开启毛玻璃效果</span>
+                                        <div class="setting-description">卡片背景将呈现半透明的模糊效果。</div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="glass-effect-toggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 4. Hitokoto Settings -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" width="1024pt" height="1024pt" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" opacity="1.00" d=" M 504.63 19.74 C 510.94 18.73 517.82 18.56 523.72 21.44 C 536.31 27.78 548.23 35.34 560.39 42.45 C 566.80 45.20 572.36 49.45 578.55 52.60 C 584.51 56.73 591.37 59.35 597.14 63.79 C 601.84 66.40 606.91 68.37 611.18 71.72 C 627.90 81.47 645.09 90.40 661.68 100.34 C 668.72 105.16 676.65 108.48 683.78 113.16 C 688.90 116.60 694.41 119.37 699.76 122.40 C 707.70 127.57 716.15 131.88 724.27 136.77 C 732.78 141.10 740.57 146.67 749.04 151.07 C 756.21 155.28 763.14 159.89 770.71 163.38 C 776.68 166.09 781.58 170.66 787.70 173.08 C 791.89 174.65 794.89 178.27 799.11 179.77 C 804.53 181.55 808.92 185.32 813.91 187.94 C 818.23 190.26 822.52 192.65 826.53 195.49 C 832.90 199.17 839.32 202.77 845.68 206.47 C 852.70 211.25 860.40 214.92 867.59 219.42 C 874.68 224.69 882.87 228.11 890.40 232.67 C 897.91 235.86 904.15 241.26 911.61 244.55 C 917.72 248.14 923.69 252.00 930.12 255.03 C 935.28 257.19 938.63 262.13 940.96 267.01 C 942.24 271.59 943.57 276.21 944.18 280.94 C 944.26 431.29 944.10 581.65 944.23 732.00 C 944.13 737.44 944.80 742.99 943.42 748.33 C 942.44 751.91 942.19 755.81 940.03 758.95 C 937.64 762.46 934.82 765.84 931.07 767.94 C 920.48 774.50 909.12 779.70 898.72 786.57 C 890.72 790.92 882.75 795.35 874.85 799.87 C 869.36 803.85 863.17 806.69 857.61 810.54 C 854.92 812.33 851.70 813.13 849.08 815.03 C 846.93 816.53 844.91 818.23 842.59 819.47 C 832.35 824.33 822.96 830.74 812.94 836.01 C 801.05 843.11 788.51 849.06 776.91 856.65 C 769.03 860.59 761.78 865.65 754.08 869.94 C 739.78 877.87 725.59 885.99 711.61 894.48 C 708.34 896.25 704.75 897.45 701.86 899.86 C 699.10 902.06 695.86 903.46 692.65 904.83 C 688.48 906.60 685.38 910.10 681.33 912.08 C 670.31 917.47 660.26 924.56 649.48 930.38 C 643.83 934.24 637.53 936.95 631.71 940.53 C 626.08 943.64 620.74 947.29 614.85 949.91 C 610.05 951.96 606.12 955.56 601.28 957.54 C 596.76 959.36 593.39 963.08 588.99 965.11 C 580.47 969.18 572.80 974.73 564.71 979.56 C 556.94 983.30 549.59 987.83 542.07 992.05 C 536.38 996.03 530.02 998.87 523.81 1001.94 C 518.07 1004.76 511.45 1004.98 505.25 1003.93 C 499.73 1002.72 495.39 998.87 490.20 996.86 C 486.33 995.41 483.33 992.49 479.74 990.55 C 468.16 985.03 457.90 977.20 446.53 971.30 C 441.06 967.24 434.36 965.26 429.12 960.88 C 425.09 957.54 419.86 956.29 415.61 953.32 C 412.16 950.89 408.09 949.60 404.52 947.40 C 397.04 942.71 389.18 938.67 381.43 934.45 C 369.93 927.19 357.86 920.89 346.39 913.58 C 339.98 910.56 334.46 905.99 328.01 903.05 C 325.14 901.73 322.60 899.85 319.94 898.17 C 308.01 891.87 296.51 884.75 284.71 878.20 C 278.94 874.10 272.26 871.55 266.58 867.34 C 252.94 859.73 239.24 852.21 225.88 844.13 C 218.87 840.98 212.55 836.57 205.69 833.13 C 197.13 829.06 190.03 822.53 181.33 818.72 C 174.65 814.12 167.13 811.08 160.44 806.52 C 143.76 796.83 126.98 787.32 110.23 777.77 C 104.25 773.91 97.89 770.67 91.67 767.24 C 87.36 764.18 83.44 759.98 81.91 754.82 C 81.24 751.22 80.03 747.71 79.77 744.05 C 79.65 590.03 79.87 436.00 79.67 281.97 C 79.68 277.75 80.96 273.69 81.93 269.62 C 82.99 264.88 86.37 261.06 89.99 258.01 C 97.18 252.74 105.30 248.93 112.81 244.15 C 119.81 241.38 125.54 236.33 132.38 233.26 C 136.79 231.25 140.47 227.97 144.93 226.08 C 152.89 222.78 159.44 217.05 166.99 213.00 C 171.95 210.42 176.75 207.55 181.46 204.54 C 195.78 197.08 209.09 187.85 223.45 180.48 C 227.28 178.96 230.60 176.51 234.08 174.37 C 247.28 167.79 259.72 159.87 272.39 152.36 C 290.80 142.16 308.90 131.43 327.19 121.06 C 332.12 118.93 336.40 115.67 341.08 113.10 C 349.62 108.55 357.67 103.17 365.81 97.96 C 377.22 92.30 387.72 84.98 399.14 79.34 C 405.93 75.36 413.08 72.06 419.71 67.79 C 426.37 65.18 431.45 59.92 438.00 57.09 C 454.35 46.85 471.63 38.18 487.98 27.94 C 493.46 25.08 498.64 21.52 504.63 19.74 M 339.46 301.66 C 339.21 305.49 339.82 309.28 340.27 313.07 C 340.71 323.05 341.67 332.99 342.32 342.95 C 342.36 442.30 342.29 541.65 342.36 641.00 C 342.11 654.95 344.63 669.22 351.25 681.62 C 354.62 687.98 359.64 693.29 365.00 698.04 C 376.73 707.89 391.54 713.33 406.47 715.99 C 417.29 717.76 428.04 720.23 439.04 720.46 C 444.07 720.49 449.04 721.43 454.07 721.48 C 459.09 721.49 463.92 723.24 468.95 723.25 C 483.53 723.19 498.12 723.80 512.69 723.26 C 522.15 721.83 531.73 722.96 541.23 722.24 C 553.79 720.76 566.49 722.17 579.05 720.65 C 589.61 720.27 600.18 719.64 610.69 718.47 C 626.03 717.55 641.33 716.22 656.65 715.11 C 666.15 713.71 675.81 713.85 685.27 712.12 C 685.77 703.76 685.32 695.37 685.46 687.00 C 685.33 674.84 685.76 662.66 685.31 650.51 C 678.79 650.46 672.54 652.62 666.13 653.50 C 645.86 657.50 625.33 659.82 604.82 662.17 C 589.15 662.95 573.58 665.20 557.89 665.73 C 546.61 666.92 535.23 665.88 523.98 667.41 C 506.99 667.57 489.99 667.61 473.00 667.33 C 464.46 666.41 455.85 666.51 447.37 665.06 C 433.64 663.59 418.97 661.90 407.61 653.30 C 400.44 647.99 398.88 638.34 398.39 630.02 C 398.34 592.92 398.25 555.83 398.40 518.74 C 403.72 515.84 409.85 515.14 415.58 513.40 C 433.87 508.37 452.11 503.16 470.40 498.12 C 531.66 480.08 592.55 460.35 651.31 435.19 C 658.43 432.13 665.83 429.59 672.57 425.71 C 667.79 412.38 661.56 399.62 656.42 386.42 C 654.40 381.52 652.55 376.43 649.08 372.34 C 641.43 376.06 634.28 380.70 626.63 384.43 C 617.13 388.86 608.07 394.20 598.31 398.08 C 585.88 403.01 573.61 408.40 560.89 412.59 C 512.03 430.12 462.40 445.43 412.30 458.96 C 407.47 460.19 402.75 461.94 397.78 462.48 C 397.41 428.66 397.71 394.83 397.60 361.00 C 397.75 352.98 397.19 344.91 398.32 336.94 C 398.99 325.17 400.06 313.44 401.43 301.74 C 393.63 301.24 385.80 301.63 377.99 301.51 C 365.15 301.62 352.30 301.32 339.46 301.66 Z" /></svg>一言</h3>
@@ -2882,6 +2924,9 @@
                 customUrl: null,
                 customType: 'unknown' // 'image', 'api', or 'unknown'
             },
+            appearance: {
+                glassEffect: true
+            },
             theme: 'system', // 'system', 'light', 'dark'
             timeFormat: '24h', // '12h' or '24h'
             immersiveBlinkingColon: false,
@@ -3573,6 +3618,7 @@ function applyNewYearMode() {
                         weather: { ...appSettings.weather, ...(parsedSettings.weather || {}) },
                         developer: { ...appSettings.developer, ...(parsedSettings.developer || {}) },
                         newYearTheme: { ...appSettings.newYearTheme, ...(parsedSettings.newYearTheme || {}) },
+                        appearance: { ...appSettings.appearance, ...(parsedSettings.appearance || {}) }
                     };
 
                     // Backward compatibility: If old setting `view: 'weather'` exists, but new `weather.source` doesn't, default it.
@@ -4378,6 +4424,13 @@ function applyNewYearMode() {
             }
         }
 
+        function updateAppearanceSettingsUI() {
+            const glassEffectToggle = document.getElementById('glass-effect-toggle');
+            if (glassEffectToggle) {
+                glassEffectToggle.checked = appSettings.appearance.glassEffect;
+            }
+        }
+
         function updateSettingsUI() {
             updateBgSettingsUI();
             // updateThemeSettingsUI(); // This is now handled by a dedicated initializer
@@ -4386,6 +4439,7 @@ function applyNewYearMode() {
             updateHitokotoSettingsUI();
             updateImmersiveBlinkUI();
             updateDeveloperSettingsUI();
+            updateAppearanceSettingsUI();
 
             // Logic for New Year background toggle
             const newYearBgToggleSection = document.getElementById('new-year-bg-toggle-section');
@@ -4439,6 +4493,10 @@ function applyNewYearMode() {
 
         function applyBlinkingEffect() {
             document.body.classList.toggle('immersive-blink-enabled', appSettings.immersiveBlinkingColon);
+        }
+
+        function applyGlassEffect() {
+            document.body.classList.toggle('glass-effect-disabled', !appSettings.appearance.glassEffect);
         }
 
         // --- [NEW] Immersive Time View Logic ---
@@ -5563,6 +5621,16 @@ function applyNewYearMode() {
                 });
             }
 
+            // --- [NEW] Appearance Settings Listener ---
+            const glassEffectToggle = document.getElementById('glass-effect-toggle');
+            if (glassEffectToggle) {
+                glassEffectToggle.addEventListener('change', () => {
+                    appSettings.appearance.glassEffect = glassEffectToggle.checked;
+                    saveSettings();
+                    applyGlassEffect();
+                });
+            }
+
             // --- View Toggle Listeners ---
             const cityInput = document.getElementById('weather-city-input');
             const saveCityBtn = document.getElementById('save-city-btn');
@@ -5702,9 +5770,9 @@ function applyNewYearMode() {
 
             openSettingsBtn.addEventListener('click', openSettings);
             closeSettingsBtn.addEventListener('click', closeSettings);
-            settingsOverlay.addEventListener('click', (e) => {
-                if (e.target === settingsOverlay) closeSettings();
-            });
+            // settingsOverlay.addEventListener('click', (e) => {
+            //     if (e.target === settingsOverlay) closeSettings();
+            // });
 
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
@@ -6493,6 +6561,7 @@ function applyNewYearMode() {
             // 3. Now apply all other settings.
             applyCurrentTheme();
             applyBlinkingEffect();
+            applyGlassEffect();
             applyCurrentBackground();
             applyCurrentView();
             updateSettingsUI();
