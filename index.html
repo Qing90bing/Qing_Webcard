@@ -486,13 +486,13 @@
     }
     
     #immersive-date-display {
-        font-size: 2.25rem; /* text-4xl */
-        line-height: 2.5rem;
+        font-size: 1.5rem; /* text-2xl */
+        line-height: 2rem;
         color: var(--text-color-secondary);
         transition: color 0.3s ease;
     }
     #immersive-time-display {
-        font-size: 8rem; /* text-9xl */
+        font-size: 4.5rem; /* text-7xl for mobile */
         line-height: 1;
         font-weight: 700;
         margin-top: 1rem;
@@ -502,9 +502,14 @@
         text-shadow: 0 0 20px var(--accent-color);
         transition: color 0.3s ease, text-shadow 0.3s ease;
     }
+    @media (min-width: 1024px) {
+        #immersive-time-display {
+            font-size: 8rem; /* text-9xl for desktop */
+        }
+    }
     #immersive-greeting {
-        font-size: 1.875rem; /* text-3xl */
-        line-height: 2.25rem;
+        font-size: 1.25rem; /* text-xl */
+        line-height: 1.75rem;
         color: var(--text-color-secondary);
         transition: color 0.3s ease;
     }
@@ -680,7 +685,7 @@
             height: auto;
         }
         #holiday-list-card {
-            height: 50vh;
+            height: 70vh;
         }
     }
 
@@ -891,6 +896,7 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+        transition: min-height 0.3s ease-in-out;
     }
     .weather-icon-initial {
         opacity: 0;
@@ -1705,6 +1711,18 @@
         transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
         pointer-events: none; /* Prevent interaction when hidden */
     }
+
+    /* Responsive fix for theme buttons on small screens */
+    @media (max-width: 420px) {
+        .setting-btn {
+            padding-left: 0.4rem;
+            padding-right: 0.4rem;
+            font-size: 0.8rem;
+        }
+        .setting-btn > i {
+            margin-right: 0.25rem;
+        }
+    }
     body.settings-open #blur-setting-container.disabled #blur-slider-overlay {
         opacity: 1;
         visibility: visible;
@@ -1728,6 +1746,21 @@
         visibility: visible;
         pointer-events: auto; /* Allow interaction when visible */
         transition-delay: 0s;
+    }
+
+    /* Full-screen modals on mobile */
+    @media (max-width: 1023px) {
+        #settings-overlay, #developer-settings-overlay {
+            padding: 0;
+        }
+
+        #settings-window, #developer-settings-window {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 0;
+        }
     }
     </style>
 </head>
@@ -1775,7 +1808,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div id="time-card" class="glass-card p-5 flex flex-col justify-center items-center cursor-pointer">
                             <div id="date-display" class="text-lg" style="color: var(--text-color-secondary);"></div>
-                            <div id="time-display" class="text-6xl my-1" style="color: var(--text-color-primary);"></div>
+                            <div id="time-display" class="text-5xl lg:text-6xl my-1" style="color: var(--text-color-primary);"></div>
                             <div id="greeting" class="text-sm" style="color: var(--text-color-secondary);"></div>
                         </div>
                         <div id="hitokoto-card" class="glass-card p-5 flex flex-col justify-center cursor-pointer min-h-[120px] md:min-h-full">
@@ -1960,7 +1993,7 @@
                             <svg class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M224 224C224 171 267 128 320 128C373 128 416 171 416 224C416 266.7 388.1 302.9 349.5 315.4C321.1 324.6 288 350.7 288 392L288 416C288 433.7 302.3 448 320 448C337.7 448 352 433.7 352 416L352 392C352 390.3 352.6 387.9 355.5 384.7C358.5 381.4 363.4 378.2 369.2 376.3C433.5 355.6 480 295.3 480 224C480 135.6 408.4 64 320 64C231.6 64 160 135.6 160 224C160 241.7 174.3 256 192 256C209.7 256 224 241.7 224 224zM320 576C342.1 576 360 558.1 360 536C360 513.9 342.1 496 320 496C297.9 496 280 513.9 280 536C280 558.1 297.9 576 320 576z"/></svg>
                             今日人品
                         </h2>
-                        <div id="luck-container" class="flex items-center justify-center h-28 transition-all duration-500 ease-in-out">
+                        <div id="luck-container" class="flex flex-col sm:flex-row items-center justify-center h-40 sm:h-28 transition-all duration-500 ease-in-out gap-4">
                             <div id="particle-container"></div>
                             <button id="luck-button" class="text-white font-bold py-2 px-6 rounded-full transform active:scale-90 whitespace-nowrap flex-shrink-0">
                                 开盲盒
@@ -1990,9 +2023,9 @@
                     </div>
 
                     <!-- Main Content Area -->
-                    <div class="flex-1 flex gap-2">
+                    <div class="flex-1 flex flex-col sm:flex-row gap-8 sm:gap-4 mt-4 sm:mt-0">
                         <!-- Left Column -->
-                        <div class="flex flex-col items-center justify-center w-1/3">
+                        <div class="flex flex-col items-center justify-center w-full sm:w-1/3">
                             <img id="about-card-logo" src="favicon.svg" alt="Website Icon" class="w-24 h-24 cursor-pointer">
                             <p class="mt-4 font-semibold flex items-center justify-center" style="color: var(--text-color-primary);">V1.0.0<span class="ml-2 rounded-md bg-sky-500/90 px-2 py-0.5 text-xs font-bold text-white">Beta</span></p>
                             
@@ -2052,7 +2085,7 @@
             </div>
             <!-- Content -->
             <div class="flex-grow flex-1 min-h-0" data-simplebar>
-                <div class="space-y-6 p-3">
+                <div class="space-y-6 p-2 sm:p-3">
                     <!-- 1. Background Settings -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z"/></svg>背景来源</h3>
@@ -2093,7 +2126,7 @@
                         </h3>
                         <div id="appearance-settings-content">
                             <div class="space-y-2">
-                                <div class="flex justify-between items-center p-2">
+                                <div class="flex items-center justify-between p-2">
                                     <div>
                                         <span class="font-medium">开启毛玻璃效果</span>
                                         <div class="setting-description">卡片背景将呈现半透明的模糊效果。</div>
@@ -2148,7 +2181,7 @@
                                     <span class="font-medium">重置所有设置</span>
                                     <div class="setting-description">将所有设置恢复为默认值,此操作不可撤销。</div>
                                 </div>
-                                <button id="reset-settings-btn" class="px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-200 bg-red-600 hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800">
+                                <button id="reset-settings-btn" class="px-3 py-1.5 rounded-lg text-white font-semibold text-sm transition-colors duration-200 bg-red-600 hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800">
                                     重置
                                 </button>
                             </div>
@@ -2174,13 +2207,13 @@
             </div>
             <!-- Content -->
             <div class="flex-grow flex-1 min-h-0" data-simplebar>
-                <div class="space-y-6 p-3">
+                <div class="space-y-6 p-2 sm:p-3">
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);">
                             <i class="fas fa-toggle-on fa-fw w-5 h-5 mr-2"></i>总开关
                         </h3>
                         <div class="space-y-2">
-                            <div class="flex justify-between items-center p-2">
+                            <div class="flex items-center justify-between p-2">
                                 <div>
                                     <span class="font-medium">开启开发者选项</span>
                                     <div class="setting-description">总开关，控制所有开发者功能</div>
@@ -2198,7 +2231,7 @@
                             <i class="fas fa-gifts fa-fw w-5 h-5 mr-2"></i>节日主题
                         </h3>
                         <div class="space-y-2">
-                            <div class="flex justify-between items-center p-2">
+                            <div class="flex items-center justify-between p-2">
                                 <div>
                                     <span class="font-medium">强制开启新年主题</span>
                                     <div class="setting-description">用于测试新年主题的背景和音乐</div>
@@ -3542,15 +3575,15 @@ function applyNewYearMode() {
             const sunsetTime = appSettings.timeFormat === '24h' ? convert12hto24h(weatherData.sunset) : weatherData.sunset.replace(' ', '');
 
             return `
-                <div class="flex gap-x-8 items-stretch w-full">
+                <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-8 items-center md:items-stretch w-full">
                     <!-- Column 1: 图标和主温度 (固定宽度, 居中) -->
-                    <div class="flex-shrink-0 flex flex-col items-center justify-center w-32">
+                    <div class="flex-shrink-0 flex flex-row md:flex-col items-center justify-center w-full md:w-32 gap-x-4">
                         <img id="weather-icon-img" src="${iconUrl}" alt="${weatherData.weatherDesc}" class="w-16 h-16 weather-icon-initial">
                         <p class="font-bold text-3xl" style="color: var(--text-color-primary);">${weatherData.tempC}°</p>
                     </div>
 
-                    <!-- Column 2: Location, Condition, Tip (Flexible, Left-aligned) -->
-                    <div class="flex-1 flex flex-col text-left justify-between">
+                    <!-- Column 2: Location, Condition, Tip (Flexible, Center-aligned on mobile) -->
+                    <div class="flex-1 flex flex-col text-center md:text-left justify-between space-y-1">
                         <p class="font-bold text-xl truncate" style="color: var(--text-color-primary);" title="${weatherData.location}">${weatherData.location}</p>
                         <p class="text-base font-medium" style="color: var(--text-color-secondary);">${weatherData.weatherDesc}</p>
                         <p class="text-base font-medium" style="color: var(--text-color-secondary);">最高 ${weatherData.maxTempC}° 最低 ${weatherData.minTempC}°</p>
@@ -3558,7 +3591,7 @@ function applyNewYearMode() {
                     </div>
 
                     <!-- Column 3: 详细信息 (固定宽度, 左对齐) -->
-                    <div class="flex-shrink-0 flex flex-col text-sm justify-between w-56">
+                    <div class="flex-shrink-0 flex flex-col text-sm space-y-2 w-56">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center w-20">
                                 <i class="far fa-sun fa-fw w-5 text-center" style="color: var(--text-color-secondary);"></i>
