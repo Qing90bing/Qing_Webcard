@@ -14,6 +14,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* --- CSS Variables and Theming --- */
+        :root {
+            /* [NEW] Appearance variables */
+            --card-border-radius: 16px;
+            --card-backdrop-blur: 16px;
+        }
+        body {
+            /* Theme-agnostic variables are now in :root */
+        }
         body.theme-dark {
             --immersive-bg-color: #111827;
             --solid-card-bg-color: #1e293b; /* slate-800 */
@@ -72,7 +80,7 @@
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color-primary);
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, background-color 0.3s ease;
         }
 
         /* --- [NEW] Accessible Focus Styles --- */
@@ -111,11 +119,11 @@
 
         .glass-card {
             background-color: var(--card-bg-color);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 1rem;
+            backdrop-filter: blur(var(--card-backdrop-blur));
+            -webkit-backdrop-filter: blur(var(--card-backdrop-blur));
+            border-radius: var(--card-border-radius);
             border: 1px solid var(--card-border-color);
-            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, backdrop-filter 0.3s ease, border-radius 0.3s ease;
         }
         
         .glass-card:hover {
@@ -1300,6 +1308,62 @@
         transform: translateX(24px);
     }
 
+/* --- [NEW] Slider Styles --- */
+.setting-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: var(--progress-bar-bg);
+    background-image: linear-gradient(var(--accent-color), var(--accent-color));
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    border-radius: 5px;
+    outline: none;
+    transition: opacity .2s, background-size 0.1s linear;
+    --slider-progress: 0%;
+}
+.setting-slider:hover {
+    opacity: 1;
+}
+.setting-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease;
+}
+.setting-slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.setting-slider:hover::-webkit-slider-thumb {
+    transform: scale(1.1);
+}
+.setting-slider:active::-webkit-slider-thumb {
+    transform: scale(1.2);
+    background-color: var(--accent-color);
+}
+.setting-slider:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+.setting-slider:disabled::-webkit-slider-thumb {
+    background-color: var(--text-color-tertiary);
+    border-color: var(--text-color-tertiary);
+    transform: scale(1);
+}
+
     /* --- [NEW] Manual City Input Styles --- */
     #weather-city-input {
         transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
@@ -1938,6 +2002,28 @@
                                         <input type="checkbox" id="glass-effect-toggle">
                                         <span class="toggle-slider"></span>
                                     </label>
+                                </div>
+                                <!-- Card Border Radius Slider -->
+                                <div class="p-2 space-y-2 pt-3">
+                                    <div class="flex justify-between items-center">
+                                        <label for="card-border-radius-slider" class="font-medium">卡片圆角</label>
+                                        <span id="card-border-radius-value" class="text-sm font-mono" style="color: var(--text-color-secondary);">16px</span>
+                                    </div>
+                                    <input type="range" id="card-border-radius-slider" min="0" max="32" value="16" class="w-full h-2 rounded-lg appearance-none cursor-pointer setting-slider">
+                                </div>
+                                <!-- Card Blur Amount Slider -->
+                                <div class="p-2 space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <label for="card-blur-amount-slider" class="font-medium">背景模糊度</label>
+                                        <span id="card-blur-amount-value" class="text-sm font-mono" style="color: var(--text-color-secondary);">16px</span>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="range" id="card-blur-amount-slider" min="0" max="40" value="16" class="w-full h-2 rounded-lg appearance-none cursor-pointer setting-slider">
+                                        <div id="blur-slider-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-xs font-bold hidden backdrop-blur-sm cursor-not-allowed transition-opacity duration-300">
+                                            <i class="fas fa-lock mr-2"></i>
+                                            <span>请先开启毛玻璃效果</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2925,7 +3011,9 @@
                 customType: 'unknown' // 'image', 'api', or 'unknown'
             },
             appearance: {
-                glassEffect: true
+                glassEffect: true,
+                cardBorderRadius: 16,
+                cardBlurAmount: 16
             },
             theme: 'system', // 'system', 'light', 'dark'
             timeFormat: '24h', // '12h' or '24h'
@@ -4424,10 +4512,36 @@ function applyNewYearMode() {
             }
         }
 
+        function updateSliderProgress(slider) {
+            const min = slider.min;
+            const max = slider.max;
+            const value = slider.value;
+            const percentage = ((value - min) / (max - min)) * 100;
+            slider.style.backgroundSize = `${percentage}% 100%`;
+        }
+
         function updateAppearanceSettingsUI() {
+            const { glassEffect, cardBorderRadius, cardBlurAmount } = appSettings.appearance;
+
             const glassEffectToggle = document.getElementById('glass-effect-toggle');
             if (glassEffectToggle) {
-                glassEffectToggle.checked = appSettings.appearance.glassEffect;
+                glassEffectToggle.checked = glassEffect;
+            }
+
+            const radiusSlider = document.getElementById('card-border-radius-slider');
+            const radiusValue = document.getElementById('card-border-radius-value');
+            if (radiusSlider && radiusValue) {
+                radiusSlider.value = cardBorderRadius;
+                radiusValue.textContent = `${cardBorderRadius}px`;
+                updateSliderProgress(radiusSlider);
+            }
+
+            const blurSlider = document.getElementById('card-blur-amount-slider');
+            const blurValue = document.getElementById('card-blur-amount-value');
+            if (blurSlider && blurValue) {
+                blurSlider.value = cardBlurAmount;
+                blurValue.textContent = `${cardBlurAmount}px`;
+                updateSliderProgress(blurSlider);
             }
         }
 
@@ -4497,6 +4611,21 @@ function applyNewYearMode() {
 
         function applyGlassEffect() {
             document.body.classList.toggle('glass-effect-disabled', !appSettings.appearance.glassEffect);
+            
+            // [NEW]联动逻辑
+            const blurSlider = document.getElementById('card-blur-amount-slider');
+            const blurOverlay = document.getElementById('blur-slider-overlay');
+            if (blurSlider && blurOverlay) {
+                const isGlassEnabled = appSettings.appearance.glassEffect;
+                blurSlider.disabled = !isGlassEnabled;
+                blurOverlay.classList.toggle('hidden', isGlassEnabled);
+            }
+        }
+
+        function applyCardSettings() {
+            const { cardBorderRadius, cardBlurAmount } = appSettings.appearance;
+            document.documentElement.style.setProperty('--card-border-radius', `${cardBorderRadius}px`);
+            document.documentElement.style.setProperty('--card-backdrop-blur', `${cardBlurAmount}px`);
         }
 
         // --- [NEW] Immersive Time View Logic ---
@@ -5631,6 +5760,36 @@ function applyNewYearMode() {
                 });
             }
 
+            const radiusSlider = document.getElementById('card-border-radius-slider');
+            const radiusValue = document.getElementById('card-border-radius-value');
+            if (radiusSlider && radiusValue) {
+                radiusSlider.addEventListener('input', (e) => {
+                    const newValue = e.target.value;
+                    radiusValue.textContent = `${newValue}px`;
+                    appSettings.appearance.cardBorderRadius = parseInt(newValue, 10);
+                    applyCardSettings();
+                    updateSliderProgress(e.target);
+                });
+                radiusSlider.addEventListener('change', () => {
+                    saveSettings(); // Save only when the user releases the mouse
+                });
+            }
+
+            const blurSlider = document.getElementById('card-blur-amount-slider');
+            const blurValue = document.getElementById('card-blur-amount-value');
+            if (blurSlider && blurValue) {
+                blurSlider.addEventListener('input', (e) => {
+                    const newValue = e.target.value;
+                    blurValue.textContent = `${newValue}px`;
+                    appSettings.appearance.cardBlurAmount = parseInt(newValue, 10);
+                    applyCardSettings();
+                    updateSliderProgress(e.target);
+                });
+                blurSlider.addEventListener('change', () => {
+                    saveSettings(); // Save only when the user releases the mouse
+                });
+            }
+
             // --- View Toggle Listeners ---
             const cityInput = document.getElementById('weather-city-input');
             const saveCityBtn = document.getElementById('save-city-btn');
@@ -6562,6 +6721,7 @@ function applyNewYearMode() {
             applyCurrentTheme();
             applyBlinkingEffect();
             applyGlassEffect();
+            applyCardSettings();
             applyCurrentBackground();
             applyCurrentView();
             updateSettingsUI();
