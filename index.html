@@ -19,9 +19,6 @@
             --card-border-radius: 16px;
             --card-backdrop-blur: 16px;
         }
-        body {
-            /* Theme-agnostic variables are now in :root */
-        }
         body.theme-dark {
             --immersive-bg-color: #111827;
             --solid-card-bg-color: #1e293b; /* slate-800 */
@@ -35,6 +32,7 @@
             --text-color-secondary: #9ca3af; /* gray-400 */
             --text-color-tertiary: #6b7280; /* gray-500 */
             --accent-color: #38bdf8; /* sky-400 */
+            --selection-bg-color: rgba(56, 189, 248, 0.7);
             --accent-color-highlight: rgba(56, 189, 248, 0.15);
             --progress-bar-bg: rgba(255, 255, 255, 0.1);
             --link-color: #e5e7eb;
@@ -58,6 +56,7 @@
             --text-color-secondary: #475569; /* slate-600 */
             --text-color-tertiary: #64748b; /* slate-500 */
             --accent-color: #3b82f6; /* blue-500 */
+            --selection-bg-color: rgba(59, 130, 246, 0.7);
             --accent-color-highlight: rgba(59, 130, 246, 0.1);
             --progress-bar-bg: rgba(0, 0, 0, 0.08);
             --link-color: #1e293b;
@@ -93,42 +92,27 @@
 
         /* --- [NEW] Custom Selection Styles --- */
         ::selection {
-            background-color: var(--accent-color);
+            background-color: var(--selection-bg-color);
             color: white;
         }
 
-        /* --- [NEW] Custom Tooltip Styles --- */
-        .tooltip-container {
-            position: relative;
-        }
-
-        .tooltip-container::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 110%; /* Position above the element */
-            left: 50%;
-            transform: translateX(-50%);
-            
+        /* --- [NEW] JS-Powered Tooltip Style --- */
+        .js-tooltip {
+            position: fixed;
             background-color: var(--accent-color);
             color: white;
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 7px;
             font-size: 0.9rem;
             font-weight: 500;
-            white-space: nowrap;
-            
-            z-index: 10;
+            text-align: center;
+            max-width: 220px;
+            word-wrap: break-word;
+            z-index: 9999; /* Ensure it's on top of everything */
+            pointer-events: none; /* Let clicks pass through */
             opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-
-        .tooltip-container:hover::after {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(-5px);
+            transform: scale(0.95) translateY(5px);
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out;
         }
 
         /* 背景图片容器 */
@@ -417,9 +401,6 @@
             filter: blur(4px);
             transform: scale(0.98);
             transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
-        }
-        #reset-confirm-overlay {
-            /* Transitions are handled by Tailwind's hidden class and the rules below */
         }
         body.reset-confirm-open #reset-confirm-overlay {
             opacity: 1;
@@ -1773,7 +1754,7 @@
                         <div class="relative px-4 py-2">
                             <span class="absolute top-0 left-0 text-6xl font-serif -translate-y-4 -translate-x-2 select-none" style="color: var(--separator-color);">“</span>
                             <p class="text-lg" style="color: var(--text-color-primary);">Hello, World!</p>
-                            <p class="mt-1" style="color: var(--text-color-secondary);">一个建立于21世纪的小站，存活于互联网的边缘</p>
+                            <p class="mt-1" style="color: var(--text-color-secondary);">一个建立于21世纪的小站，存活于互联网的边缘:)</p>
                             <span class="absolute bottom-0 right-0 text-6xl font-serif translate-y-6 translate-x-2 select-none" style="color: var(--separator-color);">”</span>
                         </div>
                         <div class="mt-8">
@@ -1875,7 +1856,7 @@
                 <!-- Holiday List Card -->
                 <div id="holiday-list-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);"><svg fill="currentColor" class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm128 0v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H336zM64 400v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H208zm112 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H336c-8.8 0-16 7.2-16 16z"/></svg>节日倒数列表</h2>
+                        <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);"><svg fill="currentColor" class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm128 0v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H336zM64 400v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H208zm112 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H336c-8.8 0-16 7.2-16 16z"/></svg>节日倒数</h2>
                         <div class="flex items-center gap-3">
                             <button id="back-to-today-btn" data-tooltip="回到今天" class="tooltip-container w-8 h-8 rounded-full transition-all active:scale-95 flex-shrink-0 flex items-center justify-center font-bold text-white text-base">今</button>
                             <button id="close-holiday-list" data-tooltip="关闭" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
@@ -2141,7 +2122,7 @@
                                             <input type="range" id="card-blur-amount-slider" min="0" max="40" value="16" class="w-full h-2 rounded-lg appearance-none cursor-pointer setting-slider">
                                         </div>
                                     </div>
-                                    <div id="blur-slider-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-xs font-bold cursor-not-allowed">
+                                    <div id="blur-slider-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-sm font-bold cursor-not-allowed">
                                         <i class="fas fa-lock mr-2"></i>
                                         <span>请先开启毛玻璃效果</span>
                                     </div>
@@ -2165,7 +2146,7 @@
                             <div class="flex justify-between items-center">
                                 <div>
                                     <span class="font-medium">重置所有设置</span>
-                                    <div class="setting-description">将所有自定义设置恢复为出厂默认值。此操作不可撤销。</div>
+                                    <div class="setting-description">将所有设置恢复为默认值,此操作不可撤销。</div>
                                 </div>
                                 <button id="reset-settings-btn" class="px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-200 bg-red-600 hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800">
                                     重置
@@ -2244,7 +2225,7 @@
                     <i class="fas fa-exclamation-triangle fa-fw w-5 h-5 mr-2 text-amber-400"></i>确认重置？
                 </h2>
                 <p class="text-base my-4" style="color: var(--text-color-secondary);">
-                    此操作将清除所有本地保存的设置并恢复为默认值。该过程**不可逆**，您确定要继续吗？
+                    此操作将清除所有本地保存的设置并恢复为默认值。该过程<strong>不可逆</strong>，点击重置会刷新网页，您确定要继续吗？
                 </p>
                 <div class="flex justify-end gap-4 mt-4">
                     <button id="cancel-reset-btn" class="px-4 py-2 rounded-lg font-semibold transition-colors duration-200 bg-gray-500/20 hover:bg-gray-500/40">取消</button>
@@ -4427,7 +4408,7 @@ function applyNewYearMode() {
                 mainBgSettingsHTML += `
                     <div id="background-settings-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-sm font-bold cursor-not-allowed p-4 text-center">
                         <i class="fas fa-lock mr-2"></i>
-                        <span>春节主题已激活，如要使用背景功能请关闭春节主题</span>
+                        <span>新年主题已激活，如要使用背景功能请关闭新年主题</span>
                     </div>
                 `;
 
@@ -4441,7 +4422,7 @@ function applyNewYearMode() {
             if (themeSettingsContainer) {
                 const container = themeSettingsContainer.querySelector('#theme-settings-content');
                 container.innerHTML = `
-                <div class="setting-description text-center mb-3">选择主题，或跟随系统设置自动切换</div>
+                <div class="setting-description text-center mb-3">选择一个主题，或让它随系统自动更改</div>
                     <div class="setting-btn-group w-full relative">
                         <div class="theme-slider absolute h-full transition-all duration-300"></div>
                         <button class="setting-btn relative z-10" data-theme="system"><i class="fas fa-desktop fa-fw mr-2"></i>跟随系统</button>
@@ -6974,6 +6955,87 @@ function applyNewYearMode() {
             }
         }
 
+        // --- [NEW] JS-Powered Tooltip Logic ---
+        function setupTooltips() {
+            let tooltipEl = null;
+            let showTimer = null;
+
+            function createTooltipElement() {
+                if (!tooltipEl) {
+                    tooltipEl = document.createElement('div');
+                    tooltipEl.classList.add('js-tooltip');
+                    document.body.appendChild(tooltipEl);
+                }
+            }
+
+            function showTooltip(target) {
+                const tooltipText = target.getAttribute('data-tooltip');
+                if (!tooltipText) return;
+
+                createTooltipElement();
+                tooltipEl.textContent = tooltipText;
+                positionTooltip(target);
+
+                tooltipEl.style.opacity = '1';
+                tooltipEl.style.transform = 'scale(1) translateY(0)';
+            }
+
+            function hideTooltip() {
+                if (tooltipEl) {
+                    tooltipEl.style.opacity = '0';
+                    tooltipEl.style.transform = 'scale(0.95) translateY(5px)';
+                }
+            }
+
+            function positionTooltip(target) {
+                if (!tooltipEl || !target) return;
+
+                const targetRect = target.getBoundingClientRect();
+                const tooltipRect = tooltipEl.getBoundingClientRect();
+                const offset = 10; 
+
+                let top = targetRect.top - tooltipRect.height - offset;
+                let left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+
+                if (top < 0) {
+                    top = targetRect.bottom + offset;
+                }
+                if (left < 0) {
+                    left = 5;
+                }
+                if (left + tooltipRect.width > window.innerWidth) {
+                    left = window.innerWidth - tooltipRect.width - 5;
+                }
+
+                tooltipEl.style.top = `${top}px`;
+                tooltipEl.style.left = `${left}px`;
+            }
+            
+            document.body.addEventListener('mouseover', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target) {
+                    clearTimeout(showTimer);
+                    showTimer = setTimeout(() => {
+                        showTooltip(target);
+                    }, 200);
+                }
+            });
+
+            document.body.addEventListener('mouseout', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target) {
+                    clearTimeout(showTimer);
+                    hideTooltip();
+                }
+            });
+
+            window.addEventListener('scroll', () => {
+                clearTimeout(showTimer);
+                hideTooltip();
+            }, true);
+        }
+
+
         // --- 页面加载时执行的函数 ---
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
@@ -6983,6 +7045,7 @@ function applyNewYearMode() {
             backgroundFader = createCrossfader(Array.from(bgLayers));
 
             // --- [FIX] Correct Initialization Order ---
+            setupTooltips(); // Initialize the new tooltip system
             // 1. Build the settings panel UI first, so other functions can find its elements.
             setupSettingsUI();
             setupEventListeners();
