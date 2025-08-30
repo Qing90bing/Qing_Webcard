@@ -2707,6 +2707,7 @@
                             const diffTime = holiday.date - today;
                             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                             let statusText = '';
+
                             if (holiday.date.getFullYear() < now.getFullYear() || (holiday.date.getFullYear() === now.getFullYear() && diffDays < -1)) {
                                 statusText = `<span style="color: var(--status-past);">已过</span>`;
                             } else if (diffDays === -1) {
@@ -2716,17 +2717,26 @@
                             } else if (diffDays === 1) {
                                 statusText = `<span style="color: var(--status-tomorrow); font-weight: bold;">明天</span>`;
                             } else {
-                                statusText = `<span style="color: var(--accent-color);">${diffDays} 天</span>`;
+                                statusText = `
+                                    <div class="flex items-baseline" style="color: var(--accent-color);">
+                                        <span class="text-2xl font-bold">${diffDays}</span>
+                                        <span class="text-sm ml-1">天</span>
+                                    </div>
+                                `;
                             }
                             
                             const isHighlighted = firstUpcoming && firstUpcoming.name === holiday.name && firstUpcoming.date.getTime() === holiday.date.getTime();
                             const highlightClass = isHighlighted ? 'highlight-holiday' : '';
 
+                            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                            const dayOfWeek = weekdays[holiday.date.getDay()];
+                            const formattedDate = `${holiday.date.getMonth() + 1}月${holiday.date.getDate()}日`;
+
                             html += `
                                 <div class="flex justify-between items-center p-2 rounded-lg ${highlightClass}">
                                     <div>
-                                        <span style="color: var(--text-color-primary);">${holiday.name}</span>
-                                        <span class="text-xs ml-2" style="color: var(--text-color-secondary);">${String(holiday.date.getMonth() + 1).padStart(2, '0')}-${String(holiday.date.getDate()).padStart(2, '0')}</span>
+                                        <div style="color: var(--text-color-primary);">${holiday.name}</div>
+                                        <div class="text-sm" style="color: var(--text-color-secondary);">${formattedDate} | ${dayOfWeek}</div>
                                     </div>
                                     ${statusText}
                                 </div>
