@@ -1629,6 +1629,27 @@
     body.theme-light .dot.active {
         background-color: rgba(0, 0, 0, 1);
     }
+
+    /* --- [NEW] Appearance Settings Disabled State --- */
+    #blur-setting-content-wrapper {
+        transition: filter 0.3s ease-in-out;
+    }
+    #blur-setting-container.disabled #blur-setting-content-wrapper {
+        filter: blur(4px);
+        pointer-events: none;
+    }
+    #blur-slider-overlay {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+        pointer-events: none; /* Prevent interaction when hidden */
+    }
+    #blur-setting-container.disabled #blur-slider-overlay {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto; /* Allow interaction when visible */
+        transition-delay: 0s;
+    }
     </style>
 </head>
 <body>
@@ -2012,17 +2033,19 @@
                                     <input type="range" id="card-border-radius-slider" min="0" max="32" value="16" class="w-full h-2 rounded-lg appearance-none cursor-pointer setting-slider">
                                 </div>
                                 <!-- Card Blur Amount Slider -->
-                                <div class="p-2 space-y-2">
-                                    <div class="flex justify-between items-center">
-                                        <label for="card-blur-amount-slider" class="font-medium">背景模糊度</label>
-                                        <span id="card-blur-amount-value" class="text-sm font-mono" style="color: var(--text-color-secondary);">16px</span>
-                                    </div>
-                                    <div class="relative">
-                                        <input type="range" id="card-blur-amount-slider" min="0" max="40" value="16" class="w-full h-2 rounded-lg appearance-none cursor-pointer setting-slider">
-                                        <div id="blur-slider-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-xs font-bold hidden backdrop-blur-sm cursor-not-allowed transition-opacity duration-300">
-                                            <i class="fas fa-lock mr-2"></i>
-                                            <span>请先开启毛玻璃效果</span>
+                                <div class="relative" id="blur-setting-container">
+                                    <div class="p-2 space-y-2" id="blur-setting-content-wrapper">
+                                        <div class="flex justify-between items-center">
+                                            <label for="card-blur-amount-slider" class="font-medium">背景模糊度</label>
+                                            <span id="card-blur-amount-value" class="text-sm font-mono" style="color: var(--text-color-secondary);">16px</span>
                                         </div>
+                                        <div>
+                                            <input type="range" id="card-blur-amount-slider" min="0" max="40" value="16" class="w-full h-2 rounded-lg appearance-none cursor-pointer setting-slider">
+                                        </div>
+                                    </div>
+                                    <div id="blur-slider-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-xs font-bold cursor-not-allowed">
+                                        <i class="fas fa-lock mr-2"></i>
+                                        <span>请先开启毛玻璃效果</span>
                                     </div>
                                 </div>
                             </div>
@@ -4612,13 +4635,12 @@ function applyNewYearMode() {
         function applyGlassEffect() {
             document.body.classList.toggle('glass-effect-disabled', !appSettings.appearance.glassEffect);
             
-            // [NEW]联动逻辑
             const blurSlider = document.getElementById('card-blur-amount-slider');
-            const blurOverlay = document.getElementById('blur-slider-overlay');
-            if (blurSlider && blurOverlay) {
+            const blurContainer = document.getElementById('blur-setting-container'); // Target the new container
+            if (blurSlider && blurContainer) {
                 const isGlassEnabled = appSettings.appearance.glassEffect;
                 blurSlider.disabled = !isGlassEnabled;
-                blurOverlay.classList.toggle('hidden', isGlassEnabled);
+                blurContainer.classList.toggle('disabled', !isGlassEnabled);
             }
         }
 
