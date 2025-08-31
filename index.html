@@ -1153,7 +1153,7 @@
         border: 1px solid transparent;
     }
     .setting-radio-label:hover {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: var(--accent-color-highlight);
     }
     .setting-radio-input {
         display: none; /* Hide original radio button */
@@ -1351,8 +1351,12 @@
         right: 0;
         bottom: 0;
         background-color: var(--text-color-tertiary);
-        transition: .3s;
+        transition: all .3s;
         border-radius: 28px;
+    }
+
+    .toggle-switch:hover .toggle-slider {
+        box-shadow: 0 0 0 4px var(--accent-color-highlight);
     }
     .toggle-slider:before {
         position: absolute;
@@ -1520,7 +1524,7 @@
         transition: background-color 0.2s ease-in-out;
     }
     .hitokoto-checkbox-label:hover {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: var(--accent-color-highlight);
     }
     .hitokoto-checkbox-label.invalid {
         animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
