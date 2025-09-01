@@ -90,7 +90,7 @@ function applyNewYearMode() {
         if (!isCurrentlyActive) {
             // It needs to be turned ON
             body.classList.add('new-year-active');
-            backgroundFader.update('new_year_bg.svg', true);
+            backgroundFader.update('assets/images/new_year_bg.svg', true);
             // Music is not auto-played, user must click.
         }
         // If it's already active, do nothing to prevent re-renders.
