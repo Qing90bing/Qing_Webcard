@@ -1,3 +1,1064 @@
+// --- [NEW] Settings Management ---
+let appSettings = {
+    background: {
+        source: 'default',
+        specifier: 'random',
+        customUrl: null,
+        customType: 'unknown' // 'image', 'api', or 'unknown'
+    },
+    appearance: {
+        glassEffect: true,
+        cardBorderRadius: 16,
+        cardBlurAmount: 16
+    },
+    theme: 'system', // 'system', 'light', 'dark'
+    timeFormat: '24h', // '12h' or '24h'
+    immersiveBlinkingColon: false,
+    view: 'github', // 'github' or 'weather'
+    weather: {
+        source: 'auto', // 'auto' or 'manual'
+        city: null, // User-overridden city
+        lastFetchedCity: null // City from last successful fetch
+    },
+    hitokoto: {
+        mode: 'default', // 'default' or 'custom'
+        categories: ['a'] // Array of selected category codes
+    },
+    developer: {
+        masterSwitchEnabled: true, // Master switch for the entire feature
+        uiToggleState: true,       // State of the toggle in the UI
+        forceNewYearTheme: false // [NEW] Developer toggle for New Year theme
+    },
+    newYearTheme: {
+        backgroundEnabled: true
+    }
+};
+
+// --- [NEW] New Year Theme Logic ---
+function isNewYearPeriod() {
+    const today = new Date();
+    const lunarDate = new Dianaday(today);
+
+    // Case 1: It's the first lunar month, from day 1 to day 10.
+    if (lunarDate.month === 1 && lunarDate.day >= 1 && lunarDate.day <= 10) {
+        return true;
+    }
+
+    // Case 2: It's the last day of the 12th lunar month (New Year's Eve).
+    if (lunarDate.month === 12) {
+        const daysInLastMonth = monthDays(lunarDate.year, 12);
+        if (lunarDate.day === daysInLastMonth) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+let newYearMusicIntroPlayed = false;
+const NY_MUSIC_LOOP_START = 85.16; // 01:25:16
+const NY_MUSIC_LOOP_END = 173.20;   // 02:53:20
+
+function stopNewYearMusic() {
+    const audio = document.getElementById('new-year-audio');
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+}
+
+
+function applyNewYearMode() {
+    const body = document.body;
+    const musicBtn = document.getElementById('new-year-music-btn');
+
+    const isThemeAvailable = isNewYearPeriod() || appSettings.developer.forceNewYearTheme;
+    const isThemeEnabledByUser = appSettings.newYearTheme.backgroundEnabled;
+    const shouldBeActive = isThemeAvailable && isThemeEnabledByUser;
+
+    const isCurrentlyActive = body.classList.contains('new-year-active');
+
+    const bgSettingsWrapper = document.getElementById('main-background-settings-wrapper');
+    if (bgSettingsWrapper) {
+        bgSettingsWrapper.classList.toggle('disabled', shouldBeActive);
+    }
+
+    if (shouldBeActive) {
+        // --- Activate or Keep Active ---
+        musicBtn.classList.add('visible'); // [MODIFIED] Use 'visible' class for transition
+        musicBtn.classList.add('is-paused'); // Set initial state
+        if (!isCurrentlyActive) {
+            // It needs to be turned ON
+            body.classList.add('new-year-active');
+            backgroundFader.update('assets/images/new_year_bg.svg', true);
+            // Music is not auto-played, user must click.
+        }
+        // If it's already active, do nothing to prevent re-renders.
+    } else {
+        // --- Deactivate or Keep Inactive ---
+        musicBtn.classList.remove('visible'); // [MODIFIED] Use 'visible' class for transition
+        stopNewYearMusic();
+        if (isCurrentlyActive) {
+            // It needs to be turned OFF
+            body.classList.remove('new-year-active');
+            applyCurrentBackground();
+        }
+        // If it's already inactive, do nothing.
+    }
+}
+
+function saveSettings() {
+    localStorage.setItem('qing-homepage-settings', JSON.stringify(appSettings));
+}
+
+function loadSettings() {
+    const savedSettings = localStorage.getItem('qing-homepage-settings');
+    if (savedSettings) {
+        try {
+            const parsedSettings = JSON.parse(savedSettings);
+            // Merge saved settings with defaults to ensure compatibility with future updates
+            appSettings = {
+                ...appSettings,
+                ...parsedSettings,
+                background: { ...appSettings.background, ...(parsedSettings.background || {}) },
+                weather: { ...appSettings.weather, ...(parsedSettings.weather || {}) },
+                developer: { ...appSettings.developer, ...(parsedSettings.developer || {}) },
+                newYearTheme: { ...appSettings.newYearTheme, ...(parsedSettings.newYearTheme || {}) },
+                appearance: { ...appSettings.appearance, ...(parsedSettings.appearance || {}) }
+            };
+
+            // Backward compatibility: If old setting `view: 'weather'` exists, but new `weather.source` doesn't, default it.
+            if (appSettings.view === 'weather' && !appSettings.weather.source) {
+                appSettings.weather.source = 'auto';
+            }
+        } catch (e) {
+            console.error("Failed to parse settings from localStorage", e);
+            // If parsing fails, use default settings
+        }
+    }
+}
+
+let currentBgUrl = ''; // Holds the resolved URL of the current background
+let currentImageBlob = null; // Holds the raw image data for original-quality download
+let currentImageExtension = 'jpg'; // Holds the file extension for the blob
+
+// --- [NEW] Download Image Helper ---
+function downloadImage() {
+    const downloadBtn = document.getElementById('bg-preview-download-btn');
+    if (!downloadBtn) return;
+
+    const originalIcon = downloadBtn.innerHTML;
+    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    const restoreIcon = () => {
+        downloadBtn.innerHTML = originalIcon;
+    };
+
+    // Prioritize downloading the original blob if it exists
+    if (currentImageBlob) {
+        try {
+            const objectUrl = URL.createObjectURL(currentImageBlob);
+            const a = document.createElement('a');
+            a.href = objectUrl;
+            a.download = `background-${Date.now()}.${currentImageExtension}`;
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(objectUrl);
+            setTimeout(restoreIcon, 100);
+        } catch (error) {
+            console.error('Blob download failed:', error);
+            if (currentBgUrl) window.open(currentBgUrl, '_blank');
+            restoreIcon();
+        }
+    } else {
+        // Fallback to canvas method for static images or if blob capture failed
+        console.warn("No image blob available, falling back to canvas download.");
+        try {
+            const img = document.getElementById('bg-preview-img');
+            if (!img || !img.src || !img.complete || img.naturalWidth === 0) {
+                throw new Error('Preview image is not available or ready for canvas download.');
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob((blob) => {
+                if (!blob) throw new Error('Canvas toBlob returned null.');
+                const objectUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = objectUrl;
+                a.download = `background-${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(objectUrl);
+                restoreIcon();
+            }, 'image/png');
+        } catch (error) {
+            console.error('Canvas download fallback failed:', error);
+            if (currentBgUrl) window.open(currentBgUrl, '_blank');
+            restoreIcon();
+        }
+    }
+}
+
+const showPreviewError = () => {
+    const errorContainer = document.getElementById('bg-preview-error');
+    const loader = document.getElementById('preview-loader');
+    const previewImg = document.getElementById('bg-preview-img');
+
+    if (!errorContainer || !loader || !previewImg) return;
+
+    loader.classList.remove('visible');
+    previewImg.classList.remove('breathing-effect');
+
+    errorContainer.classList.remove('hidden');
+    setTimeout(() => {
+        errorContainer.classList.add('visible');
+    }, 10);
+};
+
+const hidePreviewError = () => {
+    const errorContainer = document.getElementById('bg-preview-error');
+    if (!errorContainer) return;
+
+    errorContainer.classList.remove('visible');
+    setTimeout(() => {
+        if (!errorContainer.classList.contains('visible')) {
+            errorContainer.classList.add('hidden');
+        }
+    }, 300);
+};
+
+const showPreview = (displayUrl, originalUrl) => {
+    const requestId = ++latestPreviewRequestId;
+    const previewImg = document.getElementById('bg-preview-img');
+    const loader = document.getElementById('preview-loader');
+    const downloadBtn = document.getElementById('bg-preview-download-btn');
+    const refreshBtn = document.getElementById('bg-preview-refresh-btn');
+
+    if (!previewImg || !loader) return;
+
+    previewImg.classList.remove('breathing-effect');
+    loader.classList.remove('visible');
+
+    downloadBtn.classList.add('visible');
+    refreshBtn.classList.add('visible');
+
+    currentBgUrl = originalUrl;
+
+    const preloader = new Image();
+    preloader.src = displayUrl;
+
+    preloader.onload = () => {
+        if (requestId !== latestPreviewRequestId) return;
+
+        previewImg.classList.remove('hidden');
+        previewImg.style.transition = 'opacity 0.2s ease-in-out';
+        previewImg.style.opacity = 0;
+
+        setTimeout(() => {
+            previewImg.src = preloader.src;
+            previewImg.style.opacity = 1;
+        }, 200);
+    };
+
+    preloader.onerror = () => {
+        if (requestId !== latestPreviewRequestId) return;
+        console.error(`Preview image failed to load: ${displayUrl}`);
+        showPreviewError();
+    };
+};
+
+async function applyCurrentBackground() {
+    // [FIX] Add a guard clause to prevent overriding the active New Year theme.
+    // This check is now based on settings state, not DOM state, to avoid race conditions on page load.
+    const isThemeAvailable = isNewYearPeriod() || (appSettings.developer && appSettings.developer.forceNewYearTheme);
+    const isThemeEnabledByUser = appSettings.newYearTheme && appSettings.newYearTheme.backgroundEnabled;
+    if (isThemeAvailable && isThemeEnabledByUser) {
+        return; // Do nothing if the New Year background should be showing.
+    }
+
+    const requestId = ++latestBgRequestId;
+    const { source, specifier } = appSettings.background;
+
+    hidePreviewError();
+
+    const stopSpinner = () => {
+        const refreshBtn = document.getElementById('bg-preview-refresh-btn');
+        if (refreshBtn) {
+            const icon = refreshBtn.querySelector('i');
+            if (icon) icon.classList.remove('fa-spin');
+        }
+    };
+
+    const hideStaticPreviewElements = () => {
+        const container = document.getElementById('background-preview-container');
+        if (container) container.classList.remove('visible');
+    };
+
+    const handleError = (error, source) => {
+        if (requestId !== latestBgRequestId) return;
+        console.error(`Error fetching background from source: ${source}`, error);
+        stopSpinner();
+        showPreviewError();
+    };
+
+    try {
+        const { source, specifier, customUrl, customType } = appSettings.background;
+        const isDynamicSource = ['bing', 'anime', 'random'].includes(source);
+        const shouldShowPreview = isDynamicSource || source === 'custom';
+
+        if (shouldShowPreview) {
+            const container = document.getElementById('background-preview-container');
+            const previewImg = document.getElementById('bg-preview-img');
+            const loader = document.getElementById('preview-loader');
+            const refreshBtn = document.getElementById('bg-preview-refresh-btn');
+
+            if (container) container.classList.add('visible');
+
+            if (previewImg && loader) {
+                previewImg.classList.add('breathing-effect');
+                loader.classList.add('visible');
+            }
+
+            // Logic for refresh button visibility
+            const showRefresh = isDynamicSource || (source === 'custom' && customType === 'api');
+            if (refreshBtn) {
+                // Use a class to control visibility for animation purposes
+                refreshBtn.classList.toggle('visible', showRefresh);
+            }
+        } else {
+            hideStaticPreviewElements();
+        }
+
+        let finalUrl;
+        let displayUrl;
+
+        if (source === 'custom') {
+            if (!customUrl) {
+                stopSpinner();
+                const errContainer = document.getElementById('bg-preview-error');
+                if (errContainer) {
+                   const firstP = errContainer.querySelector('p:first-child');
+                   const secondP = errContainer.querySelector('p:last-child');
+                   if (firstP) firstP.textContent = '未提供链接';
+                   if (secondP) secondP.textContent = '请在上方输入自定义链接并保存';
+                }
+                showPreviewError();
+                return;
+            }
+
+            if (customType === 'image') {
+                finalUrl = customUrl;
+                displayUrl = finalUrl;
+                currentImageBlob = null;
+            } else { // API - Now with robust content-type checking
+                const apiResponse = await fetch(`https://cors.eu.org/${customUrl.split('?')[0]}?v=${new Date().getTime()}`);
+                if (!apiResponse.ok) throw new Error(`Custom API fetch failed with status: ${apiResponse.status}`);
+
+                const contentType = apiResponse.headers.get('content-type');
+
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await apiResponse.json();
+                    let imageUrl;
+                    const target = Array.isArray(data) ? data[Math.floor(Math.random() * data.length)] : data;
+
+                    if (typeof target === 'object' && target !== null) {
+                        imageUrl = target.url || target.image || target.img_url;
+                    }
+
+                    if (!imageUrl) throw new Error('Could not find a valid image URL in JSON API response.');
+
+                    finalUrl = imageUrl;
+                    const imageResponse = await fetch(`https://cors.eu.org/${finalUrl}`);
+                    if (!imageResponse.ok) throw new Error(`Failed to fetch image from API's URL: ${finalUrl}`);
+
+                    const imageBlob = await imageResponse.blob();
+                    currentImageBlob = imageBlob;
+                    const imageContentType = imageResponse.headers.get('content-type');
+                    const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/webp': 'webp' };
+                    currentImageExtension = mimeToExt[imageContentType] || 'jpg';
+                    displayUrl = URL.createObjectURL(imageBlob);
+
+                } else if (contentType && contentType.startsWith('image/')) {
+                    // This is a direct image API
+                    finalUrl = customUrl;
+                    const imageBlob = await apiResponse.blob();
+                    currentImageBlob = imageBlob;
+                    const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/webp': 'webp' };
+                    currentImageExtension = mimeToExt[contentType] || 'jpg';
+                    displayUrl = URL.createObjectURL(imageBlob);
+                } else {
+                    throw new Error(`Unsupported API response content-type: ${contentType}`);
+                }
+            }
+        } else if (source === 'default') {
+            finalUrl = (specifier && specifier !== 'random' && DEFAULT_BG_IMAGES.includes(specifier))
+                ? specifier
+                : DEFAULT_BG_IMAGES[Math.floor(Math.random() * DEFAULT_BG_IMAGES.length)];
+            displayUrl = finalUrl;
+            currentImageBlob = null;
+        } else { // bing, anime, random
+            if (source === 'bing') {
+                const bingApiResponse = await fetch('https://cors.eu.org/https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN');
+                if (!bingApiResponse.ok) throw new Error('Bing API request failed');
+                const bingData = await bingApiResponse.json();
+                finalUrl = `https://www.bing.com${bingData.images[0].urlbase}_1920x1080.jpg`;
+            } else {
+                const apiUrl = source === 'anime'
+                    ? 'https://api.sretna.cn/api/anime.php'
+                    : 'https://imgapi.cn/api.php?zd=zsy&fl=fengjing&gs=images';
+                finalUrl = `${apiUrl}?v=${new Date().getTime()}`;
+            }
+
+            const imageResponse = await fetch(`https://cors.eu.org/${finalUrl}`);
+            if (!imageResponse.ok) throw new Error(`Failed to fetch image from proxy: ${finalUrl}`);
+
+            const imageBlob = await imageResponse.blob();
+            currentImageBlob = imageBlob;
+            const contentType = imageResponse.headers.get('content-type');
+            const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/webp': 'webp' };
+            currentImageExtension = mimeToExt[contentType] || 'jpg';
+
+            displayUrl = URL.createObjectURL(imageBlob);
+        }
+
+        if (requestId !== latestBgRequestId) {
+            if (displayUrl && displayUrl.startsWith('blob:')) URL.revokeObjectURL(displayUrl);
+            return;
+        }
+
+        await backgroundFader.update(displayUrl, true);
+        if (shouldShowPreview) {
+            showPreview(displayUrl, finalUrl);
+        }
+
+        stopSpinner();
+
+    } catch (error) {
+        handleError(error, source);
+    }
+}
+
+function updateBgSettingsUI() {
+    const { source, specifier } = appSettings.background;
+
+    // Update radio buttons
+    const radio = document.querySelector(`input[name="background-source"][value="${source}"]`);
+    if (radio) {
+        radio.checked = true;
+    }
+
+    // Update thumbnail selection
+    const defaultOptionsContainer = document.getElementById('default-bg-options');
+    const allThumbs = defaultOptionsContainer.querySelectorAll('.thumb-item');
+    allThumbs.forEach(thumb => thumb.classList.remove('active'));
+
+    const activeThumb = defaultOptionsContainer.querySelector(`.thumb-item[data-bg-url="${specifier}"]`);
+    if (activeThumb) {
+        activeThumb.classList.add('active');
+    }
+
+    // Show/hide thumbnail section
+    if (source === 'default') {
+        defaultOptionsContainer.classList.add('open');
+    } else {
+        defaultOptionsContainer.classList.remove('open');
+    }
+
+    // --- [NEW] Update Custom URL Input ---
+    const customBgInputWrapper = document.getElementById('custom-bg-input-wrapper');
+    const customBgInput = document.getElementById('custom-bg-input');
+    if (customBgInputWrapper && customBgInput) {
+        if (source === 'custom') {
+            customBgInputWrapper.style.maxHeight = '80px';
+            customBgInputWrapper.classList.add('mt-2');
+            customBgInput.value = appSettings.background.customUrl || '';
+        } else {
+            customBgInputWrapper.style.maxHeight = '0';
+            customBgInputWrapper.classList.remove('mt-2');
+        }
+    }
+
+    // Preview container should be visible for all dynamic sources, including custom
+    const previewContainer = document.getElementById('background-preview-container');
+    if (['bing', 'anime', 'random', 'custom'].includes(source)) {
+        previewContainer.classList.add('visible');
+    } else {
+        previewContainer.classList.remove('visible');
+    }
+}
+
+function updateThemeSettingsUI(isInstant = false) {
+    const slider = document.querySelector('.theme-slider');
+    const parent = slider ? slider.parentElement : null;
+    const currentTheme = appSettings.theme;
+    const activeButton = document.querySelector(`.setting-btn[data-theme='${currentTheme}']`);
+
+    if (!slider || !parent || !activeButton) {
+        return; // Exit if any required element is missing
+    }
+
+    if (isInstant) {
+        slider.style.transition = 'none';
+    }
+
+    // Update active classes on all buttons
+    document.querySelectorAll('.setting-btn-group .setting-btn').forEach(btn => {
+        btn.classList.toggle('active', btn === activeButton);
+    });
+
+    // Use getBoundingClientRect for precise positioning
+    const parentRect = parent.getBoundingClientRect();
+    const buttonRect = activeButton.getBoundingClientRect();
+
+    const left = buttonRect.left - parentRect.left;
+    const width = buttonRect.width;
+
+    slider.style.width = `${width}px`;
+    slider.style.transform = `translateX(${left}px)`;
+
+    if (isInstant) {
+        // Force reflow to apply styles synchronously before re-enabling the transition
+        void slider.offsetHeight;
+        slider.style.transition = '';
+    }
+}
+
+function initializeThemeSlider() {
+    const settingsWindow = document.getElementById('settings-window');
+    if (!settingsWindow) return;
+
+    // 1. Temporarily make the modal measurable but invisible to the user
+    const originalTransition = settingsWindow.style.transition;
+    settingsWindow.style.transition = 'none';
+    settingsWindow.style.visibility = 'hidden';
+    settingsWindow.style.display = 'flex'; // Ensure it's not display:none
+
+    // 2. Force it to its final "open" state to get correct dimensions
+    document.body.classList.add('settings-open');
+
+    // 3. Now, take the measurement and set the slider's state instantly
+    updateThemeSettingsUI(true);
+
+    // 4. Immediately revert all changes so the user sees nothing.
+    // This happens synchronously before the browser can paint.
+    document.body.classList.remove('settings-open');
+    settingsWindow.style.display = ''; // Revert to default
+    settingsWindow.style.visibility = ''; // Revert to default
+    settingsWindow.style.transition = originalTransition;
+}
+
+// --- [NEW] Settings Panel UI Generation ---
+function setupSettingsUI() {
+    // --- 1. Background Settings ---
+    const bgSettingsContainer = document.getElementById('background-settings-content');
+    if (bgSettingsContainer) {
+        const bgOptions = [
+            { value: 'default', label: '默认图片', description: '随机选择一张内置图片作为背景' },
+            { value: 'bing', label: '每日一Bing', description: '展示 Bing 搜索的每日壁纸' },
+            { value: 'anime', label: '随机动漫', description: '从公共动漫图库随机加载一张高清壁纸' },
+            { value: 'random', label: '随机图片', description: '从公共图库中随机加载一张风景图' },
+            { value: 'custom', label: '自定义来源', description: '使用单个图片链接或公共图库API' } // 测试使用 https://www.loliapi.com/acg/
+        ];
+
+        const newYearToggleHTML = `
+            <div id="new-year-bg-toggle-section" class="hidden">
+                <div class="flex justify-between items-center p-2">
+                    <div>
+                        <span class="font-medium">启用新年节日背景</span>
+                        <div class="setting-description">关闭后将恢复您选择的常规背景</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="new-year-bg-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="border-t border-[var(--separator-color)] my-4"></div>
+            </div>
+        `;
+
+        let mainBgSettingsHTML = `<div id="main-background-settings-wrapper" class="relative">`;
+        mainBgSettingsHTML += `<div id="main-background-settings-content">`;
+
+        let radioOptionsHTML = '';
+        bgOptions.forEach(option => {
+            radioOptionsHTML += `
+                <div>
+                    <input type="radio" id="bg-radio-${option.value}" name="background-source" value="${option.value}" class="setting-radio-input">
+                    <label for="bg-radio-${option.value}" class="setting-radio-label">
+                        <span class="custom-radio-button"></span>
+                        <div>
+                            <span>${option.label}</span>
+                            <div class="setting-description">${option.description}</div>
+                        </div>
+                    </label>
+                </div>
+            `;
+        });
+
+        const customBgInputHTML = `
+            <div id="custom-bg-input-wrapper" class="pl-2 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
+                <div class="relative flex items-center">
+                    <input type="text" id="custom-bg-input" placeholder="输入图片或API链接" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); color: var(--text-color-primary); border-color: var(--separator-color); padding-right: 5.5rem;">
+                    <div class="absolute right-1 flex items-center justify-end h-full w-14">
+                        <div id="custom-bg-btn-group" class="flex items-center space-x-1">
+                            <button id="clear-custom-bg-btn" data-tooltip="清空" class="tooltip-container p-1 rounded-full text-gray-400 hover:text-white transition-all relative w-8 h-8">
+                                <i class="fas fa-times w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></i>
+                            </button>
+                            <button id="save-custom-bg-btn" data-tooltip="保存" class="tooltip-container p-1 rounded-full text-gray-400 hover:text-white transition-all relative w-8 h-8">
+                                <i class="fas fa-save w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 opacity-100 flex items-center justify-center"></i>
+                                <i class="fas fa-check w-5 h-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 opacity-0 flex items-center justify-center" style="color: var(--status-today);"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="custom-bg-input-error" class="text-xs mt-1 pl-1 hidden" style="color: #ef4444;"></div>
+            </div>
+        `;
+
+        let defaultOptionsHTML = `
+            <div id="default-bg-options">
+                <div class="thumb-container">
+                    <div class="thumb-item" data-bg-url="random">
+                        <div class="thumb-overlay">随机</div>
+                    </div>
+        `;
+        DEFAULT_BG_IMAGES.forEach((url, index) => {
+            defaultOptionsHTML += `
+                <div class="thumb-item" data-bg-url="${url}">
+                    <img src="${url}" alt="Default Background ${index + 1}" loading="lazy">
+                </div>
+            `;
+        });
+        defaultOptionsHTML += `</div></div>`;
+
+        const previewHTML = `
+            <div id="background-preview-container">
+                <div id="bg-preview-wrapper" class="relative w-full aspect-[16/9] rounded-lg overflow-hidden bg-white/5 transition-all duration-300 ease-in-out">
+                    <img id="bg-preview-img" src="${DEFAULT_BG_IMAGES[0]}" alt="背景预览" class="w-full h-full object-cover hidden" crossorigin="anonymous">
+                    <div id="preview-loader"></div>
+                    <div id="bg-preview-error" class="absolute inset-0 hidden grid place-items-center cursor-pointer rounded-lg transition-all bg-black/30 backdrop-blur-sm text-center">
+                        <div>
+                            <p class="font-bold text-lg">图片加载失败</p>
+                            <p class="mt-1 text-sm">请点击预览画面重试</p>
+                        </div>
+                    </div>
+                    <a id="bg-preview-download-btn" href="#" download="background.jpg" data-tooltip="保存该图片" class="tooltip-container absolute bottom-2 right-2 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <button id="bg-preview-refresh-btn" data-tooltip="换一张" class="tooltip-container absolute bottom-2 right-12 w-9 h-9 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-all scale-0 duration-300">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        mainBgSettingsHTML += radioOptionsHTML + customBgInputHTML + defaultOptionsHTML + previewHTML;
+        mainBgSettingsHTML += `</div>`; // closes main-background-settings-content
+
+        mainBgSettingsHTML += `
+            <div id="background-settings-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-sm font-bold cursor-not-allowed p-4 text-center">
+                <i class="fas fa-lock mr-2"></i>
+                <span>新年主题已激活，如要使用背景功能请关闭新年主题</span>
+            </div>
+        `;
+
+        mainBgSettingsHTML += `</div>`; // closes main-background-settings-wrapper
+
+        bgSettingsContainer.innerHTML = newYearToggleHTML + mainBgSettingsHTML;
+    }
+
+    // --- 2. Theme Mode Settings ---
+    const themeSettingsContainer = document.getElementById('theme-settings-content').parentElement;
+    if (themeSettingsContainer) {
+        const container = themeSettingsContainer.querySelector('#theme-settings-content');
+        container.innerHTML = `
+        <div class="setting-description text-center mb-3">选择一个主题，或让它随系统自动更改</div>
+            <div class="setting-btn-group w-full relative">
+                <div class="theme-slider absolute h-full transition-all duration-300"></div>
+                <button class="setting-btn relative z-10" data-theme="system"><i class="fas fa-desktop fa-fw mr-2"></i>跟随系统</button>
+                <button class="setting-btn relative z-10" data-theme="light"><i class="fas fa-sun fa-fw mr-2"></i>日间模式</button>
+                <button class="setting-btn relative z-10" data-theme="dark"><i class="fas fa-moon fa-fw mr-2"></i>夜间模式</button>
+            </div>
+        `;
+    }
+
+    // --- NEW: Time Format Settings ---
+    const timeFormatContainer = document.getElementById('time-format-settings-content');
+    if (timeFormatContainer) {
+        timeFormatContainer.innerHTML = `
+            <div class="space-y-2">
+                <div class="flex justify-between items-center p-2">
+                    <div>
+                        <span class="font-medium">沉浸模式冒号闪烁</span>
+                        <div class="setting-description">仅在全屏时钟下生效</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="immersive-blink-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="time-format-24h" name="time-format" value="24h" class="setting-radio-input">
+                    <label for="time-format-24h" class="setting-radio-label">
+                        <span class="custom-radio-button"></span>
+                        <div>
+                            <span>24小时制（ 19:30 ）</span>
+                            <div class="setting-description">以 00:00 至 23:59 的格式显示时间</div>
+                        </div>
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="time-format-12h" name="time-format" value="12h" class="setting-radio-input">
+                    <label for="time-format-12h" class="setting-radio-label">
+                        <span class="custom-radio-button"></span>
+                        <div>
+                            <span>12小时制（ 7:30 AM / 7:30 PM ）</span>
+                            <div class="setting-description">使用 AM/PM 来区分上午和下午，符合部分用户习惯</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- 3. View Toggle Settings ---
+    const viewToggleContainer = document.getElementById('view-toggle-content');
+    if (viewToggleContainer) {
+        viewToggleContainer.innerHTML = `
+            <div class="space-y-2">
+                <div>
+                    <input type="radio" id="view-radio-github" name="view-source" value="github" class="setting-radio-input">
+                    <label for="view-radio-github" class="setting-radio-label">
+                        <span class="custom-radio-button"></span>
+                        <div>
+                            <span>显示 GitHub 贡献图</span>
+                            <div class="setting-description">主卡片区域展示您的 GitHub 提交活动图表</div>
+                        </div>
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="view-radio-weather-auto" name="view-source" value="weather-auto" class="setting-radio-input">
+                    <label for="view-radio-weather-auto" class="setting-radio-label">
+                        <span class="custom-radio-button"></span>
+                        <div>
+                            <span>天气信息（ IP 自动定位 ）</span>
+                            <div class="setting-description">根据您的网络位置自动获取并显示当地的天气情况</div>
+                        </div>
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="view-radio-weather-manual" name="view-source" value="weather-manual" class="setting-radio-input">
+                    <label for="view-radio-weather-manual" class="setting-radio-label">
+                        <span class="custom-radio-button"></span>
+                        <div>
+                            <span>天气信息（ 手动输入 ）</span>
+                            <div class="setting-description">手动输入城市名称来获取指定地点的天气预报</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div id="manual-city-input-wrapper" class="mt-2 pl-2 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
+                <div class="relative flex items-center">
+                    <input type="text" id="weather-city-input" placeholder="输入城市后回车 (例如: 北京)" class="w-full rounded-md border px-3 py-1.5 text-sm" style="background-color: var(--progress-bar-bg); color: var(--text-color-primary); border-color: var(--separator-color);">
+                    <button id="save-city-btn" data-tooltip="保存" class="tooltip-container absolute right-1 p-1 rounded-full text-gray-400 hover:text-white">
+                        <i class="fas fa-save w-5 h-5 flex items-center justify-center"></i>
+                    </button>
+                    <div id="confirm-city-icon" class="absolute right-1 p-1 hidden opacity-0" style="color: var(--status-today);">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+                <div id="city-input-error" class="text-xs mt-1 pl-1 hidden" style="color: #ef4444;"></div>
+            </div>
+        `;
+    }
+
+    // --- 4. Hitokoto Settings ---
+    const hitokotoContainer = document.getElementById('hitokoto-settings-content');
+    if (hitokotoContainer) {
+        const categories = [
+            { id: 'a', name: '动画' }, { id: 'b', name: '漫画' }, { id: 'c', name: '游戏' },
+            { id: 'd', name: '文学' }, { id: 'e', name: '原创' }, { id: 'f', name: '网络' },
+            { id: 'g', name: '其他' }, { id: 'h', name: '影视' }, { id: 'i', name: '诗词' },
+            { id: 'j', name: '网易云' }, { id: 'k', name: '哲学' }, { id: 'l', name: '抖机灵' }
+        ];
+
+        let checkboxesHTML = categories.map(cat => `
+            <div>
+                <input type="checkbox" id="hitokoto-cat-${cat.id}" name="hitokoto-category" value="${cat.id}" class="setting-radio-input hitokoto-checkbox-input">
+                <label for="hitokoto-cat-${cat.id}" class="hitokoto-checkbox-label">
+                    <span class="custom-checkbox">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                    <span>${cat.name}</span>
+                </label>
+            </div>
+        `).join('');
+
+        hitokotoContainer.innerHTML = `
+            <div class="space-y-2">
+                <div>
+                    <input type="radio" id="hitokoto-mode-default" name="hitokoto-mode" value="default" class="setting-radio-input">
+                    <label for="hitokoto-mode-default" class="setting-radio-label">
+                        <span class="custom-radio-button"></span>
+                        <div>
+                            <span>默认</span>
+                            <div class="setting-description">随机从所有分类中获取句子</div>
+                        </div>
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="hitokoto-mode-custom" name="hitokoto-mode" value="custom" class="setting-radio-input">
+                    <label for="hitokoto-mode-custom" class="setting-radio-label">
+                        <span class="custom-radio-button"></span>
+                        <div>
+                            <span>自定义</span>
+                            <div class="setting-description">手动选择想要获取的句子分类</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div id="hitokoto-custom-options">
+                <div class="border-t border-[var(--separator-color)] pt-3">
+                    <div class="hitokoto-checkbox-container">
+                        ${checkboxesHTML}
+                    </div>
+                     <div class="mt-4 flex items-center">
+                        <div class="flex-shrink-0">
+                            <input type="checkbox" id="hitokoto-select-all" class="setting-radio-input hitokoto-checkbox-input">
+                            <label for="hitokoto-select-all" class="hitokoto-checkbox-label font-medium">
+                                <span class="custom-checkbox">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </span>
+                                <span>全选 / 全不选</span>
+                            </label>
+                        </div>
+                        <div class="flex-grow text-center">
+                            <div id="hitokoto-validation-msg" class="inline-flex items-center">
+                                <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <span>必须保留一个类型</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <button id="hitokoto-save-btn" data-tooltip="保存" class="tooltip-container p-2 rounded-full icon-btn transition-all active:scale-95 relative w-9 h-9">
+                                <i class="fas fa-save fa-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300"></i>
+                                <div id="hitokoto-confirm-icon" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-300" style="color: var(--status-today);">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function updateTimeFormatUI() {
+    const selectedFormat = appSettings.timeFormat;
+    const radio = document.querySelector(`input[name="time-format"][value="${selectedFormat}"]`);
+    if (radio) {
+        radio.checked = true;
+    }
+}
+
+function updateViewToggleUI() {
+    const cityInputWrapper = document.getElementById('manual-city-input-wrapper');
+    const cityInput = document.getElementById('weather-city-input');
+
+    let selectedViewValue;
+    if (appSettings.view === 'github') {
+        selectedViewValue = 'github';
+    } else { // view is 'weather'
+        selectedViewValue = `weather-${appSettings.weather.source}`;
+    }
+
+    const radio = document.querySelector(`input[name="view-source"][value="${selectedViewValue}"]`);
+    if (radio) {
+        radio.checked = true;
+    }
+
+    const isManual = appSettings.view === 'weather' && appSettings.weather.source === 'manual';
+    cityInputWrapper.style.maxHeight = isManual ? '60px' : '0';
+    cityInputWrapper.style.marginTop = isManual ? '0.75rem' : '0';
+
+    if (isManual) {
+        cityInput.placeholder = appSettings.weather.city || '输入城市后回车 (例如: 北京)';
+        cityInput.value = appSettings.weather.city || '';
+    }
+}
+
+function updateHitokotoSettingsUI() {
+    const { mode, categories } = appSettings.hitokoto;
+
+    // Update radio buttons
+    const radio = document.querySelector(`input[name="hitokoto-mode"][value="${mode}"]`);
+    if (radio) {
+        radio.checked = true;
+    }
+
+    // Show/hide custom options panel
+    const customOptionsContainer = document.getElementById('hitokoto-custom-options');
+    if (mode === 'custom') {
+        customOptionsContainer.classList.add('open');
+    } else {
+        customOptionsContainer.classList.remove('open');
+    }
+
+    // Update checkboxes
+    const allCheckboxes = document.querySelectorAll('input[name="hitokoto-category"]');
+    allCheckboxes.forEach(checkbox => {
+        checkbox.checked = categories.includes(checkbox.value);
+    });
+
+    // Update "Select All" checkbox state
+    const selectAllCheckbox = document.getElementById('hitokoto-select-all');
+    if (selectAllCheckbox) {
+        const allCategories = Array.from(allCheckboxes).map(cb => cb.value);
+        selectAllCheckbox.checked = categories.length === allCategories.length;
+    }
+}
+
+function updateImmersiveBlinkUI() {
+    const toggle = document.getElementById('immersive-blink-toggle');
+    if (toggle) {
+        toggle.checked = appSettings.immersiveBlinkingColon;
+    }
+}
+
+function updateDeveloperSettingsUI() {
+    const devToggle = document.getElementById('dev-options-toggle');
+    const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
+
+    if (devToggle) {
+        devToggle.checked = appSettings.developer.uiToggleState;
+    }
+    if (forceNewYearToggle) {
+        forceNewYearToggle.checked = appSettings.developer.forceNewYearTheme;
+    }
+}
+
+function updateSliderProgress(slider) {
+    const min = slider.min;
+    const max = slider.max;
+    const value = slider.value;
+    const percentage = ((value - min) / (max - min)) * 100;
+    slider.style.backgroundSize = `${percentage}% 100%`;
+}
+
+function updateAppearanceSettingsUI() {
+    const { glassEffect, cardBorderRadius, cardBlurAmount } = appSettings.appearance;
+
+    const glassEffectToggle = document.getElementById('glass-effect-toggle');
+    if (glassEffectToggle) {
+        glassEffectToggle.checked = glassEffect;
+    }
+
+    const radiusSlider = document.getElementById('card-border-radius-slider');
+    const radiusValue = document.getElementById('card-border-radius-value');
+    if (radiusSlider && radiusValue) {
+        radiusSlider.value = cardBorderRadius;
+        radiusValue.textContent = `${cardBorderRadius}px`;
+        updateSliderProgress(radiusSlider);
+    }
+
+    const blurSlider = document.getElementById('card-blur-amount-slider');
+    const blurValue = document.getElementById('card-blur-amount-value');
+    if (blurSlider && blurValue) {
+        blurSlider.value = cardBlurAmount;
+        blurValue.textContent = `${cardBlurAmount}px`;
+        updateSliderProgress(blurSlider);
+    }
+}
+
+function updateSettingsUI() {
+    updateBgSettingsUI();
+    // updateThemeSettingsUI(); // This is now handled by a dedicated initializer
+    updateTimeFormatUI();
+    updateViewToggleUI();
+    updateHitokotoSettingsUI();
+    updateImmersiveBlinkUI();
+    updateDeveloperSettingsUI();
+    updateAppearanceSettingsUI();
+
+    // Logic for New Year background toggle
+    const newYearBgToggleSection = document.getElementById('new-year-bg-toggle-section');
+    const newYearBgToggle = document.getElementById('new-year-bg-toggle');
+    const shouldThemeBeActive = isNewYearPeriod() || appSettings.developer.forceNewYearTheme;
+
+    if (newYearBgToggleSection && newYearBgToggle) {
+        if (shouldThemeBeActive) {
+            newYearBgToggleSection.classList.remove('hidden');
+            newYearBgToggle.checked = appSettings.newYearTheme.backgroundEnabled;
+        } else {
+            newYearBgToggleSection.classList.add('hidden');
+        }
+    }
+}
+
+// --- [NEW] View (GitHub/Weather) Management ---
+function applyCurrentView() {
+    const githubView = document.getElementById('github-view');
+    const weatherView = document.getElementById('weather-view');
+
+    if (appSettings.view === 'weather') {
+        githubView.classList.add('hidden');
+        weatherView.classList.remove('hidden');
+        fetchAndDisplayWeather();
+    } else {
+        weatherView.classList.add('hidden');
+        githubView.classList.remove('hidden');
+        setupGitHubChartLoader();
+    }
+}
+
+function applyCurrentTheme() {
+    const body = document.body;
+    // Clear all theme-* classes before adding the new one
+    body.classList.forEach(className => {
+        if (className.startsWith('theme-')) {
+            body.classList.remove(className);
+        }
+    });
+
+    let themeToApply;
+    if (appSettings.theme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        themeToApply = prefersDark ? 'theme-dark' : 'theme-light';
+    } else {
+        themeToApply = `theme-${appSettings.theme}`;
+    }
+    body.classList.add(themeToApply);
+}
+
+function applyBlinkingEffect() {
+    document.body.classList.toggle('immersive-blink-enabled', appSettings.immersiveBlinkingColon);
+}
+
+function applyGlassEffect() {
+    document.body.classList.toggle('glass-effect-disabled', !appSettings.appearance.glassEffect);
+
+    const blurSlider = document.getElementById('card-blur-amount-slider');
+    const blurContainer = document.getElementById('blur-setting-container'); // Target the new container
+    if (blurSlider && blurContainer) {
+        const isGlassEnabled = appSettings.appearance.glassEffect;
+        blurSlider.disabled = !isGlassEnabled;
+        blurContainer.classList.toggle('disabled', !isGlassEnabled);
+    }
+}
+
+function applyCardSettings() {
+    const { cardBorderRadius, cardBlurAmount } = appSettings.appearance;
+    document.documentElement.style.setProperty('--card-border-radius', `${cardBorderRadius}px`);
+    document.documentElement.style.setProperty('--card-backdrop-blur', `${cardBlurAmount}px`);
+}
+
 // --- 初始状态和常量 ---
 const DEFAULT_BG_IMAGES = [
     'https://s21.ax1x.com/2025/08/10/pVdEmM6.jpg',
@@ -8,13 +1069,20 @@ const DEFAULT_BG_IMAGES = [
 ];
 // Calendar and holiday logic moved to js/calendar.js
 let holidayListDisplayedYear = new Date().getFullYear();
-let hasManuallyScrolled = false;
-let holidayListSimpleBar; // Instance for the holiday list scrollbar
+import { initializeClock } from './clock.js';
+import { initializeGreeting } from './greeting.js';
+import { initializeHitokoto } from './hitokoto.js';
+import { initializeTimeCapsule } from './time-capsule.js';
+import { initializeHolidayDisplay } from './holiday-display.js';
+
 let settingsSimpleBar = null; // Instance for the settings scrollbar
 let isFetchingWeather = false; // Lock to prevent multiple weather requests
 let cachedCommitsHTML = null;
 let areCommitsCached = false;
 let aboutCardHasAnimated = false;
+let clockModule;
+let hitokotoModule;
+let timeCapsuleModule;
 
 // --- [NEW] Reusable Cross-fade Logic ---
 function createCrossfader(layers) {
@@ -87,571 +1155,10 @@ const cancelYearBtn = document.getElementById('cancel-year-btn');
 const yearInputError = document.getElementById('year-input-error');
 const yearRangeWarning = document.getElementById('year-range-warning');
 
-// --- 动态时钟功能 ---
-function updateTime() {
-    const timeDisplay = document.getElementById('time-display');
-    const dateDisplay = document.getElementById('date-display');
-    const now = new Date();
 
-    const hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const colon = `<span class="time-colon">:</span>`;
 
-    if (appSettings.timeFormat === '12h') {
-        timeDisplay.classList.add('flex', 'items-baseline', 'justify-center');
-        let h12 = hours % 12;
-        h12 = h12 ? h12 : 12; // the hour '0' should be '12'
-        const strH12 = String(h12).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        
-        const timeString = `${strH12}${colon}${minutes}${colon}${seconds}`;
-        timeDisplay.innerHTML = `<span>${timeString}</span><span class="text-3xl font-bold ml-2">${ampm}</span>`;
-    } else { // 24h format
-        timeDisplay.classList.remove('flex', 'items-baseline', 'justify-center');
-        const strH24 = String(hours).padStart(2, '0');
-        timeDisplay.innerHTML = `${strH24}${colon}${minutes}${colon}${seconds}`;
-    }
 
-    const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-    dateDisplay.textContent = `${now.getFullYear()}年${String(now.getMonth() + 1).padStart(2, '0')}月${String(now.getDate()).padStart(2, '0')}日 ${weekdays[now.getDay()]}`;
-}
 
-// --- 问候语功能 ---
-function updateGreeting() {
-    const greetingEl = document.getElementById('greeting');
-    const now = new Date();
-    const hour = now.getHours();
-    const month = now.getMonth() + 1; // getMonth() 返回 0-11, +1 变为 1-12
-
-    // 定义问候语库
-    const greetings = {
-        spring: { // 春季 (3-5月)
-            morning: [
-                "早上好，春意盎然，愿你的一天如诗如画。🌿",
-                "清晨的露水，伴着花香，道一声早安。🌸",
-                "春日黎明，万物复苏，今天也要活力满满！",
-                "早安，愿春风为你吹来一天的好运。🍃",
-                "听，窗外是不是有鸟儿在歌唱？早安！🐦",
-                "新的一天，从一个清新的春日早晨开始。",
-                "一年之计在于春，一日之计在于晨，加油！",
-                "拉开窗帘，让第一缕春光拥抱你。☀️"
-            ],
-            afternoon: [
-                "下午好，春日暖阳，适合小憩片刻。☀️",
-                "午后时光，泡杯花茶，享受春日的悠闲吧。🍵",
-                "愿你心情如春日午后的阳光，明媚不忧伤。",
-                "春天到，别春困，起来活动一下筋骨吧！",
-                "天气这么好，不去公园散散步吗？",
-                "午后的阳光，暖得让人想打瞌睡。😴",
-                "泡一壶龙井，静品春日的午后时光。",
-                "春雷阵阵，说不定会有一场春雨，记得带伞。"
-            ],
-            evening: [
-                "晚上好，春风拂面，一天的疲惫都消散了。🎑",
-                "夜幕降临，静享春夜的温柔与宁静。",
-                "春夜的星空格外明朗，祝你晚安好梦。✨",
-                "在温柔的春夜里，和世界道一句晚安。",
-                "春天的晚霞总是格外温柔，晚上好。",
-                "忙碌了一天，是时候享受一顿美味的晚餐了。🍲",
-                "晚风轻轻，吹来青草和泥土的芬芳。",
-                "今晚月色真美，风也温柔，祝你愉快。"
-            ],
-            night: [
-                "夜深了，春夜微凉，记得盖好被子。🌙",
-                "晚安，愿你在梦里与最美的春天相遇。",
-                "放下手机，闭上眼睛，聆听春虫的鸣叫。😴",
-                "夜阑人静，祝你安眠，明日又是崭新的一天。",
-                "春夜宁静，宜读一本闲书，安然入睡。",
-                "把今天份的开心打包，睡个好觉吧。",
-                "晚安，愿你的梦里繁花似锦。🌸",
-                "夜了，全世界都睡了，你也要早点休息。"
-            ]
-        },
-        summer: { // 夏季 (6-8月)
-            morning: [
-                "早上好，夏日清晨，阳光正好，微风不燥。☀️",
-                "早安！今天也是元气满满的一天，别怕热！",
-                "夏日的清晨，是西瓜味的，是冰汽水味的。🍉",
-                "蝉鸣声声，唤醒了夏天的早晨，早安！",
-                "早安！今天的太阳也很热情呢！",
-                "赶在热浪来临前，享受清晨的片刻凉爽吧。",
-                "又是被阳光叫醒的一天，你好呀！",
-                "新的一天，像加了冰块的汽水，充满活力！"
-            ],
-            afternoon: [
-                "下午好，夏日炎炎，记得多喝水防暑哦。💧",
-                "午后困倦，来根冰棍提提神吧！🍦",
-                "心静自然凉，愿你拥有一个清爽的下午。",
-                "夏日午后，宜开空调，宜听音乐，宜想你。😉",
-                "热到融化的下午，你还好吗？",
-                "“哪儿凉快待着去”，是夏天最真诚的祝福。",
-                "这个钟点，唯有空调和西瓜不可辜负。🍉"
-            ],
-            evening: [
-                "晚上好，夏夜晚风，吹散白天的燥热。🎐",
-                "提着一瓶汽水，坐在台阶上，感受夏天的晚风。",
-                "属于夏天的夜晚，是烧烤、小龙虾和冰啤酒。🍻",
-                "晚风轻踩着云朵，月亮在贩售快乐，晚安！",
-                "晚风吹走了热气，带来了夏夜的惬意。",
-                "又到了可以去夜市逛吃逛吃的季节！",
-                "小时候的夏夜，是蒲扇、凉席和满天繁星。✨",
-                "晚上好，去散散步吧，说不定能看到萤火虫。"
-            ],
-            night: [
-                "夜深了，晚安，愿你的梦里有凉爽的夏风。🌌",
-                "仲夏夜之梦，愿你拥抱整片星空。✨",
-                "晚安，月亮警察已就位，请安心入睡。👮",
-                "嘘，静下心来，听听窗外的虫鸣。",
-                "晚安，空调调到26度刚刚好哦。😉",
-                "别熬夜了，你的皮肤和头发都需要休息。",
-                "祝你做个凉爽的梦，梦里没有蚊子。🦟"
-            ]
-        },
-        autumn: { // 秋季 (9-11月)
-            morning: [
-                "早上好，秋高气爽，愿你今天也心情舒畅。🍁",
-                "早安，空气中有了秋天的味道，深呼吸一下吧。",
-                "秋日的晨光，温柔地洒在每一片落叶上，早安。",
-                "天凉了，记得多穿件衣服，别感冒了哦。🧥",
-                "秋日的天空，蓝得像一块画布，早安。",
-                "早晨的空气微凉，记得添一件薄外套。",
-                "秋天，是一个让一切都沉静下来的季节，早。",
-                "又是被梦想叫醒的一天，加油，打工人！"
-            ],
-            afternoon: [
-                "下午好，秋日的午后，阳光温暖得刚刚好。☕️",
-                "捧一杯热茶，读一本好书，享受秋日的静谧。",
-                "秋天是收获的季节，愿你的努力都有回报。",
-                "午安，愿秋风带走你的烦恼和疲惫。🍂",
-                "秋日的午后，每一帧都像电影画面。🎬",
-                "阳光正好，温度也正好，一切都刚刚好。",
-                "来块烤红薯或是糖炒栗子怎么样？🌰",
-                "下午犯困的话，就看看窗外的蓝天白云吧。"
-            ],
-            evening: [
-                "晚上好，秋风送爽，月色宜人。🌕",
-                "丹桂飘香的夜晚，适合思念和团圆。",
-                "秋天的夜晚，是思念的季节，也是养膘的季节。",
-                "晚来秋，天凉如水，早点休息吧。",
-                "晚上好，今天你看到美丽的落日了吗？",
-                "秋天的夜晚，总让人感觉格外宁静和舒适。",
-                "天气转凉，晚餐要吃得暖暖和和的。",
-                "月亮挂在枝头，像一颗熟透的果子。晚安。"
-            ],
-            night: [
-                "夜深了，秋意渐浓，晚安好梦。🌙",
-                "愿你伴着窗外的桂花香，甜甜地进入梦乡。",
-                "天阶夜色凉如水，卧看牵牛织女星。晚安。",
-                "被子要盖厚一点了，夜里会降温的。😴",
-                "夜深了，把心事放一边，好好睡觉最重要。",
-                "秋夜微凉，盖着柔软的被子，最是舒服。😴",
-                "晚安，愿你梦里有金色的麦田和果实。",
-                "明天会更好，快睡吧。"
-            ]
-        },
-        winter: { // 冬季 (12-2月)
-            morning: [
-                "早上好，虽然天气寒冷，但也要拥抱阳光哦。❄️",
-                "早安，冬日醒来有阳光，就是最幸福的事。",
-                "起床大作战开始了！祝你成功！💪",
-                "冬日清晨，来一杯热饮，温暖一整天。☕️",
-                "早安！今天你和你的床分离成功了吗？",
-                "窗户上结了霜花，冬天真的来啦。❄️",
-                "热气腾腾的早餐，是对冬天早晨最大的尊重。",
-                "呼一口气都是白色的，这才是冬天的感觉。"
-            ],
-            afternoon: [
-                "下午好，晒晒冬日的太阳，整个人都暖洋洋的。",
-                "泡个热水脚，是对冬天下午最好的尊重。",
-                "天气这么冷，不如…吃顿火锅？🍲",
-                "愿这个冬天，有人与你立黄昏，问你粥可温。",
-                "冬日的午后短暂又珍贵，多晒晒太阳吧。",
-                "一杯热可可，一份好心情，送给下午的你。☕️",
-                "外面天寒地冻，还是待在室内最舒服了。",
-                "离天黑又近了一步，珍惜白天的时光。"
-            ],
-            evening: [
-                "晚上好，窗外天寒地冻，屋内温暖如春。",
-                "冬天最适合窝在沙发里，看一部温暖的电影。🎬",
-                "雪落下的声音，是冬夜的交响曲。",
-                "晚来天欲雪，能饮一杯无？",
-                "晚上好，回家路上注意保暖呀。",
-                "冬夜的灯火，看起来总是格外温暖。",
-                "忙了一天，窝在沙发里就是最大的幸福。",
-                "天冷了，今晚吃点热乎的吧！"
-            ],
-            night: [
-                "夜深了，钻进温暖的被窝，和世界说晚安。🛌",
-                "晚安，愿你一夜无梦，安睡到天亮。",
-                "冬天，是适合早睡的季节，晚安。",
-                "请查收你的冬日限定好梦。🌙",
-                "晚安，让温暖的被窝治愈你的一切。",
-                "听着窗外的风声，安稳地睡吧。",
-                "别熬夜了，对得起这么冷的天吗？快去睡觉！",
-                "晚安，愿你梦里阳光普照，春暖花开。"
-            ]
-        },
-        default: [ // 默认/备用问候语
-            "你好呀，今天过得怎么样？",
-            "愿你眼里的星星，永远闪亮。",
-            "无论天气如何，记得带上自己的阳光。",
-            "希望你今天也能开心！",
-            "嘿，陌生人，祝你今天开心。",
-            "生活或许不易，但请别忘了微笑。😊",
-            "每一天都是一份独一无二的礼物。",
-            "偷偷告诉你，你很棒！",
-            "愿你所到之处皆热土，所遇之人皆良善。"
-        ]
-    };
-
-    // 判断季节
-    let season = 'default';
-    if (month >= 3 && month <= 5) {
-        season = 'spring';
-    } else if (month >= 6 && month <= 8) {
-        season = 'summer';
-    } else if (month >= 9 && month <= 11) {
-        season = 'autumn';
-    } else { // 12, 1, 2月
-        season = 'winter';
-    }
-
-    // 判断时间段
-    let timeOfDay = 'night';
-    if (hour >= 5 && hour < 12) {
-        timeOfDay = 'morning';
-    } else if (hour >= 12 && hour < 18) {
-        timeOfDay = 'afternoon';
-    } else if (hour >= 18 && hour < 22) {
-        timeOfDay = 'evening';
-    }
-
-    // 获取对应的问候语列表
-    const availableGreetings = greetings[season][timeOfDay] || greetings.default;
-    
-    // 随机选择一条问候语并显示
-    const randomGreeting = availableGreetings[Math.floor(Math.random() * availableGreetings.length)];
-    greetingEl.textContent = randomGreeting;
-}
-
-// --- 主倒计时卡片更新 ---
-function updateCountdown() {
-    const countdownDisplay = document.getElementById('countdown-display');
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    const currentYearEvents = getAllHolidaysForYear(now.getFullYear());
-    const nextYearEvents = getAllHolidaysForYear(now.getFullYear() + 1);
-
-    const upcomingEvents = [...currentYearEvents, ...nextYearEvents].filter(event => event.date >= today);
-
-    if (upcomingEvents.length > 0) {
-        const nextHoliday = upcomingEvents[0];
-        const diffTime = nextHoliday.date - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 0) {
-            countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><span class="text-2xl font-bold" style="color: var(--text-color-primary);">${nextHoliday.name}</span><br><strong class="text-4xl font-bold" style="color: var(--accent-color);">今天</strong>`;
-        } else if (diffDays === 1) {
-            countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><span class="text-2xl font-bold" style="color: var(--text-color-primary);">${nextHoliday.name}</span><br><strong class="text-4xl font-bold" style="color: var(--accent-color);">明天</strong>`;
-        } else {
-            countdownDisplay.innerHTML = `<span style="color: var(--text-color-primary);">距离</span><br><strong class="text-2xl" style="color: var(--text-color-primary);">${nextHoliday.name}</strong><br><span class="font-bold text-5xl align-baseline">${diffDays}</span><span class="text-lg align-baseline ml-1">天</span>`;
-        }
-    } else {
-        countdownDisplay.textContent = '所有节日都已计算完毕！';
-    }
-}
-
-// --- 节日列表视图更新 ---
-function displayHolidayList(year, isAnimated = false) {
-    const container = document.getElementById('holiday-list-container');
-    const yearDisplay = document.getElementById('holiday-list-year');
-
-    const updateContent = () => {
-        yearDisplay.textContent = year;
-    
-        const allHolidays = getAllHolidaysForYear(year);
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        const firstUpcoming = [...getAllHolidaysForYear(now.getFullYear()), ...getAllHolidaysForYear(now.getFullYear() + 1)]
-            .filter(e => e.date >= today)[0];
-
-        const holidaysByMonth = allHolidays.reduce((acc, holiday) => {
-            const month = holiday.date.getMonth();
-            if (!acc[month]) acc[month] = [];
-            acc[month].push(holiday);
-            return acc;
-        }, {});
-
-        let html = '';
-        for (let month = 0; month < 12; month++) {
-            if (holidaysByMonth[month]) {
-                html += `<div class="mb-3"><h3 class="text-lg font-semibold border-b pb-1 mb-2" style="color: var(--text-color-secondary); border-color: var(--separator-color);">${month + 1}月</h3>`;
-                holidaysByMonth[month].forEach(holiday => {
-                    const diffTime = holiday.date - today;
-                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                    let statusText = '';
-
-                    if (holiday.date.getFullYear() < now.getFullYear() || (holiday.date.getFullYear() === now.getFullYear() && diffDays < -1)) {
-                        statusText = `<span style="color: var(--status-past);">已过</span>`;
-                    } else if (diffDays === -1) {
-                        statusText = `<span style="color: var(--status-yesterday);">昨天</span>`;
-                    } else if (diffDays === 0) {
-                        statusText = `<span style="color: var(--status-today); font-weight: bold;">今天</span>`;
-                    } else if (diffDays === 1) {
-                        statusText = `<span style="color: var(--status-tomorrow); font-weight: bold;">明天</span>`;
-                    } else {
-                        statusText = `
-                            <div class="flex items-baseline" style="color: var(--accent-color);">
-                                <span class="text-2xl font-bold">${diffDays}</span>
-                                <span class="text-sm ml-1">天</span>
-                            </div>
-                        `;
-                    }
-                    
-                    const isHighlighted = firstUpcoming && firstUpcoming.name === holiday.name && firstUpcoming.date.getTime() === holiday.date.getTime();
-                    const highlightClass = isHighlighted ? 'highlight-holiday' : '';
-
-                    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-                    const dayOfWeek = weekdays[holiday.date.getDay()];
-                    const formattedDate = `${holiday.date.getMonth() + 1}月${holiday.date.getDate()}日`;
-
-                    html += `
-                        <div class="flex justify-between items-center p-2 rounded-lg ${highlightClass}">
-                            <div>
-                                <div style="color: var(--text-color-primary);">${holiday.name}</div>
-                                <div class="text-sm" style="color: var(--text-color-secondary);">${formattedDate} | ${dayOfWeek}</div>
-                            </div>
-                            ${statusText}
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-            }
-        }
-        container.innerHTML = html;
-        // [NEW] Update button visibility after content is rendered
-        setTimeout(updateTodayButtonVisibility, 50);
-    };
-
-    if (isAnimated) {
-        container.style.opacity = 0;
-        yearDisplay.style.opacity = 0;
-        setTimeout(() => {
-            updateContent();
-            container.style.opacity = 1;
-            yearDisplay.style.opacity = 1;
-        }, 100);
-    } else {
-        updateContent();
-    }
-}
-
-// [NEW] Custom smooth scroll implementation for speed control
-function customSmoothScrollTo(targetElement, options) {
-    const { duration = 300, block = 'center' } = options;
-    // SimpleBar creates a specific wrapper for the scrollable content.
-    const scrollContainer = document.getElementById('holiday-list-container-wrapper').querySelector('.simplebar-content-wrapper');
-
-    if (!scrollContainer || !targetElement) return;
-
-    let targetY;
-    if (block === 'center') {
-        targetY = targetElement.offsetTop + (targetElement.offsetHeight / 2) - (scrollContainer.offsetHeight / 2);
-    } else if (block === 'start') {
-        targetY = targetElement.offsetTop;
-    } else { // 'end'
-        targetY = targetElement.offsetTop + targetElement.offsetHeight - scrollContainer.offsetHeight;
-    }
-    
-    // Ensure targetY is within scrollable bounds
-    targetY = Math.max(0, Math.min(targetY, scrollContainer.scrollHeight - scrollContainer.clientHeight));
-
-    const startY = scrollContainer.scrollTop;
-    const distance = targetY - startY;
-    let startTime = null;
-
-    // easeInOutCubic easing function for a slightly smoother start/end
-    function ease(t, b, c, d) {
-        t /= d / 2;
-        if (t < 1) return c / 2 * t * t * t + b;
-        t -= 2;
-        return c / 2 * (t * t * t + 2) + b;
-    }
-
-    function animation(currentTime) {
-        if (startTime === null) startTime = currentTime;
-        const timeElapsed = currentTime - startTime;
-        const run = ease(timeElapsed, startY, distance, duration);
-        scrollContainer.scrollTop = run;
-        if (timeElapsed < duration) {
-            requestAnimationFrame(animation);
-        }
-    }
-
-    requestAnimationFrame(animation);
-}
-
-// [NEW] Core function to scroll to the target festival
-const scrollToTargetFestival = (isAnimated = true) => {
-    // Use a timeout to ensure the DOM has updated, e.g., after a year change
-    setTimeout(() => {
-        const container = document.getElementById('holiday-list-container');
-        if (!container) return;
-
-        let targetElement = container.querySelector('.highlight-holiday');
-
-        // If no highlighted holiday in the current view (e.g., all passed for the year)
-        if (!targetElement) {
-            // As per user request, find the last festival of the displayed year
-            const allHolidays = container.querySelectorAll('.flex.justify-between.items-center');
-            if (allHolidays.length > 0) {
-                targetElement = allHolidays[allHolidays.length - 1];
-            }
-        }
-
-        if (targetElement) {
-            if (isAnimated) {
-                customSmoothScrollTo(targetElement, { duration: 300, block: 'center' });
-            } else {
-                targetElement.scrollIntoView({ behavior: 'auto', block: 'center' });
-            }
-        }
-    }, 160); // Must be slightly longer than the list update animation (150ms)
-};
-
-// [NEW] Logic for the "Today" button's visibility
-let todayButtonObserver;
-function updateTodayButtonVisibility() {
-    const backToTodayBtn = document.getElementById('back-to-today-btn');
-    const currentYear = new Date().getFullYear();
-
-    if (todayButtonObserver) {
-        todayButtonObserver.disconnect();
-    }
-
-    if (holidayListDisplayedYear !== currentYear) {
-        backToTodayBtn.classList.add('visible'); // Always show for other years
-        return;
-    }
-
-    // Logic for the current year
-    const container = document.getElementById('holiday-list-container');
-    let targetElement = container.querySelector('.highlight-holiday');
-
-    if (!targetElement) {
-        const allHolidays = container.querySelectorAll('.flex.justify-between.items-center');
-        if (allHolidays.length > 0) {
-            targetElement = allHolidays[allHolidays.length - 1];
-        }
-    }
-
-    if (targetElement) {
-        const scrollWrapper = document.getElementById('holiday-list-container-wrapper');
-        todayButtonObserver = new IntersectionObserver((entries) => {
-            const [entry] = entries;
-            // Show button if target is NOT visible
-            if (entry.isIntersecting) {
-                backToTodayBtn.classList.remove('visible');
-            } else {
-                backToTodayBtn.classList.add('visible');
-            }
-        }, {
-            root: scrollWrapper,
-            threshold: 0.5 // 50% of the element is visible
-        });
-        todayButtonObserver.observe(targetElement);
-    } else {
-        // No target element found, hide the button
-        backToTodayBtn.classList.remove('visible');
-    }
-}
-
-// --- Hitokoto 一言 功能 ---
-let isUpdatingQuote = false;
-async function fetchHitokoto() {
-    if (isUpdatingQuote) return;
-    isUpdatingQuote = true;
-    const hitokotoText = document.getElementById('hitokoto-text');
-    const hitokotoFrom = document.getElementById('hitokoto-from');
-    hitokotoText.classList.add('opacity-0');
-    hitokotoFrom.classList.add('opacity-0');
-    try {
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        let apiUrl = 'https://v1.hitokoto.cn/?encode=json';
-        if (appSettings.hitokoto.mode === 'custom' && appSettings.hitokoto.categories.length > 0) {
-            const categoryParams = appSettings.hitokoto.categories.map(cat => `c=${cat}`).join('&');
-            apiUrl += `&${categoryParams}`;
-        }
-
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Network response was not ok.');
-        const data = await response.json();
-        hitokotoText.textContent = data.hitokoto;
-        hitokotoFrom.textContent = `— 「${data.from || '未知来源'}」`;
-    } catch (error) {
-        console.error("获取一言失败:", error);
-        hitokotoText.textContent = '获取一言失败，请稍后再试。';
-        hitokotoFrom.textContent = '';
-    } finally {
-        hitokotoText.classList.remove('opacity-0');
-        hitokotoFrom.classList.remove('opacity-0');
-        setTimeout(() => { isUpdatingQuote = false; }, 600);
-    }
-}
-
-// --- 时光胶囊功能 ---
-function updateTimeCapsule() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const dayOfMonth = now.getDate();
-    const dayOfWeek = now.getDay(); // 0 for Sunday, 1 for Monday, etc.
-    const hour = now.getHours();
-
-    // 1. 今日进度
-    const dayPassed = hour;
-    const dayLeft = 24 - dayPassed;
-    const dayPercent = (dayPassed / 24) * 100;
-    document.getElementById('day-passed').textContent = dayPassed;
-    document.getElementById('day-left').textContent = dayLeft;
-    document.getElementById('day-percent').textContent = `${dayPercent.toFixed(1)}%`;
-    document.getElementById('day-progress').style.width = `${dayPercent}%`;
-
-    // 2. 本周进度 (周一为第一天)
-    const weekPassed = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const weekLeft = 7 - weekPassed;
-    const weekPercent = ((weekPassed + (hour / 24)) / 7) * 100;
-    document.getElementById('week-passed').textContent = weekPassed;
-    document.getElementById('week-left').textContent = weekLeft;
-    document.getElementById('week-percent').textContent = `${weekPercent.toFixed(1)}%`;
-    document.getElementById('week-progress').style.width = `${weekPercent}%`;
-
-    // 3. 本月进度
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const monthPassed = dayOfMonth;
-    const monthLeft = daysInMonth - monthPassed;
-    const monthPercent = (monthPassed / daysInMonth) * 100;
-    document.getElementById('month-passed').textContent = monthPassed;
-    document.getElementById('month-left').textContent = monthLeft;
-    document.getElementById('month-percent').textContent = `${monthPercent.toFixed(1)}%`;
-    document.getElementById('month-progress').style.width = `${monthPercent}%`;
-
-    // 4. 今年进度
-    const startOfYear = new Date(year, 0, 1);
-    const endOfYear = new Date(year, 11, 31);
-    const totalDaysInYear = (endOfYear - startOfYear) / (1000 * 60 * 60 * 24) + 1;
-    const yearPassed = Math.ceil((now - startOfYear) / (1000 * 60 * 60 * 24));
-    const yearLeft = totalDaysInYear - yearPassed;
-    const yearPercent = (yearPassed / totalDaysInYear) * 100;
-    document.getElementById('year-passed').textContent = yearPassed;
-    document.getElementById('year-left').textContent = yearLeft;
-    document.getElementById('year-percent').textContent = `${yearPercent.toFixed(1)}%`;
-    document.getElementById('year-progress').style.width = `${yearPercent}%`;
-}
 
 // --- 网站运行时间 ---
 function updateSiteRuntime() {
@@ -1293,7 +1800,7 @@ function setupEventListeners() {
         radio.addEventListener('change', () => {
             appSettings.timeFormat = radio.value;
             saveSettings();
-            updateTime(); // Immediately update the main clock
+            clockModule.updateTime(); // Immediately update the main clock
             // If weather view is active, re-render it to update sunrise/sunset
             if (appSettings.view === 'weather') {
                 applyCurrentView();
@@ -1640,7 +2147,7 @@ function setupEventListeners() {
             aboutCard.classList.add('hidden'); // Hide other cards
             timeCapsuleCard.classList.remove('hidden');
             timeCapsuleCard.classList.add('bounce-in');
-            updateTimeCapsule();
+            timeCapsuleModule.updateTimeCapsule();
         }
     });
 
@@ -1707,190 +2214,6 @@ function setupEventListeners() {
         });
     }
 
-    // 切换到节日列表
-    countdownCard.addEventListener('click', () => {
-        if (!holidayListCard.classList.contains('hidden')) {
-            holidayListCard.classList.add('hidden');
-            rightColumn.classList.remove('hidden');
-            animateRightColumnIn();
-        } else {
-            hasManuallyScrolled = false; // Reset scroll flag
-            rightColumn.classList.add('hidden');
-            timeCapsuleCard.classList.add('hidden'); // Hide other cards
-            aboutCard.classList.add('hidden'); // Hide other cards
-            holidayListCard.classList.remove('hidden');
-            holidayListCard.classList.add('bounce-in');
-            holidayListDisplayedYear = new Date().getFullYear();
-            displayHolidayList(holidayListDisplayedYear, true);
-            updateWarningMessage(holidayListDisplayedYear);
-            
-            // Only initialize SimpleBar and listeners once to prevent bugs
-            if (!holidayListSimpleBar) {
-                holidayListSimpleBar = new SimpleBar(document.getElementById('holiday-list-container-wrapper'));
-                const scrollElement = holidayListSimpleBar.getScrollElement();
-                const maskContainer = document.getElementById('holiday-list-container-wrapper');
-                const maxFadeSize = 40;
-
-                const updateMask = () => {
-                    const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-                    const tolerance = 1;
-                    if (scrollHeight <= clientHeight + tolerance) {
-                        maskContainer.style.setProperty('--fade-top-size', '0px');
-                        maskContainer.style.setProperty('--fade-bottom-size', '0px');
-                        return;
-                    }
-                    const scrollBottom = scrollHeight - clientHeight - scrollTop;
-                    const topFade = Math.min(scrollTop, maxFadeSize);
-                    const bottomFade = Math.min(scrollBottom, maxFadeSize);
-                    maskContainer.style.setProperty('--fade-top-size', `${topFade}px`);
-                    maskContainer.style.setProperty('--fade-bottom-size', `${bottomFade}px`);
-                };
-
-                scrollElement.addEventListener('scroll', updateMask);
-                
-                // Also handle the original manual scroll flag listener
-                scrollElement.addEventListener('scroll', () => {
-                    hasManuallyScrolled = true;
-                }, { once: true });
-
-                // Call once after a short delay to ensure layout is calculated correctly
-                setTimeout(updateMask, 50);
-            }
-
-            // Initial scroll is now animated
-            setTimeout(() => {
-                scrollToTargetFestival(true);
-            }, 50);
-        }
-    });
-
-    // 关闭节日列表
-    document.getElementById('close-holiday-list').addEventListener('click', (e) => {
-        e.stopPropagation();
-        holidayListCard.classList.add('hidden');
-        rightColumn.classList.remove('hidden');
-        animateRightColumnIn();
-    });
-
-    // "回到今天"按钮逻辑
-    document.getElementById('back-to-today-btn').addEventListener('click', () => {
-        const currentYear = new Date().getFullYear();
-        if (holidayListDisplayedYear !== currentYear) {
-            handleYearChange(currentYear);
-        }
-        scrollToTargetFestival(true);
-    });
-
-    // [NEW] Warning message logic
-    const updateWarningMessage = (year) => {
-        const yearWarning = document.getElementById('year-range-warning');
-        if (year < 1900 || year > 2049) {
-            yearWarning.innerHTML = `<svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg><span>${year}年的农历节日可能不准确</span>`;
-            if (yearWarning.classList.contains('hidden')) {
-                yearWarning.classList.remove('hidden', 'animate-fade-out');
-                yearWarning.classList.add('animate-fade-in');
-                setTimeout(() => yearWarning.classList.remove('animate-fade-in'), 100);
-            }
-        } else {
-            if (!yearWarning.classList.contains('hidden')) {
-                yearWarning.classList.add('animate-fade-out');
-                setTimeout(() => {
-                    yearWarning.classList.add('hidden');
-                    yearWarning.classList.remove('animate-fade-out');
-                }, 100);
-            }
-        }
-    };
-
-    // 节日列表年份切换
-    const handleYearChange = (newYear) => {
-        const yearBeforeChange = holidayListDisplayedYear;
-        const currentSystemYear = new Date().getFullYear();
-        
-        holidayListDisplayedYear = newYear;
-        displayHolidayList(holidayListDisplayedYear, true);
-        updateWarningMessage(newYear); // Centralized call to handle warning
-
-        // Check for smart scroll condition
-        if (hasManuallyScrolled && holidayListDisplayedYear === currentSystemYear && yearBeforeChange !== currentSystemYear) {
-            scrollToTargetFestival(true);
-            hasManuallyScrolled = false; // Reset flag after use
-        }
-    };
-
-    document.getElementById('prev-year').addEventListener('click', () => {
-        handleYearChange(holidayListDisplayedYear - 1);
-    });
-    document.getElementById('next-year').addEventListener('click', () => {
-        handleYearChange(holidayListDisplayedYear + 1);
-    });
-
-    // --- [NEW] Year Input Logic ---
-    const enterEditMode = () => {
-        yearDisplayControls.classList.add('animate-fade-out');
-        setTimeout(() => {
-            yearDisplayControls.classList.add('hidden');
-            yearDisplayControls.classList.remove('animate-fade-out');
-
-            yearEditControls.classList.remove('hidden');
-            yearEditControls.classList.add('animate-fade-in');
-            yearInput.value = holidayListDisplayedYear;
-            yearInput.focus();
-            yearInput.select();
-
-            setTimeout(() => {
-                yearEditControls.classList.remove('animate-fade-in');
-            }, 100);
-        }, 100);
-    };
-
-    const exitEditMode = () => {
-        yearInput.classList.remove('invalid');
-        yearInputError.classList.add('hidden');
-
-        yearEditControls.classList.add('animate-fade-out');
-        setTimeout(() => {
-            yearEditControls.classList.add('hidden');
-            yearEditControls.classList.remove('animate-fade-out');
-
-            yearDisplayControls.classList.remove('hidden');
-            yearDisplayControls.classList.add('animate-fade-in');
-            setTimeout(() => {
-                yearDisplayControls.classList.remove('animate-fade-in');
-            }, 100);
-        }, 100);
-    };
-
-    const submitNewYear = () => {
-        const newYear = parseInt(yearInput.value, 10);
-        // Relaxed validation as per user request.
-        if (!isNaN(newYear) && newYear > 0 && newYear < 9999) {
-            handleYearChange(newYear);
-            exitEditMode();
-        } else {
-            yearInputError.textContent = '请输入有效的4位年份';
-            yearInputError.classList.remove('hidden');
-            yearInput.classList.add('invalid');
-            setTimeout(() => {
-                yearInput.classList.remove('invalid');
-            }, 500);
-            setTimeout(() => {
-                 yearInputError.classList.add('hidden');
-            }, 2500);
-        }
-    };
-
-    holidayListYearSpan.addEventListener('click', enterEditMode);
-    confirmYearBtn.addEventListener('click', submitNewYear);
-    cancelYearBtn.addEventListener('click', exitEditMode);
-    yearInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { submitNewYear(); }
-        else if (e.key === 'Escape') { exitEditMode(); }
-    });
-
-    // 点击一言卡片刷新
-    document.getElementById('hitokoto-card').addEventListener('click', fetchHitokoto);
-    
     // 天气刷新按钮
     document.getElementById('weather-refresh-btn').addEventListener('click', () => {
         setWeatherSpinner(true);
@@ -2038,7 +2361,7 @@ function setupEventListeners() {
 
         appSettings.hitokoto.categories = selectedCategories;
         saveSettings();
-        fetchHitokoto();
+        hitokotoModule.fetchHitokoto();
 
         // --- [FIX] Refined Save button animation & spam prevention ---
         const saveIcon = saveBtn.querySelector('i');
@@ -2060,52 +2383,6 @@ function setupEventListeners() {
         }, 300);
     });
 
-    // --- [NEW] Immersive Time Listeners ---
-    const immersiveView = document.getElementById('immersive-time-view');
-    const timeCard = document.getElementById('time-card');
-    const exitImmersiveBtn = document.getElementById('exit-immersive-btn');
-
-    const handleImmersiveMouseMove = (event) => {
-        const { clientX, clientY } = event;
-        const { innerWidth, innerHeight } = window;
-        if (clientX > innerWidth / 2 && clientY < innerHeight / 2) {
-            exitImmersiveBtn.classList.add('visible');
-        } else {
-            exitImmersiveBtn.classList.remove('visible');
-        }
-    };
-
-    const handleImmersiveMouseLeave = () => {
-        exitImmersiveBtn.classList.remove('visible');
-    };
-
-    timeCard.addEventListener('click', (event) => {
-        // Do not trigger if a sub-element that is a link was clicked
-        if (event.target.closest('a')) {
-            return;
-        }
-        document.body.classList.add('immersive-active');
-        updateImmersiveTime(); // Initial population
-        if (immersiveTimeInterval) clearInterval(immersiveTimeInterval);
-        immersiveTimeInterval = setInterval(updateImmersiveTime, 1000);
-
-        // Add mouse listeners for the exit button
-        immersiveView.addEventListener('mousemove', handleImmersiveMouseMove);
-        immersiveView.addEventListener('mouseleave', handleImmersiveMouseLeave);
-    });
-
-    exitImmersiveBtn.addEventListener('click', () => {
-        document.body.classList.remove('immersive-active');
-        if (immersiveTimeInterval) {
-            clearInterval(immersiveTimeInterval);
-            immersiveTimeInterval = null;
-        }
-        
-        // Clean up button visibility and remove listeners
-        exitImmersiveBtn.classList.remove('visible');
-        immersiveView.removeEventListener('mousemove', handleImmersiveMouseMove);
-        immersiveView.removeEventListener('mouseleave', handleImmersiveMouseLeave);
-    });
 
     // --- [NEW] Hidden Reset Feature ---
     const luckTitleIcon = document.querySelector('#time-capsule-card h2 svg');
@@ -2465,13 +2742,13 @@ document.addEventListener('DOMContentLoaded', () => {
     applyNewYearMode(); // [NEW] Apply New Year theme on load
 
     // 3. Initial data fetches and updates.
-    updateTime();
-    updateGreeting();
-    updateCountdown();
-    fetchHitokoto();
+    clockModule = initializeClock(appSettings);
+    initializeGreeting();
+    hitokotoModule = initializeHitokoto(appSettings);
+    timeCapsuleModule = initializeTimeCapsule();
+    initializeHolidayDisplay();
     setupGitHubChartLoader();
     updateSiteRuntime();
-    updateTimeCapsule();
     
     // 4. Defer non-critical layout calculations.
     setTimeout(() => {
@@ -2483,11 +2760,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- [NEW] Initialize Card Slider ---
     createCardSlider('#link-slider-container');
     
-    setInterval(updateTime, 1000);
     setInterval(updateSiteRuntime, 1000);
-    setInterval(updateGreeting, 1800000); 
-    setInterval(updateCountdown, 3600000); 
-    setInterval(updateTimeCapsule, 60000);
 
     // [NEW] Auto-refresh weather data every 30 minutes
     setInterval(() => {
