@@ -1,0 +1,54 @@
+/*
+ * @file: base.css
+ * @description: 定义HTML元素的基础样式，确保在不同浏览器中表现一致。
+ *              包括全局字体、背景色、文本颜色以及重置默认边距和内边距。
+ */
+
+/* --- 基础和重置样式 --- */
+
+/* 自定义样式 */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden; /* 防止在桌面端出现双滚动条 */
+}
+
+body {
+    font-family: 'Inter', 'Noto Sans SC', sans-serif; /* 优先使用Inter字体，并为中文字符提供回退 */
+    background-color: var(--bg-color); /* 使用CSS变量定义背景色，方便主题切换 */
+    color: var(--text-color-primary); /* 使用CSS变量定义主要文本颜色 */
+    transition: color 0.3s ease, background-color 0.3s ease; /* 为颜色和背景色变化添加平滑过渡效果 */
+}
+
+/* --- 可访问性优化：自定义聚焦样式 --- */
+/* 
+ * 使用 :focus-visible 伪类为键盘导航用户提供清晰的焦点指示，
+ * 同时避免为鼠标点击用户显示不必要的轮廓。
+ * 这取代了浏览器默认的 outline 样式。
+ */
+*:focus-visible {
+    outline: none; /* 移除默认的轮廓线 */
+    box-shadow: 0 0 0 3px var(--accent-color); /* 使用主题强调色创建自定义的发光轮廓 */
+}
+
+/* --- 自定义文本选中样式 --- */
+/*
+ * 覆盖浏览器默认的文本选中样式，以匹配应用的主题。
+ */
+::selection {
+    background-color: var(--selection-bg-color); /* 使用CSS变量定义选中背景色 */
+    color: white; /* 选中文本颜色设为白色以保证对比度 */
+}
+
+/* --- 响应式调整 --- */
+/*
+ * 在小屏幕设备（如手机）上，允许页面垂直滚动。
+ * 这是为了适应移动端常见的单列布局和内容溢出。
+ */
+@media (max-width: 1023px) {
+    html, body {
+        height: auto; /* 高度自适应内容 */
+        overflow-y: auto; /* 允许垂直方向滚动 */
+    }
+}

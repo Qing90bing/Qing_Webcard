@@ -1,0 +1,140 @@
+/*
+ * @file: modals.css
+ * @description: 定义所有模态框（对话框）组件的样式。
+ *              包括设置、开发者设置、重置确认等模态框的容器、遮罩层和显示/隐藏状态。
+ */
+
+/* --- 设置模态框 --- */
+
+/* 遮罩层 */
+#settings-overlay {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s; /* 隐藏时延迟 visibility 的变化 */
+}
+
+/* 模态框窗口 */
+#settings-window {
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease-in-out;
+    height: 680px; /* [修复] 设置固定高度以保持一致性 */
+    max-height: 85vh; /* [新增] 为小视口添加响应式最大高度 */
+}
+
+/* 当设置模态框打开时 (body.settings-open) */
+body.settings-open #main-wrapper {
+    opacity: 0;
+    pointer-events: none; /* 禁止与主内容区交互 */
+}
+body.settings-open #bg-wrapper {
+    transform: scale(1); /* 背景恢复正常大小 */
+    filter: blur(16px); /* 模糊背景 */
+}
+body.settings-open #settings-overlay {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s; /* 立即显示 */
+}
+body.settings-open #settings-window {
+    transform: scale(1);
+    opacity: 1;
+}
+
+
+/* --- 开发者设置模态框 --- */
+
+/* 遮罩层 */
+#developer-settings-overlay {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s;
+}
+
+/* 模态框窗口 */
+#developer-settings-window {
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease-in-out;
+    height: 680px;
+    max-height: 85vh;
+}
+
+/* 当开发者设置模态框打开时 (body.developer-settings-open) */
+body.developer-settings-open #main-wrapper {
+    opacity: 0;
+    pointer-events: none;
+}
+body.developer-settings-open #bg-wrapper {
+    transform: scale(1);
+    filter: blur(16px);
+}
+body.developer-settings-open #developer-settings-overlay {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+body.developer-settings-open #developer-settings-window {
+    transform: scale(1);
+    opacity: 1;
+}
+
+
+/* --- 重置确认模态框 --- */
+
+/* 当重置确认模态框打开时 (body.reset-confirm-open) */
+body.reset-confirm-open #settings-window {
+    /* 保持设置窗口可见，但轻微模糊和缩小 */
+    filter: blur(4px);
+    transform: scale(0.98);
+    transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+}
+body.reset-confirm-open #reset-confirm-overlay {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+/* 模态框窗口 */
+#reset-confirm-window {
+    transform: scale(0.95);
+    opacity: 0;
+    height: 220px; /* [修复] 设置固定高度 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* [修复] 合并过渡效果，以包含 .glass-card 的悬停效果 */
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                opacity 0.15s ease-in-out;
+}
+
+#reset-confirm-state, #reset-success-state {
+    transition: opacity 0.2s ease-in-out;
+}
+
+body.reset-confirm-open #reset-confirm-window {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* 如果基础类应用了 bounce-in 动画，我们用 transition 替代它 */
+#reset-confirm-window.bounce-in {
+    animation: none;
+}
+
+/* --- 移动端响应式：全屏模态框 --- */
+@media (max-width: 1023px) {
+    #settings-overlay, #developer-settings-overlay {
+        padding: 0; /* 移除内边距 */
+    }
+
+    #settings-window, #developer-settings-window {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 0; /* 移除圆角 */
+    }
+}

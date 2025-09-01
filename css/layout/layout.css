@@ -1,0 +1,54 @@
+/*
+ * @file: layout.css
+ * @description: 定义页面的主要布局结构样式。
+ *              包括背景容器、主内容包装器等。
+ */
+
+/* --- 背景图片容器 --- */
+#bg-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* 确保背景在最底层 */
+    transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+}
+
+/* 背景图层，用于实现平滑的背景切换效果 */
+.bg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0; /* 默认隐藏 */
+    transition: opacity 0.5s ease-in-out;
+}
+.bg-layer.active {
+    opacity: 1; /* 当前显示的图层 */
+}
+
+
+/* --- 主内容包装器 --- */
+#main-wrapper {
+    height: 100vh; /* 占满整个视口高度 */
+    transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+
+/* --- 响应式布局调整 --- */
+@media (max-width: 1023px) {
+    /* 在移动端，主内容包装器高度自适应 */
+    #main-wrapper {
+        height: auto;
+    }
+
+    /* 节日列表卡片在移动端的高度 */
+    #holiday-list-card {
+        height: 70vh;
+    }
+}

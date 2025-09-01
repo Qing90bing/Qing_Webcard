@@ -1,0 +1,27 @@
+/*
+ * @file: progress-bar.css
+ * @description: 定义进度条组件的样式。
+ */
+
+/* --- 进度条样式 --- */
+
+/* 进度条容器 */
+.progress-bar {
+    background-color: var(--progress-bar-bg); /* 使用变量定义背景色 */
+    border-radius: 9999px; /* 圆角设为极大值以形成胶囊形状 */
+    overflow: hidden; /* 隐藏内部溢出的部分 */
+}
+
+/* 进度条内部填充部分 */
+.progress-bar-inner {
+    background-color: var(--accent-color); /* 使用主题强调色作为填充色 */
+    border-radius: 9999px; /* 同样设置为胶囊形状 */
+    transition: width 0.5s ease-out; /* 为宽度的变化添加平滑过渡 */
+}
+
+/* 进度条上的文本 */
+.progress-bar-text {
+    color: var(--text-color-primary);
+    /* 文本阴影，使其在不同背景的进度条上都清晰可见 */
+    text-shadow: 0 0 4px rgba(0,0,0,0.5);
+}

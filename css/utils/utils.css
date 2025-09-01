@@ -1,0 +1,13 @@
+/*
+ * @file: utils.css
+ * @description: 提供通用的工具类，用于快速实现特定功能，如隐藏元素。
+ */
+
+/* 
+ * @class .hidden
+ * @description 彻底隐藏一个元素，使其不占用任何空间。
+ *              使用 !important 来确保最高优先级，覆盖其他 display 属性。
+ */
+.hidden {
+  display: none !important;
+}

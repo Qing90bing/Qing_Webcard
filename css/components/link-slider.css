@@ -1,0 +1,72 @@
+/*
+ * @file: link-slider.css
+ * @description: 定义网站链接卡片滑块（轮播）组件的样式。
+ *              包括容器、轨道、卡片和分页指示点。
+ */
+
+/* --- 滑块容器 --- */
+#link-slider-container {
+    position: relative;
+    /* 预留空间给绝对定位的分页点 */
+    padding-bottom: 0rem; 
+    /* 使用负边距来抵消轨道的内边距，使卡片与容器边缘对齐 */
+    margin: 0 -0.5rem;
+}
+
+/* --- 滑块轨道包装器 --- */
+.slider-wrapper {
+    overflow: hidden; /* 隐藏超出容器的卡片 */
+    cursor: grab; /* 鼠标样式：可拖动 */
+    padding: 0.5rem;
+}
+.slider-wrapper.grabbing {
+    cursor: grabbing; /* 鼠标样式：正在拖动 */
+}
+
+/* --- 滑块轨道 --- */
+.slider-track {
+    display: flex;
+    gap: 1rem; /* 卡片之间的间距 */
+    /* `transition` 将由 JavaScript 控制，以实现吸附效果 */
+}
+
+/* --- 单个卡片幻灯片 --- */
+.card-slide {
+    flex-shrink: 0; /* 防止卡片在 flex 布局中被压缩 */
+    /* 默认显示3张卡片，`2 * 1rem` 是两个卡片间距的总和 */
+    width: calc((100% - 2 * 1rem) / 3);
+    transition: transform 0.2s ease-in-out;
+    position: relative; /* 用于设置 z-index */
+}
+.card-slide:hover {
+    z-index: 10; /* 确保悬停的卡片在最上层，不会被邻近卡片遮挡 */
+}
+
+
+/* --- 分页指示点 --- */
+.slider-dots {
+    position: absolute;
+    bottom: -0.6rem; /* 定位在滑块下方 */
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem; /* 8px */
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3); /* 默认颜色 (暗色主题) */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.dot.active {
+    background-color: rgba(255, 255, 255, 1);
+}

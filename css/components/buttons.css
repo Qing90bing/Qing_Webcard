@@ -1,0 +1,166 @@
+/*
+ * @file: buttons.css
+ * @description: 定义项目中所有按钮组件的样式。
+ *              包括图标按钮、返回今日按钮、抽奖按钮等。
+ */
+
+/* --- 图标按钮 --- */
+.icon-btn:hover {
+    background-color: var(--accent-color-highlight);
+    transition: all 0.3s ease;
+}
+
+/* --- 返回今日按钮 --- */
+#back-to-today-btn {
+    display: flex;
+    border: 1px solid var(--card-border-color);
+    background-color: var(--accent-color);
+    opacity: 0;
+    transform: scale(0.9);
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out, 
+                transform 0.2s ease-in-out, 
+                visibility 0s linear 0.2s, 
+                background-color 0.2s ease;
+}
+
+#back-to-today-btn:hover {
+    opacity: 0.85 !important; /* 使用 !important 确保覆盖 .visible 的透明度 */
+}
+
+#back-to-today-btn.visible {
+    opacity: 0.7;
+    transform: scale(1);
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s; /* 取消隐藏时的延迟 */
+}
+
+/* --- 沉浸式视图退出按钮 --- */
+#exit-immersive-btn {
+    position: absolute;
+    top: 2rem;  /* 32px */
+    right: 2rem; /* 32px */
+    width: 3rem;  /* 48px */
+    height: 3rem; /* 48px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    color: var(--text-color-secondary);
+    background-color: transparent;
+    cursor: pointer;
+    border: none; /* 移除默认按钮边框 */
+    opacity: 0;
+    visibility: hidden;
+    transition: color 0.2s ease-in-out, 
+                background-color 0.2s ease-in-out, 
+                transform 0.2s ease-in-out, 
+                opacity 0.3s ease-in-out, 
+                visibility 0s linear 0.3s;
+}
+
+#exit-immersive-btn.visible {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+#exit-immersive-btn:hover {
+    color: var(--text-color-primary);
+    background-color: var(--accent-color-highlight);
+}
+
+#exit-immersive-btn:active {
+    transform: scale(0.95);
+}
+
+#exit-immersive-btn svg {
+    width: 1.75rem; /* 28px */
+    height: 1.75rem; /* 28px */
+}
+
+/* --- “今日人品”盲盒按钮 --- */
+#luck-button {
+    background-color: var(--accent-color);
+    opacity: 0.9;
+    transition: transform 0.15s ease-out, 
+                opacity 0.2s ease-in-out, 
+                background-color 0.2s ease-in-out;
+}
+
+#luck-button:hover {
+    opacity: 1;
+}
+
+/* --- 通用主题悬停背景 --- */
+/* 一个工具类，用于提供与当前主题强调色一致的悬停背景 */
+.themed-hover-bg:hover {
+    background-color: var(--accent-color-highlight);
+}
+
+/* --- 提交历史记录刷新按钮 --- */
+#refresh-commits-btn {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: opacity 0.2s, visibility 0.2s, transform 0.2s, background-color 0.2s;
+}
+
+#refresh-commits-btn:hover:not(:disabled) {
+    background-color: var(--accent-color-highlight);
+}
+
+/* 当鼠标悬停在整个提交历史面板上时显示刷新按钮 */
+#commit-history-panel:hover #refresh-commits-btn:not(:disabled) {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+/* 正在刷新时保持按钮可见 */
+#refresh-commits-btn.is-refreshing {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+#refresh-commits-btn:active:not(:disabled) {
+    transform: scale(0.9);
+}
+
+#refresh-commits-btn:disabled {
+    cursor: not-allowed;
+}
+
+/* --- 背景预览图上的下载和刷新按钮 --- */
+#bg-preview-download-btn.visible,
+#bg-preview-refresh-btn.visible {
+    transform: scale(1);
+}
+
+#bg-preview-download-btn:hover,
+#bg-preview-refresh-btn:hover {
+    transform: scale(1.1);
+}
+
+#bg-preview-download-btn:active,
+#bg-preview-refresh-btn:active {
+    transform: scale(1);
+    transition: transform 0.1s;
+}
+
+/* --- 天气信息刷新按钮 --- */
+.weather-hover-zone:hover + #weather-refresh-btn,
+#weather-refresh-btn:hover {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+#weather-refresh-btn {
+    transition: opacity 0.2s ease-in-out, 
+                color 0.2s ease-in-out, 
+                background-color 0.2s ease-in-out, 
+                visibility 0s linear 0.2s;
+}

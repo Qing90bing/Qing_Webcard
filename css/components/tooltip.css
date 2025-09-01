@@ -1,0 +1,27 @@
+/*
+ * @file: tooltip.css
+ * @description: 定义由JavaScript驱动的工具提示（Tooltip）组件的样式。
+ */
+
+/* --- JS驱动的工具提示样式 --- */
+.js-tooltip {
+    position: fixed; /* 固定定位，相对于视口 */
+    background-color: var(--accent-color); /* 使用主题强调色作为背景 */
+    color: white; /* 白色文字以保证对比度 */
+    padding: 8px 12px; /* 内边距 */
+    border-radius: 7px; /* 圆角 */
+    font-size: 0.9rem; /* 字体大小 */
+    font-weight: 500; /* 字体粗细 */
+    text-align: center; /* 文本居中 */
+    max-width: 220px; /* 最大宽度 */
+    word-wrap: break-word; /* 允许长单词换行 */
+    z-index: 9999; /* 确保在最顶层显示 */
+    pointer-events: none; /* 让鼠标事件穿透，不会阻挡下方元素的点击 */
+    
+    /* 初始状态：不可见且轻微缩小 */
+    opacity: 0;
+    transform: scale(0.95) translateY(5px);
+    
+    /* 过渡效果：为显示和隐藏添加平滑动画 */
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}

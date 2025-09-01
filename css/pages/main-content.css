@@ -1,0 +1,374 @@
+/*
+ * @file: main-content.css
+ * @description: 定义主页面特定区域和元素的样式。
+ *              这些样式通常不具有通用性，仅适用于主内容区的特定卡片或模块。
+ */
+
+/* --- 字体变体：等宽数字 --- */
+/* 确保数字等宽，防止在数字变化时产生宽度抖动 */
+#time-display, 
+.runtime-number, 
+#countdown-display, 
+#holiday-list-container, 
+#time-capsule-card {
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- 时间显示 --- */
+#time-display {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    text-shadow: 0 0 10px var(--accent-color); /* 发光效果 */
+}
+
+/* --- 节日列表 --- */
+.highlight-holiday {
+    background-color: var(--accent-color-highlight);
+    border-left: 3px solid var(--accent-color); /* 高亮最近的节日 */
+}
+#holiday-list-container {
+    transition: opacity 0.1s ease-in-out;
+}
+#holiday-list-year {
+    transition: opacity 0.1s ease-in-out, color 0.2s ease-in-out;
+}
+#holiday-list-year:hover {
+    color: var(--accent-color);
+}
+/* 节日列表容器的顶部和底部渐变遮罩，以产生淡出效果 */
+#holiday-list-container-wrapper {
+    --fade-top-size: 40px;
+    --fade-bottom-size: 40px;
+    -webkit-mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+    mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+}
+
+/* --- 开发者图标 --- */
+#developer-icon-container {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
+    transition: height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out;
+}
+#developer-icon-container.visible {
+    height: 2rem; /* h-8 */
+    opacity: 1;
+    margin-top: 0.5rem; /* mt-2 */
+}
+#developer-icon {
+    color: var(--text-color-secondary);
+    transition: color 0.2s ease-in-out;
+}
+#developer-icon:hover {
+    color: var(--text-color-primary);
+}
+
+
+/* --- 沉浸式时间视图 --- */
+#immersive-time-view {
+    position: fixed;
+    inset: 0;
+    z-index: 100; /* 高于设置遮罩层 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--immersive-bg-color);
+    color: var(--text-color-primary);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, background-color 0.3s ease;
+}
+#immersive-date-display {
+    font-size: 1.5rem; /* text-2xl */
+    line-height: 2rem;
+    color: var(--text-color-secondary);
+    transition: color 0.3s ease;
+}
+#immersive-time-display {
+    font-size: 4.5rem; /* 移动端 text-7xl */
+    line-height: 1;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-variant-numeric: tabular-nums;
+    font-family: 'Inter', sans-serif;
+    text-shadow: 0 0 20px var(--accent-color);
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+@media (min-width: 1024px) {
+    #immersive-time-display {
+        font-size: 8rem; /* 桌面端 text-9xl */
+    }
+}
+#immersive-greeting {
+    font-size: 1.25rem; /* text-xl */
+    line-height: 1.75rem;
+    color: var(--text-color-secondary);
+    transition: color 0.3s ease;
+}
+/* 沉浸式视图激活时的状态 */
+body.immersive-active #main-wrapper {
+    opacity: 0;
+    filter: blur(4px);
+    transform: scale(0.98);
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+body.immersive-active #immersive-time-view {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+/* 沉浸式视图中闪烁的冒号 */
+body.immersive-blink-enabled #immersive-time-view .time-colon {
+    animation: instant-blink 1s steps(1, end) infinite;
+    position: relative;
+    top: -0.05em; /* 防止垂直布局偏移 */
+}
+
+
+/* --- “今日人品”结果 --- */
+#luck-result {
+    transition: max-width 0.5s ease-in-out, opacity 0.3s ease-in-out, margin-left 0.5s ease-in-out, padding 0.5s ease-in-out;
+    max-width: 0;
+    opacity: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    overflow: hidden; /* 防止内容在动画过程中溢出 */
+}
+#luck-result.visible {
+    max-width: 500px; /* 一个足够大的值，以避免内容被裁剪 */
+    opacity: 1;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+
+/* --- GitHub 贡献图 --- */
+#gh-chart-container {
+    position: relative;
+}
+#gh-chart-spinner {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 10;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    opacity: 0;
+    visibility: hidden;
+}
+#gh-chart-spinner.visible {
+    opacity: 1;
+    visibility: visible;
+}
+#gh-chart-wrapper {
+    aspect-ratio: 892 / 140; /* 保持图片的宽高比 */
+    border-radius: 0.375rem; /* 6px */
+    overflow: hidden;
+}
+#gh-chart-img.loaded {
+    opacity: 1;
+}
+#gh-chart-link.visible {
+    visibility: visible;
+}
+#gh-chart-error {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+}
+#gh-chart-error.visible {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+
+/* --- 天气信息 --- */
+#weather-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: min-height 0.3s ease-in-out;
+}
+.weather-icon-initial {
+    opacity: 0;
+}
+.weather-icon-loaded {
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+#weather-loader {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 10;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    opacity: 0;
+    visibility: hidden;
+}
+#weather-loader.visible {
+    opacity: 1;
+    visibility: visible;
+}
+#weather-data-container {
+    transition: opacity 0.3s ease-in-out;
+}
+
+
+/* --- 提交历史记录 --- */
+.commit-message-text {
+    word-break: break-all; /* 确保长提交信息能正确换行 */
+}
+/* 时间线样式 */
+.timeline-item {
+    display: flex;
+    position: relative;
+}
+/* 时间线节点间的连接线 */
+.timeline-item:not(:last-child) .timeline-node::after {
+    content: '';
+    position: absolute;
+    top: 1.25rem; /* 从圆点下方开始 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background-color: var(--separator-color);
+}
+/* 时间线上的圆点 */
+.timeline-node {
+    position: relative;
+    flex-shrink: 0;
+    width: 2rem;
+    display: flex;
+    justify-content: center;
+    padding-top: 0.25rem; /* 对齐圆点和文本 */
+}
+.timeline-node::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem; /* 垂直居中圆点 */
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    border: 2px solid var(--card-bg-color); /* 让圆点看起来像是“浮”在线上 */
+    z-index: 1;
+}
+.timeline-content {
+    flex-grow: 1;
+    padding-bottom: 1rem; /* 日期组之间的间距 */
+}
+.timeline-item:last-child .timeline-content {
+    padding-bottom: 0;
+    padding-top: 2px; /* 微调对齐 */
+}
+/* 提交者头像 */
+.commit-avatar {
+    box-shadow: 0 0 0 1px var(--separator-color);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+.commit-avatar.loaded {
+    opacity: 1;
+}
+/* 提交历史加载状态 */
+#recent-commits-container {
+    transition: opacity 0.3s ease-in-out;
+    /* 渐变遮罩，由JS控制 */
+    --fade-top-size: 0px; 
+    --fade-bottom-size: 0px;
+    -webkit-mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+    mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+}
+.commit-loader-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 27rem; /* 匹配父容器的最大高度以填充空间 */
+}
+.commit-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--separator-color);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+
+/* --- “今日人品”粒子效果 --- */
+#luck-container {
+    position: relative; /* 为粒子效果提供定位上下文 */
+}
+#particle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 粒子不响应鼠标事件 */
+    /* [修复] 移除 overflow: hidden 以允许粒子飞出容器 */
+}
+.particle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    will-change: transform, opacity; /* 优化动画性能 */
+}
+.particle.circle {
+    border-radius: 50%;
+}
+.particle.square {
+    border-radius: 0;
+}
+.particle.triangle {
+    background-color: transparent !important; /* 三角形由边框组成 */
+}
+.particle.star {
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background-color: var(--star-color); /* 颜色由JS动态设置 */
+}
+.particle.heart {
+    position: relative;
+    transform: rotate(-45deg) translate(-50%, -50%);
+    background-color: transparent;
+}
+.particle.heart::before,
+.particle.heart::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: inherit; /* 继承JS设置的颜色 */
+}
+.particle.heart::before {
+    top: -50%;
+    left: 0;
+}
+.particle.heart::after {
+    top: 0;
+    left: 50%;
+}

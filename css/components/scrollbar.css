@@ -1,0 +1,50 @@
+/*
+ * @file: scrollbar.css
+ * @description: 定义自定义滚动条的样式，包括 SimpleBar 插件和原生的 Webkit 滚动条。
+ */
+
+/* --- SimpleBar 插件滚动条样式 --- */
+
+/* 滚动条滑块 */
+.simplebar-scrollbar:before {
+    background-color: var(--accent-color); /* 使用主题强调色 */
+    border-radius: 4px;
+}
+
+/* 垂直滚动条轨道 */
+.simplebar-track.simplebar-vertical {
+    width: 8px;
+}
+
+/* 
+ * [修复] 禁止 SimpleBar 滚动区域在聚焦时显示浏览器默认的轮廓线。
+ * 这通常在可滚动的 div 上发生。
+ */
+[data-simplebar]:focus {
+    outline: none;
+}
+
+
+/* --- 原生 Webkit 浏览器滚动条样式 (用于提交历史记录) --- */
+
+/* 
+ * 这些伪元素选择器仅在 Webkit 内核的浏览器（如 Chrome, Safari）中生效。
+ */
+#recent-commits-container::-webkit-scrollbar {
+    width: 8px; /* 滚动条宽度 */
+}
+
+#recent-commits-container::-webkit-scrollbar-track {
+    background: transparent; /* 轨道背景透明 */
+}
+
+#recent-commits-container::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color); /* 滑块颜色 */
+    border-radius: 4px; /* 滑块圆角 */
+    border: 2px solid transparent; /* 创建一个“内边距”效果，使滑块看起来更细 */
+    background-clip: content-box; /* 背景色只填充 content-box 区域 */
+}
+
+#recent-commits-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-color-highlight); /* 悬停时使用高亮颜色 */
+}

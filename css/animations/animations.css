@@ -1,0 +1,156 @@
+/*
+ * @file: animations.css
+ * @description: 存放项目中所有的 @keyframes 动画定义及其关联的工具类。
+ *              这有助于将动画逻辑与组件样式分离，方便复用和管理。
+ */
+
+/* --- 动画关键帧定义 (@keyframes) --- */
+
+/**
+ * @animation bounce-in
+ * @description 一个Q弹的进入动画，元素从稍小尺寸放大至略超过最终尺寸，再回弹到正常大小。
+ * [修复] 移除了 opacity 属性以修复背景透明问题。
+ */
+@keyframes bounce-in {
+    0% { transform: scale(0.95); }
+    60% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/**
+ * @animation logo-click-bounce
+ * @description Logo被点击时的轻微回弹动画。
+ */
+@keyframes logo-click-bounce {
+    0% {
+        transform: scale3d(1, 1, 1);
+    }
+    50% {
+        transform: scale3d(0.8, 0.8, 1);
+    }
+    100% {
+        transform: scale3d(1, 1, 1);
+    }
+}
+
+/**
+ * @animation fade-in-anim
+ * @description 简单的淡入和轻微放大动画。
+ */
+@keyframes fade-in-anim {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/**
+ * @animation fade-out-anim
+ * @description 简单的淡出和轻微缩小动画。
+ */
+@keyframes fade-out-anim {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.98); }
+}
+
+/**
+ * @animation shake-anim
+ * @description 左右晃动动画，用于输入错误等提示。
+ */
+@keyframes shake-anim {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
+
+/**
+ * @animation luck-pop
+ * @description “今日人品”盲盒结果的弹出动画。
+ */
+@keyframes luck-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/**
+ * @animation fade-out-opacity-only-anim
+ * @description 仅淡出透明度的动画。
+ */
+@keyframes fade-out-opacity-only-anim {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/**
+ * @animation instant-blink
+ * @description 用于沉浸式时钟中冒号的闪烁效果。
+ */
+@keyframes instant-blink {
+    /* 创建一个50/50的闪烁效果 */
+    50% { opacity: 0; }
+}
+
+/**
+ * @animation spin
+ * @description 持续旋转动画，用于加载指示器和音乐播放器。
+ */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/**
+ * @animation breathing
+ * @description 呼吸效果，透明度在 1 和 0.6 之间平滑变化。
+ */
+@keyframes breathing {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/**
+ * @animation fade-in-out
+ * @description 用于验证消息的淡入然后淡出动画。
+ */
+@keyframes fade-in-out {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+
+/* --- 动画应用类 --- */
+
+.bounce-in {
+    animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.logo-click-bounce-anim {
+    transform-origin: center;
+    animation: logo-click-bounce 0.3s ease-out;
+}
+
+.animate-fade-in {
+    animation: fade-in-anim 0.1s ease-out forwards;
+}
+
+.animate-fade-out {
+    animation: fade-out-anim 0.1s ease-in forwards;
+}
+
+.luck-shake,
+.shake-anim { /* .shake-anim 是一个更通用的类名 */
+    animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.luck-pop-anim {
+    animation: luck-pop 0.2s ease-in-out;
+}
+
+.fade-out-opacity-only {
+    animation: fade-out-opacity-only-anim 0.3s ease-out forwards;
+}
+
+.breathing-effect {
+    animation: breathing 2s ease-in-out infinite;
+}

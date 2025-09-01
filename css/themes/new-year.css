@@ -1,0 +1,70 @@
+/*
+ * @file: new-year.css
+ * @description: 定义新年主题下的颜色变量和特定样式。
+ *              当 <body> 元素同时拥有 'new-year-active' 和对应的主题类（'theme-dark' 或 'theme-light'）时，
+ *              这些样式将被应用。
+ */
+
+/* --- 暗色模式下的新年主题 --- */
+body.new-year-active.theme-dark {
+    --card-bg-color: rgba(80, 20, 20, 0.65);         /* 卡片背景色：深红色 */
+    --card-border-color: rgba(220, 38, 38, 0.3);     /* 卡片边框颜色：猩红色边框 */
+    --card-hover-bg-color: rgba(80, 20, 20, 0.75);   /* 卡片悬停背景色 */
+    --card-hover-border-color: rgba(220, 38, 38, 0.5);/* 卡片悬停边框颜色 */
+    --text-color-primary: #fff7e6;                  /* 主要文本颜色：奶油白 */
+    --text-color-secondary: #ffdab9;                /* 次要文本颜色：桃色 */
+    --text-color-tertiary: #e53e3e;                 /* 第三级文本颜色：较柔和的红色 */
+    --accent-color: #dc2626;                        /* 强调色：宝石红 */
+    --accent-color-highlight: rgba(220, 38, 38, 0.25);/* 强调色高亮 */
+}
+
+/* --- 亮色模式下的新年主题 --- */
+body.new-year-active.theme-light {
+    --card-bg-color: rgba(255, 247, 247, 0.8);       /* 卡片背景色：极浅的奶油红 */
+    --card-border-color: rgba(190, 30, 30, 0.25);    /* 卡片边框颜色 */
+    --card-hover-bg-color: rgba(255, 247, 247, 0.9);  /* 卡片悬停背景色 */
+    --card-hover-border-color: rgba(190, 30, 30, 0.4); /* 卡片悬停边框颜色 */
+    --text-color-primary: #9b2c2c;                  /* 主要文本颜色：深褐红色 */
+    --text-color-secondary: #c53030;                /* 次要文本颜色：强烈的红色 */
+    --text-color-tertiary: #e53e3e;                 /* 第三级文本颜色 */
+    --accent-color: #c53030;                        /* 强调色：猩红色 */
+    --accent-color-highlight: rgba(197, 48, 48, 0.1);/* 强调色高亮 */
+}
+
+/* --- 新年主题下的通用组件样式调整 --- */
+
+/* [修复] 开发者图标在新年主题下的颜色 */
+body.new-year-active #developer-icon {
+    color: var(--accent-color);
+}
+body.new-year-active #developer-icon:hover {
+    /* 在新年主题中，主要文本是浅奶油色，提供了良好的悬停效果 */
+    color: var(--text-color-primary); 
+}
+
+/* [修复] 开关按钮在新年主题下的样式 */
+body.new-year-active .toggle-slider {
+    background-color: rgba(120, 50, 50, 0.5); /* “关闭”状态下的柔和红色 */
+}
+body.new-year-active input:checked + .toggle-slider {
+    background-color: var(--accent-color); /* “开启”状态下使用主题强调色 */
+}
+
+/* [新增] 确保设置中的高亮和按钮与新年主题的强调色一致 */
+body.new-year-active #luck-button {
+    background-color: var(--accent-color);
+}
+body.new-year-active .setting-radio-input:checked + .setting-radio-label {
+    background-color: var(--accent-color-highlight);
+    border-color: var(--accent-color);
+}
+body.new-year-active .setting-radio-input:checked + .setting-radio-label .custom-radio-button {
+    border-color: var(--accent-color);
+}
+body.new-year-active .setting-radio-input:checked + .setting-radio-label .custom-radio-button::after {
+    background-color: var(--accent-color);
+}
+body.new-year-active .hitokoto-checkbox-input:checked + .hitokoto-checkbox-label .custom-checkbox {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}

@@ -1,0 +1,289 @@
+/*
+ * @file: settings.css
+ * @description: 定义设置面板内部的特定布局和组件样式。
+ */
+
+/* --- 设置窗口内的滚动区域 --- */
+#settings-window [data-simplebar] {
+    /* 顶部和底部的渐变遮罩，以产生内容淡出效果 */
+    --fade-top-size: 24px;
+    --fade-bottom-size: 24px;
+    -webkit-mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+    mask-image: linear-gradient(transparent, black var(--fade-top-size), black calc(100% - var(--fade-bottom-size)), transparent);
+}
+
+/* --- 背景预览 --- */
+#background-preview-container {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    /* [改进] 过渡效果将在 body.settings-open 下方定义，以避免不必要的动画 */
+}
+/* 仅在设置面板打开时应用过渡，防止页面加载时触发动画 */
+body.settings-open #background-preview-container.visible {
+    transition: max-height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-in-out, margin-top 0.3s ease;
+    max-height: 400px;
+    opacity: 1;
+    margin-top: 0.75rem;
+}
+#bg-preview-wrapper {
+    border: 1px solid var(--card-border-color);
+}
+#bg-preview-img {
+    transition: opacity 0.3s ease-in-out;
+    background-color: var(--progress-bar-bg); /* [修复] 添加占位背景色，改善加载体验 */
+}
+#preview-loader {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 10;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    opacity: 0;
+    visibility: hidden;
+}
+#preview-loader.visible {
+    opacity: 1;
+    visibility: visible;
+}
+#bg-preview-error {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s, background-color 0.2s ease-in-out, backdrop-filter 0.2s ease-in-out;
+}
+#bg-preview-error p:first-child {
+    color: var(--accent-color);
+}
+#bg-preview-error p:last-child {
+    color: var(--text-color-primary);
+}
+#bg-preview-error:hover {
+    background-color: rgba(0,0,0,0.45);
+    backdrop-filter: blur(8px);
+}
+#bg-preview-error.visible {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+/* --- 设置项分区 --- */
+.setting-section {
+    border-top: 1px solid var(--separator-color);
+    padding-top: 1.5rem;
+}
+.setting-section:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+.setting-description {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    line-height: 1.3;
+    transition: color 0.2s ease-in-out;
+}
+.setting-radio-input:checked + .setting-radio-label .setting-description {
+    color: var(--text-color-primary); /* 选中项的描述文本颜色更亮 */
+}
+.setting-description.text-center {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+
+/* --- 默认背景图选项 --- */
+#default-bg-options {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-in-out, padding-top 0.3s ease;
+    opacity: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+#default-bg-options.open {
+    max-height: 300px; /* 展开时的高度 */
+    opacity: 1;
+    padding-top: 0.75rem;
+    padding-bottom: 0.5rem; /* 为悬停放大效果留出空间 */
+}
+.thumb-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* 响应式网格布局 */
+    gap: 0.75rem;
+    justify-content: center;
+}
+.thumb-item {
+    aspect-ratio: 16 / 9;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.05); /* 缩略图加载前的占位背景 */
+}
+.thumb-item:hover {
+    transform: scale(1.05);
+}
+.thumb-item:active {
+    transform: scale(0.98);
+}
+.thumb-item.active {
+    border-color: var(--accent-color); /* 选中项的边框 */
+}
+.thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.thumb-item .thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+
+/* --- 主题颜色选择器 --- */
+.theme-swatch {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 4px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.theme-swatch:hover {
+    transform: scale(1.1);
+}
+.theme-swatch.active {
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+}
+.swatch-color {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+
+/* --- 设置按钮组 (带滑块效果) --- */
+.setting-btn-group {
+    display: flex;
+    border-radius: 0.8rem;
+    background-color: var(--progress-bar-bg);
+}
+.theme-slider {
+    background-color: var(--accent-color);
+    border-radius: 0.8rem; /* 匹配父容器 */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    /* 带回弹效果的过渡动画 */
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.setting-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.5rem;
+    background-color: transparent;
+    color: var(--text-color-secondary);
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+.setting-btn.active {
+    color: white; /* 激活状态的按钮文本颜色 */
+}
+.setting-btn:hover:not(.active) {
+    color: var(--text-color-primary);
+}
+/* 小屏幕下的响应式调整 */
+@media (max-width: 420px) {
+    .setting-btn {
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+        font-size: 0.8rem;
+    }
+    .setting-btn > i {
+        margin-right: 0.25rem;
+    }
+}
+
+
+/* --- 一言自定义选项 --- */
+#hitokoto-custom-options {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-in-out, padding-top 0.3s ease, margin-top 0.3s ease;
+    opacity: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+#hitokoto-custom-options.open {
+    max-height: 500px;
+    opacity: 1;
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+}
+.hitokoto-checkbox-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+
+
+/* --- 设置项禁用状态 --- */
+/* 外观设置 - 模糊度滑块 */
+#blur-setting-content-wrapper {
+    transition: filter 0.3s ease-in-out;
+}
+#blur-setting-container.disabled #blur-setting-content-wrapper {
+    filter: blur(4px);
+    pointer-events: none; /* 禁止交互 */
+}
+#blur-slider-overlay {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+    pointer-events: none;
+}
+body.settings-open #blur-setting-container.disabled #blur-slider-overlay {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto; /* 允许交互（例如显示提示） */
+    transition-delay: 0s;
+}
+
+/* 背景设置 */
+#main-background-settings-wrapper.disabled #main-background-settings-content {
+    filter: blur(4px);
+    pointer-events: none;
+}
+#background-settings-overlay {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+    pointer-events: none;
+}
+body.settings-open #main-background-settings-wrapper.disabled #background-settings-overlay {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
+}
