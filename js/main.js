@@ -1,3 +1,9 @@
+import { initializeClock } from './clock.js';
+import { initializeGreeting } from './greeting.js';
+import { initializeHitokoto } from './hitokoto.js';
+import { initializeTimeCapsule } from './time-capsule.js';
+import { initializeHolidayDisplay } from './holiday-display.js';
+
 // --- [NEW] Settings Management ---
 let appSettings = {
     background: {
@@ -1069,12 +1075,6 @@ const DEFAULT_BG_IMAGES = [
 ];
 // Calendar and holiday logic moved to js/calendar.js
 let holidayListDisplayedYear = new Date().getFullYear();
-import { initializeClock } from './clock.js';
-import { initializeGreeting } from './greeting.js';
-import { initializeHitokoto } from './hitokoto.js';
-import { initializeTimeCapsule } from './time-capsule.js';
-import { initializeHolidayDisplay } from './holiday-display.js';
-
 let settingsSimpleBar = null; // Instance for the settings scrollbar
 let isFetchingWeather = false; // Lock to prevent multiple weather requests
 let cachedCommitsHTML = null;
