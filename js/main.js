@@ -28,6 +28,7 @@ import {
 } from './appearance.js';
 import { initializeViewManager, applyCurrentView, updateViewToggleUI } from './view-manager.js';
 import { updateSettingsUI } from './settings-updater.js';
+import { initializeDeveloperMode } from './developer-mode.js';
 
 
 // UI Update functions are now in js/settings-updater.js
@@ -49,6 +50,7 @@ let clockModule;
 let hitokotoModule;
 let timeCapsuleModule;
 let backgroundFader;
+let closeDeveloperSettings; // This will be populated by initializeDeveloperMode
 
 // previewFader is no longer needed
 
@@ -71,19 +73,6 @@ const confirmYearBtn = document.getElementById('confirm-year-btn');
 const cancelYearBtn = document.getElementById('cancel-year-btn');
 const yearInputError = document.getElementById('year-input-error');
 const yearRangeWarning = document.getElementById('year-range-warning');
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // --- 交互事件监听 ---
 function setupEventListeners() {
@@ -282,7 +271,7 @@ function setupEventListeners() {
             
             // Priority 1: Close developer settings modal if it's open
             if (document.body.classList.contains('developer-settings-open')) {
-                closeDeveloperSettings();
+                if (closeDeveloperSettings) closeDeveloperSettings();
                 return;
             }
 
@@ -316,68 +305,6 @@ function setupEventListeners() {
         }
     });
 
-    // --- [NEW] Developer Mode Logic ---
-    let logoClickCount = 0;
-    let logoClickTimer = null;
-
-    const aboutCardLogo = document.getElementById('about-card-logo');
-    const developerIconContainer = document.getElementById('developer-icon-container');
-    const developerIcon = document.getElementById('developer-icon');
-    const developerSettingsOverlay = document.getElementById('developer-settings-overlay');
-    const closeDeveloperSettingsBtn = document.getElementById('close-developer-settings-btn');
-
-    const openDeveloperSettings = () => {
-        updateDeveloperSettingsUI(); // Update the UI from the latest settings state
-        document.body.classList.add('developer-settings-open');
-    };
-    const closeDeveloperSettings = () => document.body.classList.remove('developer-settings-open');
-
-    if (aboutCardLogo) {
-        aboutCardLogo.addEventListener('click', () => {
-            // Re-trigger animation for a satisfying click feel
-            aboutCardLogo.classList.remove('logo-click-bounce-anim');
-            void aboutCardLogo.offsetWidth; // Force reflow to restart animation
-            aboutCardLogo.classList.add('logo-click-bounce-anim');
-
-            // [FIX] Check the master switch to see if the feature is enabled at all
-            if (!appSettings.developer.masterSwitchEnabled) return;
-
-            clearTimeout(logoClickTimer);
-            logoClickCount++;
-
-            if (logoClickCount >= 5) {
-                if (!developerIconContainer.classList.contains('visible')) {
-                    developerIconContainer.classList.add('visible');
-                    // [NEW] Save unlock state
-                    try {
-                        localStorage.setItem('developerModeUnlocked', 'true');
-                    } catch (e) {
-                        console.error("Failed to save to localStorage", e);
-                    }
-                }
-                // [FIX] When re-unlocking, always reset the toggle's state to ON.
-                appSettings.developer.uiToggleState = true;
-                saveSettings();
-
-                logoClickCount = 0;
-                clearTimeout(logoClickTimer); // Stop timer once icon is shown
-            } else {
-                logoClickTimer = setTimeout(() => {
-                    logoClickCount = 0;
-                }, 1500); // 1.5-second window for consecutive clicks
-            }
-        });
-    }
-
-    if (developerIcon) developerIcon.addEventListener('click', openDeveloperSettings);
-    if (closeDeveloperSettingsBtn) closeDeveloperSettingsBtn.addEventListener('click', closeDeveloperSettings);
-
-    // [FIX] Remove the click animation class after it finishes to prevent re-playing on show/hide
-    if (aboutCardLogo) {
-        aboutCardLogo.addEventListener('animationend', () => {
-            aboutCardLogo.classList.remove('logo-click-bounce-anim');
-        });
-    }
     // --- End Settings Modal Logic ---
 
     const animateRightColumnIn = () => {
@@ -679,53 +606,7 @@ function setupEventListeners() {
         });
     }
 
-    // --- [REVISED] Developer Options Toggle Listener ---
-    const devOptionsToggle = document.getElementById('dev-options-toggle');
-    if (devOptionsToggle) {
-        devOptionsToggle.addEventListener('change', () => {
-            const isEnabled = devOptionsToggle.checked;
-            appSettings.developer.uiToggleState = isEnabled;
-            const developerIconContainer = document.getElementById('developer-icon-container');
-
-            if (isEnabled) {
-                // When turned ON, just ensure the icon is marked as visible for the next time the 'About' panel is opened.
-                // This fixes the bug where the icon would disappear.
-                if (developerIconContainer) {
-                    developerIconContainer.classList.add('visible');
-                }
-            } else {
-                // When turned OFF, perform all reset actions as requested.
-                // 1. Reset sub-settings in the settings object.
-                appSettings.developer.forceNewYearTheme = false;
-                
-                // 2. Update the UI of all sub-settings to reflect the change.
-                const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
-                if (forceNewYearToggle) {
-                    forceNewYearToggle.checked = false;
-                }
-                
-                // 3. Apply changes triggered by settings reset (e.g., turn off NY theme).
-                applyNewYearMode(); 
-                
-                // 4. Hide the developer icon in the 'About' panel.
-                if (developerIconContainer) {
-                    developerIconContainer.classList.remove('visible');
-                }
-
-                // 5. Remove the unlock flag from localStorage to re-lock the feature.
-                try {
-                    localStorage.removeItem('developerModeUnlocked');
-                } catch (e) {
-                    console.error("Failed to remove from localStorage", e);
-                }
-
-                // 6. Close the developer settings window immediately.
-                closeDeveloperSettings();
-            }
-            
-            saveSettings(); // Save all settings changes.
-        });
-    }
+    // --- [REVISED] Developer Options Toggle Listener (Moved to developer-mode.js) ---
 
     // --- [NEW] New Year Theme Event Listeners (Moved to new-year-theme.js) ---
     const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
@@ -765,22 +646,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme(); // Set up theme-related event listeners
     initializeAppearanceSettings(); // Set up appearance-related event listeners
     initializeViewManager(); // Set up view-related event listeners
-    setupEventListeners();
+    
+    // Initialize modules that might return functions needed by others
+    const devModeFuncs = initializeDeveloperMode();
+    closeDeveloperSettings = devModeFuncs.closeDeveloperSettings;
+
+    setupEventListeners(); // Must be called after modules that provide functions to it are initialized
     initializeResetSettings();
     setupLuckFeature(); // Activate the new luck feature
     particleEffects.init(); // Initialize particle system
-
-    // [NEW] Check for persisted developer mode unlock
-    try {
-        if (localStorage.getItem('developerModeUnlocked') === 'true') {
-            const developerIconContainer = document.getElementById('developer-icon-container');
-            if (developerIconContainer) {
-                developerIconContainer.classList.add('visible');
-            }
-        }
-    } catch (e) {
-        console.error("Failed to read developerModeUnlocked from localStorage", e);
-    }
 
     // 2. Pre-calculate the theme slider's correct position before it's ever shown.
     initializeThemeSlider();

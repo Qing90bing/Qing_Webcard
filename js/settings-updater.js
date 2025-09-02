@@ -51,7 +51,7 @@ function updateImmersiveBlinkUI() {
     }
 }
 
-function updateDeveloperSettingsUI() {
+export function updateDeveloperSettingsUI() {
     const devToggle = document.getElementById('dev-options-toggle');
     const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
 
