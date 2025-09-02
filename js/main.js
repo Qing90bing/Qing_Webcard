@@ -20,6 +20,12 @@ import { setupSettingsUI } from './settings-ui.js';
 import { setupTooltips } from './tooltip.js';
 import { setupGitHubChartLoader } from './github-chart.js';
 import { initializeResetSettings } from './reset-settings.js';
+import {
+    initializeAppearanceSettings,
+    applyGlassEffect,
+    applyCardSettings,
+    updateAppearanceSettingsUI
+} from './appearance.js';
 
 
 function updateTimeFormatUI() {
@@ -106,39 +112,6 @@ function updateDeveloperSettingsUI() {
     }
 }
 
-function updateSliderProgress(slider) {
-    const min = slider.min;
-    const max = slider.max;
-    const value = slider.value;
-    const percentage = ((value - min) / (max - min)) * 100;
-    slider.style.backgroundSize = `${percentage}% 100%`;
-}
-
-function updateAppearanceSettingsUI() {
-    const { glassEffect, cardBorderRadius, cardBlurAmount } = appSettings.appearance;
-
-    const glassEffectToggle = document.getElementById('glass-effect-toggle');
-    if (glassEffectToggle) {
-        glassEffectToggle.checked = glassEffect;
-    }
-
-    const radiusSlider = document.getElementById('card-border-radius-slider');
-    const radiusValue = document.getElementById('card-border-radius-value');
-    if (radiusSlider && radiusValue) {
-        radiusSlider.value = cardBorderRadius;
-        radiusValue.textContent = `${cardBorderRadius}px`;
-        updateSliderProgress(radiusSlider);
-    }
-
-    const blurSlider = document.getElementById('card-blur-amount-slider');
-    const blurValue = document.getElementById('card-blur-amount-value');
-    if (blurSlider && blurValue) {
-        blurSlider.value = cardBlurAmount;
-        blurValue.textContent = `${cardBlurAmount}px`;
-        updateSliderProgress(blurSlider);
-    }
-}
-
 function updateSettingsUI() {
     updateBgSettingsUI();
     // updateThemeSettingsUI(); // This is now handled by a dedicated initializer
@@ -183,24 +156,6 @@ function applyCurrentView() {
 
 function applyBlinkingEffect() {
     document.body.classList.toggle('immersive-blink-enabled', appSettings.immersiveBlinkingColon);
-}
-
-function applyGlassEffect() {
-    document.body.classList.toggle('glass-effect-disabled', !appSettings.appearance.glassEffect);
-
-    const blurSlider = document.getElementById('card-blur-amount-slider');
-    const blurContainer = document.getElementById('blur-setting-container'); // Target the new container
-    if (blurSlider && blurContainer) {
-        const isGlassEnabled = appSettings.appearance.glassEffect;
-        blurSlider.disabled = !isGlassEnabled;
-        blurContainer.classList.toggle('disabled', !isGlassEnabled);
-    }
-}
-
-function applyCardSettings() {
-    const { cardBorderRadius, cardBlurAmount } = appSettings.appearance;
-    document.documentElement.style.setProperty('--card-border-radius', `${cardBorderRadius}px`);
-    document.documentElement.style.setProperty('--card-backdrop-blur', `${cardBlurAmount}px`);
 }
 
 // --- 初始状态和常量 ---
@@ -361,46 +316,6 @@ function setupEventListeners() {
             appSettings.immersiveBlinkingColon = immersiveBlinkToggle.checked;
             saveSettings();
             applyBlinkingEffect();
-        });
-    }
-
-    // --- [NEW] Appearance Settings Listener ---
-    const glassEffectToggle = document.getElementById('glass-effect-toggle');
-    if (glassEffectToggle) {
-        glassEffectToggle.addEventListener('change', () => {
-            appSettings.appearance.glassEffect = glassEffectToggle.checked;
-            saveSettings();
-            applyGlassEffect();
-        });
-    }
-
-    const radiusSlider = document.getElementById('card-border-radius-slider');
-    const radiusValue = document.getElementById('card-border-radius-value');
-    if (radiusSlider && radiusValue) {
-        radiusSlider.addEventListener('input', (e) => {
-            const newValue = e.target.value;
-            radiusValue.textContent = `${newValue}px`;
-            appSettings.appearance.cardBorderRadius = parseInt(newValue, 10);
-            applyCardSettings();
-            updateSliderProgress(e.target);
-        });
-        radiusSlider.addEventListener('change', () => {
-            saveSettings(); // Save only when the user releases the mouse
-        });
-    }
-
-    const blurSlider = document.getElementById('card-blur-amount-slider');
-    const blurValue = document.getElementById('card-blur-amount-value');
-    if (blurSlider && blurValue) {
-        blurSlider.addEventListener('input', (e) => {
-            const newValue = e.target.value;
-            blurValue.textContent = `${newValue}px`;
-            appSettings.appearance.cardBlurAmount = parseInt(newValue, 10);
-            applyCardSettings();
-            updateSliderProgress(e.target);
-        });
-        blurSlider.addEventListener('change', () => {
-            saveSettings(); // Save only when the user releases the mouse
         });
     }
 
@@ -1049,6 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Build the settings panel UI first, so other functions can find its elements.
     setupSettingsUI();
     initializeTheme(); // Set up theme-related event listeners
+    initializeAppearanceSettings(); // Set up appearance-related event listeners
     setupEventListeners();
     initializeResetSettings();
     setupLuckFeature(); // Activate the new luck feature
