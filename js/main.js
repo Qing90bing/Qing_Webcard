@@ -4,6 +4,7 @@ import { initializeHitokoto } from './hitokoto.js';
 import { initializeTimeCapsule } from './time-capsule.js';
 import { initializeHolidayDisplay } from './holiday-display.js';
 import { appSettings, loadSettings, saveSettings } from './settings.js';
+import { initializeNewYearTheme, applyNewYearMode } from './new-year-theme.js';
 import { createCrossfader, isNewYearPeriod } from './utils.js';
 import {
     initBackground,
@@ -14,61 +15,6 @@ import {
 } from './background.js';
 import { fetchAndRenderCommits, updateCommitMask } from './commit-history.js';
 import { createCardSlider } from './card-slider.js';
-
-// --- [NEW] New Year Theme Logic ---
-
-let newYearMusicIntroPlayed = false;
-const NY_MUSIC_LOOP_START = 85.16; // 01:25:16
-const NY_MUSIC_LOOP_END = 173.20;   // 02:53:20
-
-function stopNewYearMusic() {
-    const audio = document.getElementById('new-year-audio');
-    if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
-    }
-}
-
-
-function applyNewYearMode() {
-    const body = document.body;
-    const musicBtn = document.getElementById('new-year-music-btn');
-
-    const isThemeAvailable = isNewYearPeriod() || appSettings.developer.forceNewYearTheme;
-    const isThemeEnabledByUser = appSettings.newYearTheme.backgroundEnabled;
-    const shouldBeActive = isThemeAvailable && isThemeEnabledByUser;
-
-    const isCurrentlyActive = body.classList.contains('new-year-active');
-
-    const bgSettingsWrapper = document.getElementById('main-background-settings-wrapper');
-    if (bgSettingsWrapper) {
-        bgSettingsWrapper.classList.toggle('disabled', shouldBeActive);
-    }
-
-    if (shouldBeActive) {
-        // --- Activate or Keep Active ---
-        musicBtn.classList.add('visible'); // [MODIFIED] Use 'visible' class for transition
-        musicBtn.classList.add('is-paused'); // Set initial state
-        if (!isCurrentlyActive) {
-            // It needs to be turned ON
-            body.classList.add('new-year-active');
-            backgroundFader.update('assets/images/new_year_bg.svg', true);
-            // Music is not auto-played, user must click.
-        }
-        // If it's already active, do nothing to prevent re-renders.
-    } else {
-        // --- Deactivate or Keep Inactive ---
-        musicBtn.classList.remove('visible'); // [MODIFIED] Use 'visible' class for transition
-        stopNewYearMusic();
-        if (isCurrentlyActive) {
-            // It needs to be turned OFF
-            body.classList.remove('new-year-active');
-            applyCurrentBackground();
-        }
-        // If it's already inactive, do nothing.
-    }
-}
-
 
 function updateThemeSettingsUI(isInstant = false) {
     const slider = document.querySelector('.theme-slider');
@@ -1517,56 +1463,13 @@ function setupEventListeners() {
         });
     }
 
-    // --- [NEW] New Year Theme Event Listeners ---
+    // --- [NEW] New Year Theme Event Listeners (Moved to new-year-theme.js) ---
     const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
     if (forceNewYearToggle) {
         forceNewYearToggle.addEventListener('change', () => {
             appSettings.developer.forceNewYearTheme = forceNewYearToggle.checked;
             saveSettings();
             applyNewYearMode();
-        });
-    }
-
-    const musicBtn = document.getElementById('new-year-music-btn');
-    if (musicBtn) {
-        const audio = document.getElementById('new-year-audio');
-
-        musicBtn.addEventListener('click', () => {
-            if (!audio) return;
-            if (audio.paused) {
-                audio.play().catch(e => console.error("Music play failed on click:", e));
-            } else {
-                audio.pause();
-            }
-        });
-
-        if (audio) {
-            audio.addEventListener('play', () => {
-                musicBtn.classList.add('is-playing');
-                musicBtn.classList.remove('is-paused');
-            });
-            audio.addEventListener('pause', () => {
-                musicBtn.classList.remove('is-playing');
-                musicBtn.classList.add('is-paused');
-            });
-        }
-    }
-
-    const newYearAudio = document.getElementById('new-year-audio');
-    if (newYearAudio) {
-        newYearAudio.addEventListener('timeupdate', () => {
-            if (newYearAudio.paused) return;
-
-            if (!newYearMusicIntroPlayed) {
-                if (newYearAudio.currentTime >= NY_MUSIC_LOOP_END) {
-                    newYearMusicIntroPlayed = true;
-                    newYearAudio.currentTime = NY_MUSIC_LOOP_START;
-                }
-            } else {
-                if (newYearAudio.currentTime >= NY_MUSIC_LOOP_END) {
-                    newYearAudio.currentTime = NY_MUSIC_LOOP_START;
-                }
-            }
         });
     }
 
@@ -1784,9 +1687,9 @@ document.addEventListener('DOMContentLoaded', () => {
     applyCurrentBackground();
     applyCurrentView();
     updateSettingsUI();
-    applyNewYearMode(); // [NEW] Apply New Year theme on load
 
     // 3. Initial data fetches and updates.
+    initializeNewYearTheme(backgroundFader); // Initialize New Year theme logic
     clockModule = initializeClock(appSettings);
     initializeGreeting();
     hitokotoModule = initializeHitokoto(appSettings);
