@@ -643,6 +643,7 @@ let aboutCardHasAnimated = false;
 let clockModule;
 let hitokotoModule;
 let timeCapsuleModule;
+let backgroundFader;
 
 // previewFader is no longer needed
 
@@ -671,27 +672,6 @@ const yearRangeWarning = document.getElementById('year-range-warning');
 
 
 
-// --- 网站运行时间 ---
-function updateSiteRuntime() {
-     const startTime = new Date('2025-07-30T18:30:00');
-    const now = new Date();
-    const diff = now - startTime;
-
-    const displayElement = document.getElementById('site-runtime-display');
-    if (!displayElement) return;
-
-    if (diff < 0) {
-        displayElement.textContent = '小破站尚未启航...';
-        return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    displayElement.innerHTML = `小破站已经在风雨中度过了 <span class="font-semibold runtime-number" style="color: var(--text-color-primary);">${days}</span> 天 <span class="font-semibold runtime-number" style="color: var(--text-color-primary);">${hours}</span> 小时 <span class="font-semibold runtime-number" style="color: var(--text-color-primary);">${minutes}</span> 分 <span class="font-semibold runtime-number" style="color: var(--text-color-primary);">${seconds}</span> 秒`;
-}
 
 // --- GitHub Chart Loader Logic ---
 function setupGitHubChartLoader() {
@@ -2000,7 +1980,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize Faders
     const bgLayers = document.querySelectorAll('#bg-wrapper .bg-layer');
-    const backgroundFader = createCrossfader(Array.from(bgLayers));
+    backgroundFader = createCrossfader(Array.from(bgLayers));
     initBackground(backgroundFader);
 
     // --- [FIX] Correct Initialization Order ---
@@ -2043,7 +2023,6 @@ document.addEventListener('DOMContentLoaded', () => {
     timeCapsuleModule = initializeTimeCapsule();
     initializeHolidayDisplay();
     setupGitHubChartLoader();
-    updateSiteRuntime();
     
     // 4. Defer non-critical layout calculations.
     setTimeout(() => {
@@ -2055,8 +2034,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- [NEW] Initialize Card Slider ---
     createCardSlider('#link-slider-container');
     
-    setInterval(updateSiteRuntime, 1000);
-
     // [NEW] Auto-refresh weather data every 30 minutes
     setInterval(() => {
         if (appSettings.view === 'weather') {
