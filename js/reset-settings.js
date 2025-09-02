@@ -1,3 +1,5 @@
+import { resetLuckGame } from './luck-game.js';
+
 export function initializeResetSettings() {
     const resetSettingsBtn = document.getElementById('reset-settings-btn');
     const resetConfirmOverlay = document.getElementById('reset-confirm-overlay');
@@ -70,6 +72,8 @@ export function initializeResetSettings() {
                 }
 
                 // 3. Perform the actual reset
+                // [NEW] Call the luck game reset function to clear its state and localStorage
+                resetLuckGame();
                 localStorage.removeItem('qing-homepage-settings');
                 localStorage.removeItem('developerModeUnlocked');
 

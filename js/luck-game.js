@@ -1,4 +1,4 @@
-function resetLuckGame() {
+export function resetLuckGame() {
     // Clear any pending timers associated with the luck game
     clearTimeout(luckResetTimer);
     clearTimeout(countdownAnimationHandle);
@@ -72,7 +72,7 @@ function getScoreColorClass(score) {
 }
 
 // --- Inlined Particle Animation Logic ---
-const particleEffects = (() => {
+export const particleEffects = (() => {
     /*
      * --- [开发者指南] 如何添加自定义SVG粒子形状 ---
      *
@@ -539,7 +539,7 @@ function startCountdownAnimation() {
     countdownStep(currentCount);
 }
 
-function setupLuckFeature() {
+export function setupLuckFeature() {
     const luckButton = document.getElementById('luck-button');
     if (!luckButton) return;
 

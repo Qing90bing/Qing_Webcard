@@ -1,3 +1,5 @@
+import { Dianaday, monthDays } from './calendar.js';
+
 export function createCrossfader(layers) {
     let activeIndex = 0;
 

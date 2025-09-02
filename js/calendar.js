@@ -43,8 +43,8 @@ const lFtv = [
 function lYearDays(y) { let i, sum = 348; for (i = 0x8000; i > 0x8; i >>= 1) sum += (lunarInfo[y - 1900] & i) ? 1 : 0; return (sum + leapDays(y)); }
 function leapDays(y) { if (leapMonth(y)) return ((lunarInfo[y - 1900] & 0x10000) ? 30 : 29); else return (0); }
 function leapMonth(y) { return (lunarInfo[y - 1900] & 0xf); }
-function monthDays(y, m) { return ((lunarInfo[y - 1900] & (0x10000 >> m)) ? 30 : 29); }
-function Dianaday(objDate) {
+export function monthDays(y, m) { return ((lunarInfo[y - 1900] & (0x10000 >> m)) ? 30 : 29); }
+export function Dianaday(objDate) {
     const msPerDay = 86400000; // 24 * 60 * 60 * 1000
     const utcTarget = Date.UTC(objDate.getFullYear(), objDate.getMonth(), objDate.getDate());
     const utcBase = Date.UTC(1900, 0, 31);
@@ -83,7 +83,7 @@ function getSanfuDates(year) {
     ];
 }
 
-function getAllHolidaysForYear(year) {
+export function getAllHolidaysForYear(year) {
     let allEvents = [];
     
     function getSolarDateForLunar(targetYear, lunarMonth, lunarDay) {

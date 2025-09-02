@@ -1,11 +1,14 @@
-document.addEventListener('DOMContentLoaded', () => {
-    function updateSiteRuntime() {
+export function initializeSiteRuntime() {
+    const displayElement = document.getElementById('site-runtime-display');
+    if (!displayElement) {
+        // If the element doesn't exist, don't set up the interval.
+        return;
+    }
+
+    function update() {
         const startTime = new Date('2025-07-30T18:30:00');
         const now = new Date();
         const diff = now - startTime;
-
-        const displayElement = document.getElementById('site-runtime-display');
-        if (!displayElement) return;
 
         if (diff < 0) {
             displayElement.textContent = '小破站尚未启航...';
@@ -21,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial call to display time immediately
-    updateSiteRuntime();
+    update();
     // Update every second
-    setInterval(updateSiteRuntime, 1000);
-});
+    setInterval(update, 1000);
+}

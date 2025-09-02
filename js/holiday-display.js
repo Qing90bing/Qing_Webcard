@@ -1,7 +1,6 @@
-// js/features/holiday-display.js
+import { getAllHolidaysForYear } from './calendar.js';
 
 // Assuming 'Dianaday' and 'SimpleBar' are available globally from scripts in index.html
-const { getAllHolidaysForYear } = window;
 
 // --- Module State ---
 let holidayListDisplayedYear;

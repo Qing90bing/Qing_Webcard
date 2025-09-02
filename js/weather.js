@@ -1,3 +1,7 @@
+import { appSettings, saveSettings } from './settings.js';
+
+let isFetchingWeather = false;
+
 const WEATHER_TIPS = {
     spring: {
         morning: {
@@ -525,7 +529,7 @@ async function tryWeatherApis(locationQuery, locationName) {
 }
 
 // Main entry point for the weather feature.
-async function fetchAndDisplayWeather() {
+export async function fetchAndDisplayWeather() {
     if (isFetchingWeather) {
         console.log("Weather fetch already in progress. Ignoring request.");
         return;

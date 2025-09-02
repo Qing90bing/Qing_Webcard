@@ -26,6 +26,9 @@ import { initializeCardManager } from './card-manager.js';
 import { initializeWeatherUI } from './weather-ui.js';
 import { initializeTimeFormatSettings } from './time-format-settings.js';
 import { initializeLuckGameUI } from './luck-game-ui.js';
+import { fetchAndDisplayWeather } from './weather.js';
+import { setupLuckFeature, particleEffects } from './luck-game.js';
+import { initializeSiteRuntime } from './site-runtime.js';
 
 // Module-level variables to hold instances or functions needed for dependency injection.
 let clockModule;
@@ -54,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeGreeting();
     initializeTimeCapsule();
     initializeHolidayDisplay();
+    initializeSiteRuntime();
     initializeNewYearTheme(backgroundFader);
     initializeTheme();
     initializeAppearanceSettings();
@@ -73,9 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
         getCloseDeveloperSettings: () => closeDeveloperSettings
     });
 
-    // 6. Initialize features from non-module scripts (globals).
-    if (typeof setupLuckFeature === 'function') setupLuckFeature();
-    if (typeof particleEffects !== 'undefined' && typeof particleEffects.init === 'function') particleEffects.init();
+    // 6. Initialize luck game and particle effects
+    setupLuckFeature();
+    particleEffects.init();
 
     // 7. Pre-calculate UI elements now that settings are loaded.
     initializeThemeSlider();
@@ -92,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 10. Setup timers.
     setInterval(() => {
-        if (appSettings.view === 'weather' && typeof fetchAndDisplayWeather === 'function') {
+        if (appSettings.view === 'weather') {
             fetchAndDisplayWeather();
         }
     }, 30 * 60 * 1000);
