@@ -27,6 +27,7 @@ import {
 import { initializeViewManager, applyCurrentView, updateViewToggleUI } from './view-manager.js';
 import { updateSettingsUI } from './settings-updater.js';
 import { initializeDeveloperMode } from './developer-mode.js';
+import { initializeHitokotoSettings } from './hitokoto-settings.js';
 
 
 // UI Update functions are now in js/settings-updater.js
@@ -311,92 +312,8 @@ function setupEventListeners() {
         fetchAndDisplayWeather();
     });
 
-    // --- [NEW] Hitokoto Settings Listeners ---
-    const hitokotoModeRadios = document.querySelectorAll('input[name="hitokoto-mode"]');
-    const customOptionsContainer = document.getElementById('hitokoto-custom-options');
-    const categoryCheckboxes = document.querySelectorAll('input[name="hitokoto-category"]');
-    const selectAllCheckbox = document.getElementById('hitokoto-select-all');
-    const saveBtn = document.getElementById('hitokoto-save-btn');
-
-    hitokotoModeRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
-            const newMode = radio.value;
-            appSettings.hitokoto.mode = newMode;
-            if (newMode === 'default') {
-                customOptionsContainer.classList.remove('open');
-                saveSettings();
-                fetchHitokoto(); // Immediately fetch on switching to default
-            } else {
-                customOptionsContainer.classList.add('open');
-                // If entering custom mode and no categories are checked (e.g. first time), check the first one.
-                const checkedCount = document.querySelectorAll('input[name="hitokoto-category"]:checked').length;
-                if (checkedCount === 0) {
-                    const firstCategoryCheckbox = document.getElementById('hitokoto-cat-a');
-                    if (firstCategoryCheckbox) {
-                        firstCategoryCheckbox.checked = true;
-                    }
-                }
-            }
-        });
-    });
-
-    selectAllCheckbox.addEventListener('change', () => {
-        categoryCheckboxes.forEach(checkbox => {
-            checkbox.checked = selectAllCheckbox.checked;
-        });
-    });
-
-    categoryCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            const checkedCount = document.querySelectorAll('input[name="hitokoto-category"]:checked').length;
-            
-            // Prevent unchecking the last box
-            if (checkedCount === 0) {
-                checkbox.checked = true;
-            }
-
-            // Update "Select All" checkbox state
-            selectAllCheckbox.checked = checkedCount === categoryCheckboxes.length;
-        });
-    });
-
-    saveBtn.addEventListener('click', () => {
-        const selectedCategories = Array.from(document.querySelectorAll('input[name="hitokoto-category"]:checked')).map(cb => cb.value);
-        
-        if (selectedCategories.length === 0) {
-            const validationMsg = document.getElementById('hitokoto-validation-msg');
-            // Add the class to trigger the animation
-            validationMsg.classList.add('visible');
-            // Remove the class after the animation is done to allow it to be re-triggered
-            setTimeout(() => {
-                validationMsg.classList.remove('visible');
-            }, 3000);
-            return;
-        }
-
-        appSettings.hitokoto.categories = selectedCategories;
-        saveSettings();
-        hitokotoModule.fetchHitokoto();
-
-        // --- [FIX] Refined Save button animation & spam prevention ---
-        const saveIcon = saveBtn.querySelector('i');
-        const confirmIcon = document.getElementById('hitokoto-confirm-icon');
-        
-        saveBtn.disabled = true; // Disable button
-        saveIcon.style.opacity = '0';
-        
-        setTimeout(() => {
-            confirmIcon.style.opacity = '1';
-
-            setTimeout(() => {
-                confirmIcon.style.opacity = '0';
-                setTimeout(() => {
-                    saveIcon.style.opacity = '1';
-                    saveBtn.disabled = false; // Re-enable button
-                }, 300);
-            }, 3000);
-        }, 300);
-    });
+    // --- Hitokoto Settings Listeners (Moved to hitokoto-settings.js) ---
+    initializeHitokotoSettings(hitokotoModule);
 
 
     // --- [NEW] Hidden Reset Feature ---
@@ -486,6 +403,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const devModeFuncs = initializeDeveloperMode();
     closeDeveloperSettings = devModeFuncs.closeDeveloperSettings;
 
+    // 3. Initial data fetches and updates.
+    initializeNewYearTheme(backgroundFader); // Initialize New Year theme logic
+    clockModule = initializeClock(appSettings);
+    initializeGreeting();
+    hitokotoModule = initializeHitokoto(appSettings);
+    timeCapsuleModule = initializeTimeCapsule();
+    initializeHolidayDisplay();
+
     setupEventListeners(); // Must be called after modules that provide functions to it are initialized
     initializeResetSettings();
     setupLuckFeature(); // Activate the new luck feature
@@ -502,14 +427,6 @@ document.addEventListener('DOMContentLoaded', () => {
     applyCurrentBackground();
     applyCurrentView();
     updateSettingsUI();
-
-    // 3. Initial data fetches and updates.
-    initializeNewYearTheme(backgroundFader); // Initialize New Year theme logic
-    clockModule = initializeClock(appSettings);
-    initializeGreeting();
-    hitokotoModule = initializeHitokoto(appSettings);
-    timeCapsuleModule = initializeTimeCapsule();
-    initializeHolidayDisplay();
     
     // 4. Defer non-critical layout calculations.
     setTimeout(() => {
