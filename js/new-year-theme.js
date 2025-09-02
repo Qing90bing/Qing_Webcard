@@ -1,4 +1,4 @@
-import { appSettings } from './settings.js';
+import { appSettings, saveSettings } from './settings.js';
 import { isNewYearPeriod } from './utils.js';
 import { applyCurrentBackground } from './background.js';
 
@@ -101,6 +101,27 @@ export function initializeNewYearTheme(backgroundFader) {
         });
     }
     
+    // --- New Year Theme Setting Listeners ---
+    const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
+    if (forceNewYearToggle) {
+        forceNewYearToggle.checked = appSettings.developer.forceNewYearTheme;
+        forceNewYearToggle.addEventListener('change', () => {
+            appSettings.developer.forceNewYearTheme = forceNewYearToggle.checked;
+            saveSettings();
+            applyNewYearMode();
+        });
+    }
+
+    const newYearBgToggle = document.getElementById('new-year-bg-toggle');
+    if (newYearBgToggle) {
+        newYearBgToggle.checked = appSettings.newYearTheme.backgroundEnabled;
+        newYearBgToggle.addEventListener('change', () => {
+            appSettings.newYearTheme.backgroundEnabled = newYearBgToggle.checked;
+            saveSettings();
+            applyNewYearMode();
+        });
+    }
+
     // Initial application of the theme mode on load
     applyNewYearMode();
 }

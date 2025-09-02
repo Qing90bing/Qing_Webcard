@@ -3,380 +3,97 @@ import { initializeGreeting } from './greeting.js';
 import { initializeHitokoto } from './hitokoto.js';
 import { initializeTimeCapsule } from './time-capsule.js';
 import { initializeHolidayDisplay } from './holiday-display.js';
-import { appSettings, loadSettings, saveSettings } from './settings.js';
-import { initializeNewYearTheme, applyNewYearMode } from './new-year-theme.js';
+import { appSettings, loadSettings } from './settings.js';
+import { initializeNewYearTheme } from './new-year-theme.js';
 import { initializeTheme, applyCurrentTheme, initializeThemeSlider } from './theme.js';
-import { createCrossfader, isNewYearPeriod } from './utils.js';
-import {
-    initBackground,
-    applyCurrentBackground,
-    initializeBackgroundSettings
-} from './background.js';
-import { fetchAndRenderCommits, updateCommitMask } from './commit-history.js';
+import { createCrossfader } from './utils.js';
+import { initBackground, applyCurrentBackground, initializeBackgroundSettings } from './background.js';
 import { createCardSlider } from './card-slider.js';
 import { setupSettingsUI } from './settings-ui.js';
 import { setupTooltips } from './tooltip.js';
-import { setupGitHubChartLoader } from './github-chart.js';
 import { initializeResetSettings } from './reset-settings.js';
-import {
-    initializeAppearanceSettings,
-    applyGlassEffect,
-    applyCardSettings,
-    updateAppearanceSettingsUI
-} from './appearance.js';
-import { initializeViewManager, applyCurrentView, updateViewToggleUI } from './view-manager.js';
+import { initializeAppearanceSettings, applyGlassEffect, applyCardSettings } from './appearance.js';
+import { initializeViewManager, applyCurrentView } from './view-manager.js';
 import { updateSettingsUI } from './settings-updater.js';
 import { initializeDeveloperMode } from './developer-mode.js';
 import { initializeHitokotoSettings } from './hitokoto-settings.js';
-import { initializeSettingsModal, closeSettings } from './settings-modal.js';
+import { initializeSettingsModal } from './settings-modal.js';
 
+// --- Import all newly created feature modules ---
+import { initializeImmersiveMode } from './immersive-mode.js';
+import { initializeEscapeKeyHandler } from './escape-handler.js';
+import { initializeCardManager } from './card-manager.js';
+import { initializeWeatherUI } from './weather-ui.js';
+import { initializeTimeFormatSettings } from './time-format-settings.js';
+import { initializeLuckGameUI } from './luck-game-ui.js';
 
-// UI Update functions are now in js/settings-updater.js
-
-// --- [REMOVED] View (GitHub/Weather) Management is now in view-manager.js ---
-
-
-function applyBlinkingEffect() {
-    document.body.classList.toggle('immersive-blink-enabled', appSettings.immersiveBlinkingColon);
-}
-
-// --- 初始状态和常量 ---
-// Calendar and holiday logic moved to js/calendar.js
-let holidayListDisplayedYear = new Date().getFullYear();
-let isFetchingWeather = false; // Lock to prevent multiple weather requests
-let aboutCardHasAnimated = false;
+// Module-level variables to hold instances or functions needed for dependency injection.
 let clockModule;
-let hitokotoModule;
-let timeCapsuleModule;
-let backgroundFader;
-let closeDeveloperSettings; // This will be populated by initializeDeveloperMode
+let closeDeveloperSettings;
 
-// previewFader is no longer needed
-
-// --- DOM 元素获取 (部分移至DOMContentLoaded) ---
-const countdownCard = document.getElementById('countdown-card');
-const profileCard = document.getElementById('profile-card');
-const rightColumn = document.getElementById('right-column');
-const timeCapsuleCard = document.getElementById('time-capsule-card');
-const holidayListCard = document.getElementById('holiday-list-card');
-const aboutCard = document.getElementById('about-card');
-let rightColumnInitialHeight = 0;
-let cachedRightColumnHeight = 0; // Cache the height of the right column
-
-// --- [NEW] Year Input Feature Elements ---
-const yearDisplayControls = document.getElementById('year-display-controls');
-const yearEditControls = document.getElementById('year-edit-controls');
-const holidayListYearSpan = document.getElementById('holiday-list-year');
-const yearInput = document.getElementById('year-input');
-const confirmYearBtn = document.getElementById('confirm-year-btn');
-const cancelYearBtn = document.getElementById('cancel-year-btn');
-const yearInputError = document.getElementById('year-input-error');
-const yearRangeWarning = document.getElementById('year-range-warning');
-
-// --- 交互事件监听 ---
-function setupEventListeners() {
-
-
-    // --- Time Format Listeners ---
-    document.querySelectorAll('input[name="time-format"]').forEach(radio => {
-        radio.addEventListener('change', () => {
-            appSettings.timeFormat = radio.value;
-            saveSettings();
-            clockModule.updateTime(); // Immediately update the main clock
-            // If weather view is active, re-render it to update sunrise/sunset
-            if (appSettings.view === 'weather') {
-                applyCurrentView();
-            }
-        });
-    });
-
-    // --- [NEW] Immersive Blink Toggle Listener ---
-    const immersiveBlinkToggle = document.getElementById('immersive-blink-toggle');
-    if (immersiveBlinkToggle) {
-        immersiveBlinkToggle.addEventListener('change', () => {
-            appSettings.immersiveBlinkingColon = immersiveBlinkToggle.checked;
-            saveSettings();
-            applyBlinkingEffect();
-        });
-    }
-
-    // --- [REMOVED] View Toggle Listeners are now in view-manager.js ---
-
-
-    // --- [REMOVED] Settings Modal Logic is now in settings-modal.js ---
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            // Priority 0: Close immersive view
-            if (document.body.classList.contains('immersive-active')) {
-                document.getElementById('exit-immersive-btn').click();
-                return;
-            }
-            
-            // Priority 1: Close developer settings modal if it's open
-            if (document.body.classList.contains('developer-settings-open')) {
-                if (closeDeveloperSettings) closeDeveloperSettings();
-                return;
-            }
-
-            // Priority 2: Close settings modal if it's open
-            if (document.body.classList.contains('settings-open')) {
-                closeSettings();
-                return;
-            }
-
-            // [USER FEEDBACK] Priority 3: Close "About" card if it's open
-            if (!aboutCard.classList.contains('hidden')) {
-                toggleAboutCard();
-                return;
-            }
-
-            // Priority 4: Close holiday list card if it's open
-            if (!holidayListCard.classList.contains('hidden')) {
-                holidayListCard.classList.add('hidden');
-                rightColumn.classList.remove('hidden');
-                animateRightColumnIn();
-                return;
-            }
-
-            // Priority 5: Close time capsule card if it's open
-            if (!timeCapsuleCard.classList.contains('hidden')) {
-                timeCapsuleCard.classList.add('hidden');
-                rightColumn.classList.remove('hidden');
-                animateRightColumnIn();
-                return;
-            }
-        }
-    });
-
-    // --- End Settings Modal Logic ---
-
-    const animateRightColumnIn = () => {
-        const elementsToAnimate = rightColumn.querySelectorAll(':scope > div');
-        elementsToAnimate.forEach(el => {
-            el.classList.remove('bounce-in');
-            void el.offsetWidth;
-            el.classList.add('bounce-in');
-        });
-    };
-
-    // 切换到时光胶囊
-    profileCard.addEventListener('click', (e) => { // 1. 接收 event 对象，命名为 e
-        // 2. 增加判断：如果点击的目标是 <a> 标签或其内部元素，则直接返回
-        if (e.target.closest('a')) {
-            return;
-        }
-
-        // If the time capsule is already visible, hide it and show the main column.
-        if (!timeCapsuleCard.classList.contains('hidden')) {
-            timeCapsuleCard.classList.add('hidden');
-            rightColumn.classList.remove('hidden');
-            animateRightColumnIn();
-        } else { // Otherwise, show it.
-            rightColumn.classList.add('hidden');
-            holidayListCard.classList.add('hidden'); // Hide other cards
-            aboutCard.classList.add('hidden'); // Hide other cards
-            timeCapsuleCard.classList.remove('hidden');
-            timeCapsuleCard.classList.add('bounce-in');
-            timeCapsuleModule.updateTimeCapsule();
-        }
-    });
-
-    // 关闭时光胶囊
-    document.getElementById('close-time-capsule').addEventListener('click', (e) => {
-        e.stopPropagation();
-        timeCapsuleCard.classList.add('hidden');
-        rightColumn.classList.remove('hidden');
-        animateRightColumnIn();
-    });
-
-    // --- [NEW] About Card Listeners ---
-    const aboutCardTrigger = document.getElementById('about-card-trigger');
-    const closeAboutCardBtn = document.getElementById('close-about-card');
-    const refreshCommitsBtn = document.getElementById('refresh-commits-btn');
-
-    const toggleAboutCard = () => {
-        if (!aboutCard.classList.contains('hidden')) {
-            aboutCard.classList.add('hidden');
-            rightColumn.classList.remove('hidden');
-            animateRightColumnIn();
-        } else {
-            rightColumn.classList.add('hidden');
-            timeCapsuleCard.classList.add('hidden');
-            holidayListCard.classList.add('hidden');
-            aboutCard.classList.remove('hidden');
-            
-            if (!aboutCardHasAnimated) {
-                aboutCard.classList.add('bounce-in');
-                aboutCardHasAnimated = true;
-            }
-
-            const commitsContainer = document.getElementById('recent-commits-container');
-            if (commitsContainer && !SimpleBar.instances.get(commitsContainer)) {
-                const simplebarInstance = new SimpleBar(commitsContainer);
-                simplebarInstance.getScrollElement().addEventListener('scroll', updateCommitMask);
-            }
-            
-            // Simplified logic: always fetch on open
-            fetchAndRenderCommits();
-        }
-    };
-
-    if (aboutCardTrigger) {
-        aboutCardTrigger.addEventListener('click', toggleAboutCard);
-    }
-
-    if (refreshCommitsBtn) {
-        refreshCommitsBtn.addEventListener('click', () => {
-            fetchAndRenderCommits(); // forceRefresh parameter is removed
-        });
-    }
-
-    if (closeAboutCardBtn) {
-        closeAboutCardBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleAboutCard();
-        });
-    }
-
-    // 天气刷新按钮
-    document.getElementById('weather-refresh-btn').addEventListener('click', () => {
-        setWeatherSpinner(true);
-        fetchAndDisplayWeather();
-    });
-
-    // --- Hitokoto Settings Listeners (Moved to hitokoto-settings.js) ---
-    initializeHitokotoSettings(hitokotoModule);
-
-
-    // --- [NEW] Hidden Reset Feature ---
-    const luckTitleIcon = document.querySelector('#time-capsule-card h2 svg');
-    if (luckTitleIcon) {
-        luckTitleIcon.addEventListener('click', () => {
-            resetClickCount++;
-            clearTimeout(resetClickTimer);
-            resetClickTimer = setTimeout(() => {
-                resetClickCount = 0;
-            }, 3000);
-
-            if (resetClickCount === 5) {
-                resetClickCount = 0;
-                clearTimeout(resetClickTimer);
-                localStorage.removeItem('dailyLuckData');
-                
-                const luckResult = document.getElementById('luck-result');
-                if (luckResult) {
-                    // Reset all JS state immediately
-                    luckGameState = 'initial';
-                    dailyLuckData = null;
-                    hasPlayedGameToday = false;
-                    luckClickCount = 0;
-                    clearTimeout(luckResetTimer);
-                    clearTimeout(countdownAnimationHandle);
-
-                    // Start the collapse animation
-                    luckResult.classList.remove('visible');
-
-                    // After the animation finishes, clean up the DOM properties
-                    setTimeout(() => {
-                        // Only clean up if another game hasn't started in the meantime
-                        if(luckGameState === 'initial') {
-                            luckResult.classList.remove('flex', 'flex-col', 'justify-center', 'flex-1', 'min-w-0', 'relative');
-                            luckResult.innerHTML = '';
-                        }
-                    }, 500);
-                }
-            }
-        });
-    }
-
-    // --- [REVISED] Developer Options Toggle Listener (Moved to developer-mode.js) ---
-
-    // --- [NEW] New Year Theme Event Listeners (Moved to new-year-theme.js) ---
-    const forceNewYearToggle = document.getElementById('force-new-year-theme-toggle');
-    if (forceNewYearToggle) {
-        forceNewYearToggle.addEventListener('change', () => {
-            appSettings.developer.forceNewYearTheme = forceNewYearToggle.checked;
-            saveSettings();
-            applyNewYearMode();
-        });
-    }
-
-    const newYearBgToggle = document.getElementById('new-year-bg-toggle');
-    if (newYearBgToggle) {
-        newYearBgToggle.addEventListener('change', () => {
-            appSettings.newYearTheme.backgroundEnabled = newYearBgToggle.checked;
-            saveSettings();
-            applyNewYearMode(); // Re-evaluate the whole theme state
-        });
-    }
-}
-
-
-
-// --- 页面加载时执行的函数 ---
+// --- Main Application Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Load settings first, as many modules depend on it.
     loadSettings();
     
-    // Initialize Faders
+    // 2. Initialize core UI and utility modules that don't have many dependencies.
     const bgLayers = document.querySelectorAll('#bg-wrapper .bg-layer');
-    backgroundFader = createCrossfader(Array.from(bgLayers));
+    const backgroundFader = createCrossfader(Array.from(bgLayers));
     initBackground(backgroundFader);
-
-    // --- [FIX] Correct Initialization Order ---
-    setupTooltips(); // Initialize the new tooltip system
-    // 1. Build the settings panel UI first, so other functions can find its elements.
+    setupTooltips();
     setupSettingsUI();
-    initializeTheme(); // Set up theme-related event listeners
-    initializeAppearanceSettings(); // Set up appearance-related event listeners
-    initializeViewManager(); // Set up view-related event listeners
-    initializeBackgroundSettings(); // Set up background-related event listeners
-    
-    // Initialize modules that might return functions needed by others
+    createCardSlider('#link-slider-container');
+
+    // 3. Initialize modules that provide functions/instances needed by other modules.
     const devModeFuncs = initializeDeveloperMode();
     closeDeveloperSettings = devModeFuncs.closeDeveloperSettings;
-
-    // 3. Initial data fetches and updates.
-    initializeNewYearTheme(backgroundFader); // Initialize New Year theme logic
     clockModule = initializeClock(appSettings);
+    const hitokotoModule = initializeHitokoto(appSettings);
+
+    // 4. Initialize all other feature and UI modules.
     initializeGreeting();
-    hitokotoModule = initializeHitokoto(appSettings);
-    timeCapsuleModule = initializeTimeCapsule();
+    initializeTimeCapsule();
     initializeHolidayDisplay();
-
+    initializeNewYearTheme(backgroundFader);
+    initializeTheme();
+    initializeAppearanceSettings();
+    initializeViewManager();
+    initializeBackgroundSettings();
     initializeSettingsModal();
-    setupEventListeners(); // Must be called after modules that provide functions to it are initialized
     initializeResetSettings();
-    setupLuckFeature(); // Activate the new luck feature
-    particleEffects.init(); // Initialize particle system
+    initializeHitokotoSettings(hitokotoModule);
 
-    // 2. Pre-calculate the theme slider's correct position before it's ever shown.
+    // 5. Initialize all the newly refactored modules.
+    initializeImmersiveMode();
+    initializeCardManager();
+    initializeWeatherUI();
+    initializeTimeFormatSettings(clockModule);
+    initializeLuckGameUI();
+    initializeEscapeKeyHandler({
+        getCloseDeveloperSettings: () => closeDeveloperSettings
+    });
+
+    // 6. Initialize features from non-module scripts (globals).
+    if (typeof setupLuckFeature === 'function') setupLuckFeature();
+    if (typeof particleEffects !== 'undefined' && typeof particleEffects.init === 'function') particleEffects.init();
+
+    // 7. Pre-calculate UI elements now that settings are loaded.
     initializeThemeSlider();
     
-    // 3. Now apply all other settings.
+    // 8. Apply all visual settings based on the loaded configuration.
     applyCurrentTheme();
-    applyBlinkingEffect();
     applyGlassEffect();
     applyCardSettings();
     applyCurrentBackground();
     applyCurrentView();
+    
+    // 9. Update the settings UI to reflect the loaded settings.
     updateSettingsUI();
     
-    // 4. Defer non-critical layout calculations.
-    setTimeout(() => {
-        if (window.innerWidth >= 1024) {
-            cachedRightColumnHeight = rightColumn.offsetHeight;
-        }
-    }, 100);
-
-    // --- [NEW] Initialize Card Slider ---
-    createCardSlider('#link-slider-container');
-    
-    // [NEW] Auto-refresh weather data every 30 minutes
+    // 10. Setup timers.
     setInterval(() => {
-        if (appSettings.view === 'weather') {
+        if (appSettings.view === 'weather' && typeof fetchAndDisplayWeather === 'function') {
             fetchAndDisplayWeather();
         }
     }, 30 * 60 * 1000);
-
 });

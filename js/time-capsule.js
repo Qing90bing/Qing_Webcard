@@ -1,6 +1,6 @@
 // js/features/time-capsule.js
 
-function updateTimeCapsule() {
+export function updateTimeCapsule() {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();

@@ -1,3 +1,36 @@
+function resetLuckGame() {
+    // Clear any pending timers associated with the luck game
+    clearTimeout(luckResetTimer);
+    clearTimeout(countdownAnimationHandle);
+
+    // Reset all state variables to their initial values
+    luckGameState = 'initial';
+    dailyLuckData = null;
+    hasPlayedGameToday = false;
+    luckClickCount = 0;
+
+    // Clear stored data from localStorage
+    try {
+        localStorage.removeItem('dailyLuckData');
+    } catch (e) {
+        console.error("Failed to remove luck data from localStorage", e);
+    }
+
+    // Reset the UI to its initial state
+    const luckResult = document.getElementById('luck-result');
+    if (luckResult) {
+        // Animate out the result before clearing it
+        luckResult.classList.remove('visible');
+        setTimeout(() => {
+            // Only clear if the game state hasn't changed again in the meantime
+            if (luckGameState === 'initial') {
+                luckResult.innerHTML = '';
+                luckResult.classList.remove('flex', 'flex-col', 'justify-center', 'flex-1', 'min-w-0', 'relative');
+            }
+        }, 300); // Animation duration
+    }
+}
+
 // --- [NEW] 今日人品 功能逻辑 ---
 const luckTiers = {
     0: ["是不是操作系统的锅？要不重启一下？", "今日不宜出门，建议和床锁死。", "你这运气，是不是忘给老天爷续费了？", "没事，重在参与，下次一定。"],
