@@ -8,7 +8,7 @@ export let appSettings = {
     appearance: {
         glassEffect: true,
         cardBorderRadius: 16,
-        cardBlurAmount: 16
+        cardBlurAmount: 24
     },
     theme: 'system', // 'system', 'light', 'dark'
     timeFormat: '24h', // '12h' or '24h'
