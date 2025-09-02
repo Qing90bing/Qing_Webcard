@@ -28,6 +28,7 @@ import { initializeViewManager, applyCurrentView, updateViewToggleUI } from './v
 import { updateSettingsUI } from './settings-updater.js';
 import { initializeDeveloperMode } from './developer-mode.js';
 import { initializeHitokotoSettings } from './hitokoto-settings.js';
+import { initializeSettingsModal, closeSettings } from './settings-modal.js';
 
 
 // UI Update functions are now in js/settings-updater.js
@@ -42,7 +43,6 @@ function applyBlinkingEffect() {
 // --- 初始状态和常量 ---
 // Calendar and holiday logic moved to js/calendar.js
 let holidayListDisplayedYear = new Date().getFullYear();
-let settingsSimpleBar = null; // Instance for the settings scrollbar
 let isFetchingWeather = false; // Lock to prevent multiple weather requests
 let aboutCardHasAnimated = false;
 let clockModule;
@@ -103,74 +103,7 @@ function setupEventListeners() {
     // --- [REMOVED] View Toggle Listeners are now in view-manager.js ---
 
 
-    // --- Settings Modal Logic ---
-    const openSettingsBtn = document.getElementById('open-settings-btn');
-    const settingsOverlay = document.getElementById('settings-overlay');
-    const closeSettingsBtn = document.getElementById('close-settings-btn');
-
-    function openSettings() {
-        updateSettingsUI(); // Refresh UI to match saved settings
-        const settingsWindow = document.getElementById('settings-window');
-        
-        // [FIX] Temporarily disable transitions on overlays to prevent animation on panel open
-        const overlay1 = document.getElementById('background-settings-overlay');
-        const overlay2 = document.getElementById('blur-slider-overlay');
-
-        if (overlay1) overlay1.style.transition = 'none';
-        if (overlay2) overlay2.style.transition = 'none';
-
-        document.body.classList.add('settings-open');
-        
-        // Restore transitions after the panel has appeared.
-        setTimeout(() => {
-            if (overlay1) overlay1.style.transition = '';
-            if (overlay2) overlay2.style.transition = '';
-        }, 300);
-
-
-        // Initialize SimpleBar on the content area if it hasn't been already
-        if (!settingsSimpleBar) {
-            const contentWrapper = settingsWindow.querySelector('[data-simplebar]');
-            if (contentWrapper) {
-                settingsSimpleBar = new SimpleBar(contentWrapper);
-                const scrollElement = settingsSimpleBar.getScrollElement();
-                const maskContainer = contentWrapper; // The element with the mask is the one with data-simplebar
-                const maxFadeSize = 24; // Corresponds to the CSS variable
-
-                const updateSettingsMask = () => {
-                    const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-                    const tolerance = 1;
-                    // If content is not scrollable, remove fades
-                    if (scrollHeight <= clientHeight + tolerance) {
-                        maskContainer.style.setProperty('--fade-top-size', '0px');
-                        maskContainer.style.setProperty('--fade-bottom-size', '0px');
-                        return;
-                    }
-                    const scrollBottom = scrollHeight - clientHeight - scrollTop;
-                    const topFade = Math.min(scrollTop, maxFadeSize);
-                    const bottomFade = Math.min(scrollBottom, maxFadeSize);
-                    maskContainer.style.setProperty('--fade-top-size', `${topFade}px`);
-                    maskContainer.style.setProperty('--fade-bottom-size', `${bottomFade}px`);
-                };
-
-                scrollElement.addEventListener('scroll', updateSettingsMask);
-                // Call once to set initial state, delayed to allow rendering
-                setTimeout(updateSettingsMask, 50);
-            }
-        }
-    }
-
-    function closeSettings() {
-        document.body.classList.remove('settings-open');
-        // The line that removed the 'visible' class from the preview container
-        // has been removed to prevent the re-animation issue.
-    }
-
-    openSettingsBtn.addEventListener('click', openSettings);
-    closeSettingsBtn.addEventListener('click', closeSettings);
-    // settingsOverlay.addEventListener('click', (e) => {
-    //     if (e.target === settingsOverlay) closeSettings();
-    // });
+    // --- [REMOVED] Settings Modal Logic is now in settings-modal.js ---
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -411,6 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timeCapsuleModule = initializeTimeCapsule();
     initializeHolidayDisplay();
 
+    initializeSettingsModal();
     setupEventListeners(); // Must be called after modules that provide functions to it are initialized
     initializeResetSettings();
     setupLuckFeature(); // Activate the new luck feature
