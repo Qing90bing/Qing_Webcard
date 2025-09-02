@@ -1,4 +1,4 @@
-import { appSettings } from './settings.js';
+import { appSettings, saveSettings } from './settings.js';
 import { isNewYearPeriod } from './utils.js';
 
 // This will be initialized from main.js
@@ -377,4 +377,157 @@ export function updateBgSettingsUI() {
     } else {
         previewContainer.classList.remove('visible');
     }
+}
+
+export function initializeBackgroundSettings() {
+    // --- Background Settings Listeners ---
+    const bgRadioButtons = document.querySelectorAll('input[name="background-source"]');
+    const defaultOptionsContainer = document.getElementById('default-bg-options');
+    const customBgInputWrapper = document.getElementById('custom-bg-input-wrapper');
+
+    bgRadioButtons.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const source = radio.value;
+            appSettings.background.source = source;
+
+            if (source === 'default') {
+                defaultOptionsContainer.classList.add('open');
+            } else {
+                defaultOptionsContainer.classList.remove('open');
+            }
+
+            if (source === 'custom') {
+                customBgInputWrapper.style.maxHeight = '80px';
+                customBgInputWrapper.classList.add('mt-2');
+            } else {
+                customBgInputWrapper.style.maxHeight = '0';
+                customBgInputWrapper.classList.remove('mt-2');
+            }
+
+            applyCurrentBackground();
+            saveSettings();
+        });
+    });
+
+    const thumbItems = defaultOptionsContainer.querySelectorAll('.thumb-item');
+    thumbItems.forEach(thumb => {
+        thumb.addEventListener('click', () => {
+            if (appSettings.background.source !== 'default') {
+                document.getElementById('bg-radio-default').checked = true;
+                appSettings.background.source = 'default';
+            }
+            
+            const specifier = thumb.dataset.bgUrl;
+            appSettings.background.specifier = specifier;
+            
+            thumbItems.forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+            
+            applyCurrentBackground();
+            saveSettings();
+        });
+    });
+
+    // --- Preview Buttons Listeners ---
+    const refreshBtn = document.getElementById('bg-preview-refresh-btn');
+    const downloadBtn = document.getElementById('bg-preview-download-btn');
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const icon = refreshBtn.querySelector('i');
+            if (icon && !icon.classList.contains('fa-spin')) {
+                icon.classList.add('fa-spin');
+                applyCurrentBackground();
+            }
+        });
+    }
+
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadImage();
+        });
+    }
+
+    const previewErrorContainer = document.getElementById('bg-preview-error');
+    if (previewErrorContainer) {
+        previewErrorContainer.addEventListener('click', () => {
+            hidePreviewError();
+            setTimeout(() => {
+                applyCurrentBackground();
+            }, 300);
+        });
+    }
+
+    // --- Custom Background Input Listeners ---
+    const customBgInput = document.getElementById('custom-bg-input');
+    const saveCustomBgBtn = document.getElementById('save-custom-bg-btn');
+    const clearCustomBgBtn = document.getElementById('clear-custom-bg-btn');
+
+    const saveCustomBg = () => {
+        if (saveCustomBgBtn.disabled) return;
+
+        const url = customBgInput.value.trim();
+        const originalPlaceholder = "输入图片或API链接";
+        
+        if (!url || !url.startsWith('http')) {
+            customBgInput.classList.add('invalid');
+            customBgInput.value = '';
+            customBgInput.placeholder = '无效链接，请重新输入';
+            
+            setTimeout(() => {
+                customBgInput.classList.remove('invalid');
+                customBgInput.placeholder = originalPlaceholder;
+            }, 2500);
+            return;
+        }
+
+        appSettings.background.customUrl = url;
+        appSettings.background.source = 'custom';
+        
+        const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url);
+        appSettings.background.customType = isImage ? 'image' : 'api';
+
+        saveSettings();
+        applyCurrentBackground();
+
+        saveCustomBgBtn.disabled = true;
+        const saveIcon = saveCustomBgBtn.querySelector('.fa-save');
+        const checkIcon = saveCustomBgBtn.querySelector('.fa-check');
+
+        if (saveIcon && checkIcon) {
+            saveIcon.style.opacity = '0';
+            checkIcon.style.opacity = '1';
+
+            setTimeout(() => {
+                saveIcon.style.opacity = '1';
+                checkIcon.style.opacity = '0';
+                saveCustomBgBtn.disabled = false;
+            }, 2000);
+        }
+    };
+    
+    customBgInput.addEventListener('focus', () => {
+        if (customBgInput.classList.contains('invalid')) {
+            customBgInput.classList.remove('invalid');
+            customBgInput.placeholder = "输入图片或API链接";
+        }
+    });
+
+    saveCustomBgBtn.addEventListener('click', saveCustomBg);
+    customBgInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveCustomBg();
+        }
+    });
+
+    clearCustomBgBtn.addEventListener('click', () => {
+        customBgInput.value = '';
+        appSettings.background.customUrl = null;
+        appSettings.background.customType = 'unknown';
+        saveSettings();
+        customBgInput.focus();
+    });
 }

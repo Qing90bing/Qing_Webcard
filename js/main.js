@@ -10,9 +10,7 @@ import { createCrossfader, isNewYearPeriod } from './utils.js';
 import {
     initBackground,
     applyCurrentBackground,
-    updateBgSettingsUI,
-    downloadImage,
-    DEFAULT_BG_IMAGES
+    initializeBackgroundSettings
 } from './background.js';
 import { fetchAndRenderCommits, updateCommitMask } from './commit-history.js';
 import { createCardSlider } from './card-slider.js';
@@ -76,94 +74,6 @@ const yearRangeWarning = document.getElementById('year-range-warning');
 
 // --- 交互事件监听 ---
 function setupEventListeners() {
-
-    // --- Background Settings Listeners ---
-    const bgRadioButtons = document.querySelectorAll('input[name="background-source"]');
-    const defaultOptionsContainer = document.getElementById('default-bg-options');
-
-    const customBgInputWrapper = document.getElementById('custom-bg-input-wrapper');
-
-    bgRadioButtons.forEach(radio => {
-        radio.addEventListener('change', () => {
-            const source = radio.value;
-            appSettings.background.source = source;
-
-            if (source === 'default') {
-                defaultOptionsContainer.classList.add('open');
-            } else {
-                defaultOptionsContainer.classList.remove('open');
-            }
-
-            if (source === 'custom') {
-                customBgInputWrapper.style.maxHeight = '80px';
-                customBgInputWrapper.classList.add('mt-2');
-            } else {
-                customBgInputWrapper.style.maxHeight = '0';
-                customBgInputWrapper.classList.remove('mt-2');
-            }
-
-            // When a source is selected, apply the background.
-            // The applyCurrentBackground function will handle logic for new/empty custom URLs.
-            applyCurrentBackground();
-            
-            saveSettings();
-        });
-    });
-
-    const thumbItems = defaultOptionsContainer.querySelectorAll('.thumb-item');
-    thumbItems.forEach(thumb => {
-        thumb.addEventListener('click', () => {
-            // This listener only matters when the 'default' source is active
-            if (appSettings.background.source !== 'default') {
-                // To be safe, check the 'default' radio
-                document.getElementById('bg-radio-default').checked = true;
-                appSettings.background.source = 'default';
-            }
-            
-            const specifier = thumb.dataset.bgUrl;
-            appSettings.background.specifier = specifier;
-            
-            // Update UI immediately for responsiveness
-            thumbItems.forEach(t => t.classList.remove('active'));
-            thumb.classList.add('active');
-            
-            applyCurrentBackground();
-            saveSettings();
-        });
-    });
-
-    // --- [NEW] Preview Buttons Listeners ---
-    const refreshBtn = document.getElementById('bg-preview-refresh-btn');
-    const downloadBtn = document.getElementById('bg-preview-download-btn');
-
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const icon = refreshBtn.querySelector('i');
-            if (icon && !icon.classList.contains('fa-spin')) {
-                icon.classList.add('fa-spin');
-                applyCurrentBackground();
-            }
-        });
-    }
-
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            downloadImage();
-        });
-    }
-
-    const previewErrorContainer = document.getElementById('bg-preview-error');
-    if (previewErrorContainer) {
-        previewErrorContainer.addEventListener('click', () => {
-            hidePreviewError();
-            setTimeout(() => {
-                // We call this again to retry loading a background.
-                applyCurrentBackground();
-            }, 300); // Wait for the fade-out transition to complete before retrying.
-        });
-    }
 
 
     // --- Time Format Listeners ---
@@ -401,82 +311,6 @@ function setupEventListeners() {
         fetchAndDisplayWeather();
     });
 
-    // --- [NEW] Custom Background Input Listeners ---
-    const customBgInput = document.getElementById('custom-bg-input');
-    const saveCustomBgBtn = document.getElementById('save-custom-bg-btn');
-    const clearCustomBgBtn = document.getElementById('clear-custom-bg-btn');
-    const customBgError = document.getElementById('custom-bg-input-error');
-    const btnGroup = document.getElementById('custom-bg-btn-group');
-    const confirmIcon = document.getElementById('confirm-custom-bg-icon');
-
-    const saveCustomBg = () => {
-        if (saveCustomBgBtn.disabled) return; // Prevent spam-clicking
-
-        const url = customBgInput.value.trim();
-        const originalPlaceholder = "输入图片或API链接";
-        
-        if (!url || !url.startsWith('http')) {
-            customBgInput.classList.add('invalid');
-            customBgInput.value = ''; // Clear input to show placeholder
-            customBgInput.placeholder = '无效链接，请重新输入';
-            
-            // Restore after a delay
-            setTimeout(() => {
-                customBgInput.classList.remove('invalid');
-                customBgInput.placeholder = originalPlaceholder;
-            }, 2500);
-            return;
-        }
-
-        appSettings.background.customUrl = url;
-        appSettings.background.source = 'custom';
-        
-        const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url);
-        appSettings.background.customType = isImage ? 'image' : 'api';
-
-        saveSettings();
-        applyCurrentBackground();
-
-        // --- New Save Button Animation ---
-        saveCustomBgBtn.disabled = true;
-        const saveIcon = saveCustomBgBtn.querySelector('.fa-save');
-        const checkIcon = saveCustomBgBtn.querySelector('.fa-check');
-
-        if (saveIcon && checkIcon) {
-            saveIcon.style.opacity = '0';
-            checkIcon.style.opacity = '1';
-
-            setTimeout(() => {
-                saveIcon.style.opacity = '1';
-                checkIcon.style.opacity = '0';
-                saveCustomBgBtn.disabled = false;
-            }, 2000);
-        }
-    };
-    
-    customBgInput.addEventListener('focus', () => {
-        if (customBgInput.classList.contains('invalid')) {
-            customBgInput.classList.remove('invalid');
-            customBgInput.placeholder = "输入图片或API链接";
-        }
-    });
-
-    saveCustomBgBtn.addEventListener('click', saveCustomBg);
-    customBgInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            saveCustomBg();
-        }
-    });
-
-    clearCustomBgBtn.addEventListener('click', () => {
-        customBgInput.value = '';
-        appSettings.background.customUrl = null;
-        appSettings.background.customType = 'unknown';
-        saveSettings();
-        customBgInput.focus();
-    });
-
     // --- [NEW] Hitokoto Settings Listeners ---
     const hitokotoModeRadios = document.querySelectorAll('input[name="hitokoto-mode"]');
     const customOptionsContainer = document.getElementById('hitokoto-custom-options');
@@ -646,6 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme(); // Set up theme-related event listeners
     initializeAppearanceSettings(); // Set up appearance-related event listeners
     initializeViewManager(); // Set up view-related event listeners
+    initializeBackgroundSettings(); // Set up background-related event listeners
     
     // Initialize modules that might return functions needed by others
     const devModeFuncs = initializeDeveloperMode();
