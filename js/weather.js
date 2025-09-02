@@ -190,7 +190,7 @@ function getWeatherTip(weatherData) {
 
 // --- [NEW] Weather API Fallback Logic ---
 
-function setWeatherSpinner(isSpinning) {
+export function setWeatherSpinner(isSpinning) {
     const refreshBtn = document.getElementById('weather-refresh-btn');
     if (refreshBtn) {
         const icon = refreshBtn.querySelector('i');

@@ -20,5 +20,5 @@
      * @description 当启用毛玻璃效果时，应用于卡片背景的模糊滤镜强度。
      * @value 16px
      */
-    --card-backdrop-blur: 16px;
+    --card-backdrop-blur: 24px;
 }

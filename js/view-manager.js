@@ -1,7 +1,6 @@
 import { appSettings, saveSettings } from './settings.js';
 import { setupGitHubChartLoader } from './github-chart.js';
-
-// Note: fetchAndDisplayWeather is treated as a global function for now.
+import { fetchAndDisplayWeather } from './weather.js';
 
 function applyCurrentView() {
     const githubView = document.getElementById('github-view');
