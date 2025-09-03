@@ -9,7 +9,7 @@ body.theme-light {
     --immersive-bg-color: #f9fafb; /* gray-50 */
 
     /** @property --solid-card-bg-color: 当“毛玻璃效果”被禁用时，卡片所使用的实心背景色。*/
-    --solid-card-bg-color: #1e293b; /* slate-100 */
+    --solid-card-bg-color: #f9fafb; /* gray-50 */
 
     /** @property --icon-hover-bg: 通用图标在鼠标悬停时的背景色。*/
     --icon-hover-bg: rgba(0, 0, 0, 0.08);
