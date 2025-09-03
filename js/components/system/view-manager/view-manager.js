@@ -1,7 +1,19 @@
+/**
+ * @file view-manager.js
+ * @description
+ * 本文件负责管理主内容区域的视图切换，主要是在“GitHub贡献图”和“天气信息”之间进行切换。
+ * 它还处理设置面板中与此相关的UI交互。
+ *
+ * @module components/system/view-manager
+ */
 import { appSettings, saveSettings } from '../../../core/settings.js';
 import { setupGitHubChartLoader } from '../../features/github/github-chart.js';
 import { fetchAndDisplayWeather } from '../../features/weather/weather.js';
 
+/**
+ * @description 根据 `appSettings` 中的设置，应用当前的主视图。
+ * 它会隐藏不活动的视图，显示活动的视图，并触发相应视图的内容加载。
+ */
 function applyCurrentView() {
     const githubView = document.getElementById('github-view');
     const weatherView = document.getElementById('weather-view');
@@ -9,18 +21,22 @@ function applyCurrentView() {
     if (appSettings.view === 'weather') {
         githubView.classList.add('hidden');
         weatherView.classList.remove('hidden');
-        fetchAndDisplayWeather();
+        fetchAndDisplayWeather(); // 加载天气信息
     } else {
         weatherView.classList.add('hidden');
         githubView.classList.remove('hidden');
-        setupGitHubChartLoader();
+        setupGitHubChartLoader(); // 加载GitHub贡献图
     }
 }
 
+/**
+ * @description 更新设置面板中与视图切换相关的UI元素的状态。
+ */
 function updateViewToggleUI() {
     const cityInputWrapper = document.getElementById('manual-city-input-wrapper');
     const cityInput = document.getElementById('weather-city-input');
 
+    // 根据当前的视图和天气来源，确定哪个单选按钮应该被选中
     let selectedViewValue;
     if (appSettings.view === 'github') {
         selectedViewValue = 'github';
@@ -33,6 +49,7 @@ function updateViewToggleUI() {
         radio.checked = true;
     }
 
+    // 控制“手动输入城市”输入框的显示/隐藏
     const isManual = appSettings.view === 'weather' && appSettings.weather.source === 'manual';
     cityInputWrapper.style.maxHeight = isManual ? '60px' : '0';
     cityInputWrapper.style.marginTop = isManual ? '0.75rem' : '0';
@@ -43,16 +60,22 @@ function updateViewToggleUI() {
     }
 }
 
+/**
+ * @description 初始化视图管理器的所有事件监听器。
+ */
 export function initializeViewManager() {
     const cityInput = document.getElementById('weather-city-input');
     const saveCityBtn = document.getElementById('save-city-btn');
     const confirmCityIcon = document.getElementById('confirm-city-icon');
     const cityInputError = document.getElementById('city-input-error');
 
+    /**
+     * @description 保存用户手动输入的城市名称。
+     */
     const saveCity = () => {
         const newCity = cityInput.value.trim();
 
-        // Validation for length
+        // 输入验证
         if (newCity.length > 20) {
             cityInput.classList.add('invalid');
             cityInputError.textContent = '内容过长 (最多20个字符)';
@@ -61,19 +84,18 @@ export function initializeViewManager() {
             return;
         }
 
-        // Clear previous errors
+        // 清除之前的错误提示
         cityInput.classList.remove('invalid');
         cityInputError.classList.remove('visible');
-        // Use a timeout to hide it after the transition
         setTimeout(() => { cityInputError.classList.add('hidden'); }, 200);
 
-        // Save logic
+        // 保存逻辑
         appSettings.weather.city = newCity;
-        applyCurrentView();
+        applyCurrentView(); // 立即应用新城市的天气
         saveSettings();
         cityInput.blur();
 
-        // Feedback animation
+        // 提供保存成功的视觉反馈动画
         saveCityBtn.style.opacity = '0';
         confirmCityIcon.classList.remove('hidden');
         setTimeout(() => { 
@@ -91,6 +113,7 @@ export function initializeViewManager() {
         }, 2000); 
     };
 
+    // 为所有视图切换单选按钮添加事件监听
     document.querySelectorAll('input[name="view-source"]').forEach(radio => {
         radio.addEventListener('change', () => {
             const value = radio.value;
@@ -100,7 +123,7 @@ export function initializeViewManager() {
                 appSettings.view = 'weather';
                 if (value === 'weather-auto') {
                     appSettings.weather.source = 'auto';
-                    appSettings.weather.city = null; 
+                    appSettings.weather.city = null; // 切换到自动时清除手动城市
                 } else { // weather-manual
                     appSettings.weather.source = 'manual';
                 }
@@ -112,6 +135,7 @@ export function initializeViewManager() {
         });
     });
 
+    // 城市输入框的事件监听
     cityInput.addEventListener('focus', () => {
         cityInput.classList.remove('invalid');
         cityInputError.classList.remove('visible');
@@ -126,15 +150,7 @@ export function initializeViewManager() {
     });
 
     saveCityBtn.addEventListener('click', saveCity);
-
-    // Also, we need to export the functions that are called from outside this module.
-    // In this case, `updateSettingsUI` calls `updateViewToggleUI`.
-    // And `DOMContentLoaded` calls `applyCurrentView`.
-    // So we need to make them available.
-    // Let's re-export them for clarity, or just make them available on the window object if needed.
-    // For now, let's just export them.
 }
 
-// We need to export these so they can be called from main.js if needed.
-// Specifically, `updateSettingsUI` calls `updateViewToggleUI`.
+// 导出需要被外部模块（如main.js, settings-updater.js）调用的函数
 export { applyCurrentView, updateViewToggleUI };

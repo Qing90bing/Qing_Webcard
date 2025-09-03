@@ -1,5 +1,15 @@
-// js/features/greeting.js
+/**
+ * @file greeting.js
+ * @description
+ * 本文件负责根据一天中的不同时段和季节，动态地向用户显示友好的问候语。
+ *
+ * @module components/ui/greeting
+ */
 
+/**
+ * @description 更新问候语。
+ * 它会根据当前的时间和月份，从一个大型问候语数据库中选择一条合适的信息来显示。
+ */
 function updateGreeting() {
     const greetingEl = document.getElementById('greeting');
     if (!greetingEl) return;
@@ -8,6 +18,7 @@ function updateGreeting() {
     const hour = now.getHours();
     const month = now.getMonth() + 1;
 
+    // 一个大型的问候语数据库，按 季节 -> 时段 的结构组织。
     const greetings = {
         spring: {
             morning: [
@@ -188,22 +199,31 @@ function updateGreeting() {
         ]
     };
 
+    // 1. 判断季节
     let season = 'default';
     if (month >= 3 && month <= 5) season = 'spring';
     else if (month >= 6 && month <= 8) season = 'summer';
     else if (month >= 9 && month <= 11) season = 'autumn';
     else season = 'winter';
 
+    // 2. 判断时段
     let timeOfDay = 'night';
     if (hour >= 5 && hour < 12) timeOfDay = 'morning';
     else if (hour >= 12 && hour < 18) timeOfDay = 'afternoon';
     else if (hour >= 18 && hour < 22) timeOfDay = 'evening';
 
+    // 3. 根据季节和时段，获取可用的问候语列表（如果找不到则使用默认列表）
     const availableGreetings = greetings[season][timeOfDay] || greetings.default;
+    // 4. 从列表中随机选择一条
     const randomGreeting = availableGreetings[Math.floor(Math.random() * availableGreetings.length)];
+    // 5. 更新UI
     greetingEl.textContent = randomGreeting;
 }
 
+/**
+ * @description 初始化问候语功能。
+ * 它会在页面加载时立即更新一次，然后设置一个定时器，每30分钟刷新一次。
+ */
 export function initializeGreeting() {
     updateGreeting();
     setInterval(updateGreeting, 1800000); // 1800000ms = 30 minutes

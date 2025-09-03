@@ -1,37 +1,20 @@
-export function resetLuckGame() {
-    // Clear any pending timers associated with the luck game
-    clearTimeout(luckResetTimer);
-    clearTimeout(countdownAnimationHandle);
+/**
+ * @file luck-game.js
+ * @description
+ * 本文件包含了“今日人品”功能的核心逻辑。这是一个复合型趣味功能，主要由三部分组成：
+ * 1.  **每日运气盲盒**：用户每天可以点击一次，获取一个随机的“人品值”和对应的评语。
+ * 2.  **疯狂点击游戏**：在获取完当日运气后，卡片会变成一个点击计数器，用户可以狂点来获得彩蛋信息。
+ * 3.  **粒子动画系统**：一个可配置的粒子系统，用于在特定事件（如开出高分、点击时）触发庆祝效果。
+ *
+ * @module components/features/luck-game/luck-game
+ */
 
-    // Reset all state variables to their initial values
-    luckGameState = 'initial';
-    dailyLuckData = null;
-    hasPlayedGameToday = false;
-    luckClickCount = 0;
+// --- 游戏状态与数据 ---
 
-    // Clear stored data from localStorage
-    try {
-        localStorage.removeItem('dailyLuckData');
-    } catch (e) {
-        console.error("Failed to remove luck data from localStorage", e);
-    }
-
-    // Reset the UI to its initial state
-    const luckResult = document.getElementById('luck-result');
-    if (luckResult) {
-        // Animate out the result before clearing it
-        luckResult.classList.remove('visible');
-        setTimeout(() => {
-            // Only clear if the game state hasn't changed again in the meantime
-            if (luckGameState === 'initial') {
-                luckResult.innerHTML = '';
-                luckResult.classList.remove('flex', 'flex-col', 'justify-center', 'flex-1', 'min-w-0', 'relative');
-            }
-        }, 300); // Animation duration
-    }
-}
-
-// --- [NEW] 今日人品 功能逻辑 ---
+/**
+ * @description 根据不同的人品值分数，提供对应的趣味评语。
+ * 键是分数等级（0-10），值是该等级下随机抽取的评语数组。
+ */
 const luckTiers = {
     0: ["是不是操作系统的锅？要不重启一下？", "今日不宜出门，建议和床锁死。", "你这运气，是不是忘给老天爷续费了？", "没事，重在参与，下次一定。"],
     1: ["还好吗？要不要给你点一首《凉凉》？", "emm...今天可能只适合躺平。", "水逆本逆，万事小心！", "别担心，触底才能反弹！"],
@@ -45,7 +28,11 @@ const luckTiers = {
     9: ["太强了，宇宙的能量都汇聚于你！", "你就是天选之子，好运爆棚！", "欧皇附体，所向披靡！", "建议直接去龙王那儿上班，别在这儿屈才了。"],
     10: ["100分！完美！今天地球为你而转！", "这是什么神仙运气？快去拯救世界！", "系统提示：您的好运已溢出！", "我算出来了，你就是爽文/爽剧主角。"]
 };
-let dailyLuckData = null; // Stored as { date, value, phrase }
+
+/**
+ * @description 在疯狂点击游戏中，达到特定点击次数时显示的彩蛋信息。
+ * 键是点击次数的里程碑，值是对应的趣味吐槽。
+ */
 const luckMilestoneMessages = {
     50: "手速不错，继续保持！",
     100: "你已解锁「百连点击」成就！",
@@ -56,22 +43,64 @@ const luckMilestoneMessages = {
     5000: "停下！你的鼠标在冒烟了！",
     10000: "您好，地球人，看来我们暴露了..."
 };
-let luckGameState = 'initial'; // initial, result_shown, prompt_1, prompt_2, prompt_3, counting
-let luckClickCount = 0;
-let countdownAnimationHandle = null; // Add this to the global scope
-let luckResetTimer = null;
-let hasPlayedGameToday = false;
-let resetClickCount = 0;
-let resetClickTimer = null;
 
-function getScoreColorClass(score) {
-    if (score >= 90) return 'text-amber-500';
-    if (score >= 70) return 'text-green-500';
-    if (score >= 40) return 'text-sky-400'; // Default accent color
-    return 'text-gray-400';
+// --- 模块级状态变量 ---
+let luckGameState = 'initial'; // 游戏当前的状态机: initial, result_shown, prompt_1, prompt_2, prompt_3, counting
+let dailyLuckData = null;      // 存储今日运气的对象: { date, value, phrase }
+let hasPlayedGameToday = false;// 标记今天是否已经玩过"再点一下"的游戏
+let luckClickCount = 0;        // 疯狂点击的计数值
+let countdownAnimationHandle = null; // 点击倒计时动画的句柄
+let luckResetTimer = null;     // 用于在停止点击后重置游戏的定时器
+
+/**
+ * @description 重置整个今日人品游戏到初始状态。
+ * 这个函数主要用于开发调试，或者在需要时强制刷新游戏。
+ */
+export function resetLuckGame() {
+    clearTimeout(luckResetTimer);
+    clearTimeout(countdownAnimationHandle);
+
+    luckGameState = 'initial';
+    dailyLuckData = null;
+    hasPlayedGameToday = false;
+    luckClickCount = 0;
+
+    try {
+        localStorage.removeItem('dailyLuckData');
+    } catch (e) {
+        console.error("从localStorage移除运气数据失败", e);
+    }
+
+    const luckResult = document.getElementById('luck-result');
+    if (luckResult) {
+        luckResult.classList.remove('visible');
+        setTimeout(() => {
+            if (luckGameState === 'initial') {
+                luckResult.innerHTML = '';
+                luckResult.classList.remove('flex', 'flex-col', 'justify-center', 'flex-1', 'min-w-0', 'relative');
+            }
+        }, 300);
+    }
 }
 
-// --- Inlined Particle Animation Logic ---
+/**
+ * @description 根据人品值分数返回对应的文本颜色CSS类。
+ * @param {number} score - 人品值分数 (0-100)。
+ * @returns {string} Tailwind CSS的颜色类名。
+ */
+function getScoreColorClass(score) {
+    if (score >= 90) return 'text-amber-500'; // 金色传说
+    if (score >= 70) return 'text-green-500';   // 好运
+    if (score >= 40) return 'text-sky-400';     // 一般
+    return 'text-gray-400';                     // 不太行
+}
+
+
+// --- 粒子动画系统 ---
+/**
+ * @description 一个独立的、可配置的粒子动画模块。
+ * 使用IIFE（立即调用函数表达式）封装，暴露一个公共API。
+ */
 export const particleEffects = (() => {
     /*
      * --- [开发者指南] 如何添加自定义SVG粒子形状 ---
@@ -87,16 +116,16 @@ export const particleEffects = (() => {
      * 原始代码常常包含XML声明、元数据(<metadata>)、定义(<defs>)和剪切路径(<clipPath>)等
      * 非可视元素，这会导致粒子无法正常渲染。
      *
-     * 清洁指南：
+     * 清理指南：
      * 1. 打开SVG文件，只复制 `<svg ...>` 标签及其内部的所有路径(<path>)、
      *    编组(<g>)等绘图元素。
      * 2. 确保您的 `<svg>` 标签中含有 `viewBox` 属性，这是正确缩放的关键。
-     * 3. 将清洁后的代码作为单行JavaScript字符串粘贴到配置中。
+     * 3. 将清理后的代码作为单行JavaScript字符串粘贴到配置中。
      *
      * --- 配置属性详情 ---
      *
      * `svg`: (字符串)
-     *   - 您清洁后的、单行的SVG代码字符串。
+     *   - 您清理后的、单行的SVG代码字符串。
      *
      * `randomColor`: (布尔值)
      *   - `true`: 粒子将被赋予一个随机颜色。要使此功能生效，您的SVG代码中
@@ -105,30 +134,10 @@ export const particleEffects = (() => {
      *
      * `size`: (数字, 可选)
      *   - 为此特定SVG粒子设置一个固定的尺寸（单位为像素）。
-     *   - 如果不提供此属性，粒子将使用默认的随机尺寸范围 (8-15px)。
-     *
-     * --- 完整示例 ---
-     *
-     * svgShapes: [
-     *   // 示例1: 固定颜色，自定义大尺寸
-     *   { 
-     *     svg: '<svg viewBox="0 0 24 24" fill="#E74C3C">...</svg>',
-     *     randomColor: false,
-     *     size: 30
-     *   },
-     *   // 示例2: 随机颜色，使用默认随机尺寸
-     *   { 
-     *     svg: '<svg viewBox="0 0 24 24" fill="currentColor">...</svg>',
-     *     randomColor: true 
-     *   },
-     *   // ... 在此添加更多SVG对象
-     * ]
+     *   - 如果不提供此属性，粒子将使用默认的随机尺寸范围 (12-15px)。
      */
     const PARTICLE_CONFIG = {
         shapes: ['circle', 'square', 'triangle', 'heart', 'star'],
-        // [JULES] Add a new array for custom SVG shapes.
-        // For 'randomColor: true', ensure the SVG's fill property is set to "currentColor".
-        // For 'randomColor: false', the SVG will use its own hardcoded fill colors.
         svgShapes: [
             {
                 svg: '<svg viewBox="0 0 3840 1984" version="1.1" xmlns="http://www.w3.org/2000/svg"><g><path fill="currentColor" d="M 2372.53125 1499.746094 L 2752.230469 1499.746094 L 2125.871094 596.851562 C 2082.519531 534.171875 2021.230469 484.921875 1928.550781 484.921875 C 1832.878906 484.921875 1771.589844 538.640625 1728.238281 596.851562 L 1088.421875 1499.746094 L 1453.179688 1499.746094 L 1686.921875 1169.773438 L 1912.691406 1499.746094 L 2292.390625 1499.746094 L 1881.039062 895.75 L 1922.570312 837.121094 Z"/></g></svg>',
@@ -144,7 +153,6 @@ export const particleEffects = (() => {
         colors: ['#FF69B4', '#87CEEB', '#FFFACD', '#98FB98', '#E6E6FA', '#FFA500', '#DC143C', '#20B2AA', '#FFD700'],
         size: { min: 12, max: 15 },
         gravity: 0.08,
-        // 1. Lowered particle height by reducing initial upward velocity
         initialVelocity: { x_range: [-2.5, 2.5], y_range: [-3.5, -5.5] },
         rotationSpeed: { min: -2, max: 2 },
         fadeOutDuration: 500,
@@ -154,31 +162,24 @@ export const particleEffects = (() => {
 
     function createParticleElement() {
         const particle = document.createElement('div');
-        // Combine default shapes and new SVG shapes for random selection
         const allShapes = [...PARTICLE_CONFIG.shapes, ...(PARTICLE_CONFIG.svgShapes || [])];
         const shape = allShapes[Math.floor(Math.random() * allShapes.length)];
         const color = PARTICLE_CONFIG.colors[Math.floor(Math.random() * PARTICLE_CONFIG.colors.length)];
         
-        // NEW: Determine size based on shape config, with a fallback to the default random size.
         const size = (typeof shape === 'object' && typeof shape.size === 'number')
             ? shape.size 
             : rand(PARTICLE_CONFIG.size.min, PARTICLE_CONFIG.size.max);
         
         particle.classList.add('particle');
 
-        // Handle new SVG shape objects
         if (typeof shape === 'object' && shape.svg) {
-            // The SVG string is cleaned to remove width/height attributes
-            // which might interfere with styling.
             particle.innerHTML = shape.svg.replace(/width=".*?"/g, '').replace(/height=".*?"/g, '');
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
-            // Default to random color unless explicitly set to false
             if (shape.randomColor !== false) {
                 particle.style.color = color;
             }
         } 
-        // Handle old string-based shapes
         else {
             particle.classList.add(shape);
             if (shape === 'triangle') {
@@ -212,7 +213,6 @@ export const particleEffects = (() => {
         let rot = 0;
         const rotSpeed = rand(PARTICLE_CONFIG.rotationSpeed.min, PARTICLE_CONFIG.rotationSpeed.max);
         
-        // [JULES] MODIFICATION: Add fade-in variables
         const FADE_IN_DURATION = 200; // ms
         const creationTime = Date.now();
         let fadeOutStartTime = null;
@@ -224,16 +224,13 @@ export const particleEffects = (() => {
             rot += rotSpeed;
             particle.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rot}deg)`;
 
-            // [JULES] MODIFICATION: Combined fade-in and fade-out logic
             const lifeTime = Date.now() - creationTime;
             let opacity = 1;
 
-            // Calculate fade-in
             if (lifeTime < FADE_IN_DURATION) {
                 opacity = lifeTime / FADE_IN_DURATION;
             }
 
-            // Calculate fade-out
             const groundLevel = particleContainer.clientHeight * 0.9;
             if (y > groundLevel && fadeOutStartTime === null) {
                 fadeOutStartTime = Date.now();
@@ -243,11 +240,10 @@ export const particleEffects = (() => {
                 const fadeOutElapsedTime = Date.now() - fadeOutStartTime;
                 const fadeOutProgress = fadeOutElapsedTime / PARTICLE_CONFIG.fadeOutDuration;
                 if (fadeOutProgress < 1) {
-                    // Apply the lower of the two opacities
                     opacity = Math.min(opacity, 1 - fadeOutProgress);
                 } else {
                     if (particle.parentNode) particle.parentNode.removeChild(particle);
-                    return; // End animation
+                    return;
                 }
             }
             
@@ -257,7 +253,6 @@ export const particleEffects = (() => {
         requestAnimationFrame(frame);
     }
 
-    // 2. Corrected particle origin calculation
     function getParticleOrigin() {
         const luckResultEl = document.getElementById('luck-result');
         const luckButtonEl = document.getElementById('luck-button');
@@ -268,8 +263,6 @@ export const particleEffects = (() => {
         const containerRect = particleContainer.getBoundingClientRect();
         const resultRect = luckResultEl.getBoundingClientRect();
         
-        // If the result div has no width, it means it's hidden (e.g. in the clicker game phase).
-        // In this case, we should originate from the button's center.
         if (resultRect.width === 0) {
              const buttonRect = luckButtonEl.getBoundingClientRect();
              return {
@@ -278,13 +271,9 @@ export const particleEffects = (() => {
             };
         }
 
-        // [JULES] MODIFICATION: Pinpoint the number for a more precise origin.
-        // Try to find the specific number element (the one with the large text).
         const numberEl = luckResultEl.querySelector('.text-4xl');
-        // Use the number's bounding box if it exists, otherwise fall back to the whole container's box.
         const targetRect = numberEl ? numberEl.getBoundingClientRect() : resultRect;
         
-        // Return the calculated center of the target element, relative to the particle container.
         return {
             x: (targetRect.left - containerRect.left) + targetRect.width / 2,
             y: (targetRect.top - containerRect.top) + targetRect.height / 2
@@ -292,10 +281,16 @@ export const particleEffects = (() => {
     }
 
     return {
+        /**
+         * @description 初始化粒子系统，必须在DOM加载后调用。
+         */
         init: () => {
             particleContainer = document.getElementById('particle-container');
-            if (!particleContainer) console.error('Particle container #particle-container not found!');
+            if (!particleContainer) console.error('粒子容器 #particle-container 未找到!');
         },
+        /**
+         * @description 触发单个粒子的生成和动画。
+         */
         triggerSingleParticle: () => {
             if (!particleContainer) return;
             const particle = createParticleElement();
@@ -303,6 +298,10 @@ export const particleEffects = (() => {
             const origin = getParticleOrigin();
             animateParticle(particle, origin);
         },
+        /**
+         * @description 触发一次粒子爆发效果。
+         * @param {number} [count=20] - 本次爆发生成的粒子数量。
+         */
         triggerBurstEffect: (count = 20) => {
             if (!particleContainer) return;
             for (let i = 0; i < count; i++) {
@@ -312,6 +311,13 @@ export const particleEffects = (() => {
     };
 })();
 
+// --- 游戏核心逻辑 ---
+
+/**
+ * @description 在UI上显示当日的人品值结果。
+ * @param {object} data - 包含 { value, phrase } 的运气数据对象。
+ * @param {boolean} [isAnimated=false] - 是否播放庆祝动画（如弹出效果和粒子爆发）。
+ */
 function displayLuckResult(data, isAnimated = false) {
     const luckResult = document.getElementById('luck-result');
     if (!luckResult) return;
@@ -326,7 +332,7 @@ function displayLuckResult(data, isAnimated = false) {
 
     if (isAnimated) {
         contentWrapper.classList.add('bounce-in');
-        // 3. Delayed burst animation
+        // 延迟触发粒子爆发，使其与内容动画同步
         setTimeout(() => {
             particleEffects.triggerBurstEffect(20);
         }, 500);
@@ -341,29 +347,36 @@ function displayLuckResult(data, isAnimated = false) {
     });
 }
 
+/**
+ * @description 使用加权算法生成一个更接近正态分布的人品值。
+ * 这样可以使得分数更集中在中间区域，高分和低分出现的概率更小，增加趣味性。
+ * @returns {number} 0-100之间的加权随机整数。
+ */
 function generateWeightedLuck() {
-    // Using Bates distribution (sum of n uniform variables) to approximate a normal distribution.
-    // n=4 provides a decent bell curve.
+    // 使用贝茨分布（n个均匀分布变量之和）来近似正态分布。n=4提供了一个不错的钟形曲线。
     let x = 0;
     for (let i = 0; i < 4; i++) {
         x += Math.random();
     }
-    x = x / 4; // Now x is in [0, 1] with a peak at 0.5
+    x = x / 4; // x现在位于[0, 1]，峰值在0.5
 
-    // Apply a power function with k < 1 to shift the peak upwards, as requested.
-    // k=0.5 is tuned to produce a sub-60 score roughly 15-20% of the time.
+    // 应用一个幂函数（k < 1）来使峰值向上偏移，使得高分更容易出现。
+    // k=0.5经过调整，使得低于60分的概率大约为15-20%。
     const skewedX = Math.pow(x, 0.5);
 
-    // Scale to 0-100. Let's scale to 102 to make 100 a bit more reachable.
+    // 缩放到0-100。我们缩放到102，使得100分更容易达到。
     let finalValue = Math.floor(skewedX * 102);
     
-    // Cap the value at 100 to handle any edge cases where the result might exceed 100.
+    // 限制最大值为100，处理可能超过100的边界情况。
     if (finalValue > 100) {
         finalValue = 100;
     }
     return finalValue;
 }
 
+/**
+ * @description “开盲盒”操作，生成并保存当日的运气数据，并显示结果。
+ */
 function openBlindBox() {
     const value = generateWeightedLuck();
     const tier = value === 100 ? 10 : Math.floor(value / 10);
@@ -376,13 +389,18 @@ function openBlindBox() {
     try {
         localStorage.setItem('dailyLuckData', JSON.stringify(dailyLuckData));
     } catch (e) {
-        console.error("Failed to save luck data to localStorage", e);
+        console.error("保存运气数据到localStorage失败", e);
     }
 
     displayLuckResult(dailyLuckData, true);
     luckGameState = 'result_shown';
 }
 
+/**
+ * @description 更新UI以显示提示性文本，例如“你已经开过了”。
+ * @param {string} text - 要显示的文本。
+ * @param {string|null} animationClass - 要应用的CSS动画类，例如 'luck-shake'。
+ */
 function updateLuckResultText(text, animationClass = null) {
     const luckResult = document.getElementById('luck-result');
     if (!luckResult) return;
@@ -397,6 +415,9 @@ function updateLuckResultText(text, animationClass = null) {
     }
 }
 
+/**
+ * @description 显示疯狂点击游戏的计数器UI。
+ */
 function displayCounter() {
     const luckResult = document.getElementById('luck-result');
     if (!luckResult) return;
@@ -408,18 +429,23 @@ function displayCounter() {
     `;
 }
 
+/**
+ * @description 更新疯狂点击游戏的计数器，并检查是否达到里程碑。
+ */
 function updateCounter() {
     const milestoneMessage = luckMilestoneMessages[luckClickCount];
     const luckResult = document.getElementById('luck-result');
 
-    particleEffects.triggerSingleParticle();
+    particleEffects.triggerSingleParticle(); // 每次点击都触发一个粒子
 
     if (milestoneMessage) {
+        // 如果达到里程碑，显示彩蛋信息
         updateLuckResultText(milestoneMessage);
         luckResult.classList.remove('luck-pop-anim');
         void luckResult.offsetWidth;
         luckResult.classList.add('luck-pop-anim');
     } else {
+        // 否则，只更新数字
         const counterValue = document.getElementById('luck-counter-value');
         if (counterValue) {
             counterValue.textContent = luckClickCount;
@@ -427,59 +453,73 @@ function updateCounter() {
             void counterValue.offsetWidth;
             counterValue.classList.add('luck-pop-anim');
         } else {
+            // 如果计数器UI不存在，则创建它
             displayCounter();
         }
     }
 }
 
+/**
+ * @description 处理运气卡片点击事件的核心状态机。
+ * 根据当前的 `luckGameState` 决定执行哪个操作。
+ */
 function handleLuckClick() {
     clearTimeout(luckResetTimer);
-    clearTimeout(countdownAnimationHandle); // NEW: Stop any countdown immediately
+    clearTimeout(countdownAnimationHandle); // 立即停止任何正在进行的倒计时
 
-    if (luckGameState === 'initial') {
-        openBlindBox();
-        return; // No timer needed
-    }
-
-    if (luckGameState === 'result_shown') {
-        if (hasPlayedGameToday) {
+    switch (luckGameState) {
+        case 'initial':
+            openBlindBox();
+            return; // 开完盲盒后不需要设置重置定时器
+        case 'result_shown':
+            if (hasPlayedGameToday) {
+                // 如果今天已经玩过提示游戏，则直接进入计数模式
+                luckGameState = 'counting';
+                luckClickCount = 1;
+                displayCounter();
+            } else {
+                // 否则，开始一系列的挑衅性提示
+                luckGameState = 'prompt_1';
+                updateLuckResultText('你今天已经开过了，还开？', 'luck-shake');
+                hasPlayedGameToday = true;
+            }
+            break;
+        case 'prompt_1':
+            luckGameState = 'prompt_2';
+            updateLuckResultText('还点？', 'luck-shake');
+            break;
+        case 'prompt_2':
+            luckGameState = 'prompt_3';
+            updateLuckResultText('那你点吧', 'luck-shake');
+            break;
+        case 'prompt_3':
             luckGameState = 'counting';
             luckClickCount = 1;
             displayCounter();
-        } else {
-            luckGameState = 'prompt_1';
-            updateLuckResultText('你今天已经开过了，还开？', 'luck-shake');
-            hasPlayedGameToday = true;
-        }
-    } else if (luckGameState === 'prompt_1') {
-        luckGameState = 'prompt_2';
-        updateLuckResultText('还点？', 'luck-shake');
-    } else if (luckGameState === 'prompt_2') {
-        luckGameState = 'prompt_3';
-        updateLuckResultText('那你点吧', 'luck-shake');
-    } else if (luckGameState === 'prompt_3') {
-        luckGameState = 'counting';
-        luckClickCount = 1;
-        displayCounter();
-    } else if (luckGameState === 'counting') {
-        luckClickCount++;
-        updateCounter();
+            break;
+        case 'counting':
+            luckClickCount++;
+            updateCounter();
+            break;
     }
 
-    // Set the reset timer for all subsequent clicks
+    // 为所有后续点击设置重置定时器
     luckResetTimer = setTimeout(() => {
         if (luckGameState === 'counting') {
             startCountdownAnimation();
         } else {
-            // This handles resetting from prompt states
+            // 这处理了从提示状态的重置
             displayLuckResult(dailyLuckData, false);
             luckGameState = 'result_shown';
         }
-    }, 2000);
+    }, 2000); // 2秒不点击则触发
 }
 
+/**
+ * @description 启动一个从当前点击数动态倒数到0的动画。
+ */
 function startCountdownAnimation() {
-    clearTimeout(countdownAnimationHandle); // Clear any ongoing animation
+    clearTimeout(countdownAnimationHandle);
     let currentCount = luckClickCount;
 
     if (currentCount <= 0) {
@@ -489,12 +529,12 @@ function startCountdownAnimation() {
     }
     
     const counterValue = document.getElementById('luck-counter-value');
-    // Make sure the 'x' is visible, in case it was hidden by old logic
     const counterX = document.querySelector('#luck-counter-container > span:first-child');
     if (counterX && counterX.style.opacity === '0') {
         counterX.style.opacity = 1;
     }
 
+    // 根据数字大小动态调整倒计时速度，数字越大越快
     function getDelay(num) {
         if (num > 20) return 15;
         if (num > 10) return 40;
@@ -510,24 +550,20 @@ function startCountdownAnimation() {
             const nextDelay = getDelay(i - 1);
             countdownAnimationHandle = setTimeout(() => countdownStep(i - 1), nextDelay);
         } else {
-            // Countdown finished. Animate out the counter, then show the result.
+            // 倒计时结束。先将计数器淡出，然后显示最终结果。
             const luckResult = document.getElementById('luck-result');
-            const innerContent = luckResult.firstElementChild; // Use firstElementChild to get the actual DIV
+            const innerContent = luckResult.firstElementChild;
             
             if (innerContent) {
-                // Fade out the current content (the counter)
                 innerContent.classList.add('fade-out-opacity-only');
-
-                // After the fade-out, display the final result with a bounce
                 countdownAnimationHandle = setTimeout(() => {
-                    // FIX: Set isAnimated to false to prevent re-bursting
-                    displayLuckResult(dailyLuckData, false); 
+                    displayLuckResult(dailyLuckData, false); // 显示最终结果，不带粒子效果
                     luckGameState = 'result_shown';
                     luckClickCount = 0;
                     countdownAnimationHandle = null;
-                }, 300); // Wait for fade-out (0.3s) to complete.
+                }, 300); // 等待淡出动画完成
             } else {
-                // Fallback if something goes wrong, just show the result.
+                // 容错处理
                 displayLuckResult(dailyLuckData, false);
                 luckGameState = 'result_shown';
                 luckClickCount = 0;
@@ -539,26 +575,33 @@ function startCountdownAnimation() {
     countdownStep(currentCount);
 }
 
+/**
+ * @description 设置并初始化今日人品功能。
+ * 此函数应在主应用初始化时调用。
+ */
 export function setupLuckFeature() {
     const luckButton = document.getElementById('luck-button');
     if (!luckButton) return;
 
     const todayStr = new Date().toISOString().split('T')[0];
     
+    // 检查localStorage中是否已存有今天的运气数据
     try {
         const savedLuck = localStorage.getItem('dailyLuckData');
         if (savedLuck) {
             const parsedLuck = JSON.parse(savedLuck);
             if (parsedLuck.date === todayStr) {
+                // 如果有，则直接显示结果，不播放动画
                 dailyLuckData = parsedLuck;
                 displayLuckResult(dailyLuckData, false);
                 luckGameState = 'result_shown';
             } else {
+                // 如果是昨天的，则清除
                 localStorage.removeItem('dailyLuckData');
             }
         }
     } catch (e) {
-        console.error("Failed to parse luck data from localStorage", e);
+        console.error("从localStorage解析运气数据失败", e);
         localStorage.removeItem('dailyLuckData');
     }
 

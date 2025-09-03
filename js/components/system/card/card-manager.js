@@ -1,26 +1,35 @@
+/**
+ * @file card-manager.js
+ * @description
+ * 本文件是右侧栏卡片的视图管理器。它负责控制哪个卡片（主栏、关于、时间胶囊等）当前可见，
+ * 并处理它们之间的切换逻辑、动画效果以及内容的懒加载。
+ *
+ * @module components/system/card/card-manager
+ */
+
 import { updateTimeCapsule } from '../../features/time-capsule/time-capsule.js';
 import { fetchAndRenderCommits, updateCommitMask } from '../../features/github/commit-history.js';
 
-// --- Module-level state and element cache ---
-let aboutCardHasAnimated = false;
-let commitsFetched = false;
+// --- 模块级状态和元素缓存 ---
+let aboutCardHasAnimated = false; // 标记“关于”卡片是否已播放过入场动画
+let commitsFetched = false;     // 标记GitHub提交记录是否已获取过
 let rightColumn, timeCapsuleCard, holidayListCard, aboutCard, profileCard, aboutCardTrigger, closeAboutCardBtn, refreshCommitsBtn, closeTimeCapsuleBtn;
 
 /**
- * Animates the right column cards into view with a bounce effect.
+ * @description 为右侧主栏的卡片应用入场动画。
  */
 export function animateRightColumnIn() {
     if (!rightColumn) return;
     const elementsToAnimate = rightColumn.querySelectorAll(':scope > div');
     elementsToAnimate.forEach(el => {
         el.classList.remove('bounce-in');
-        void el.offsetWidth; // Trigger reflow to restart animation
+        void el.offsetWidth; // 强制浏览器重绘，以确保动画能够重新播放
         el.classList.add('bounce-in');
     });
 }
 
 /**
- * Hides all overlaying cards and shows the main right column.
+ * @description 显示右侧主栏，并隐藏所有覆盖型卡片。
  */
 function showRightColumn() {
     if (!rightColumn) return;
@@ -32,7 +41,7 @@ function showRightColumn() {
 }
 
 /**
- * Hides all cards and the right column. Used before showing a specific card.
+ * @description 隐藏所有视图，包括右侧主栏和所有覆盖型卡片。通常在显示特定卡片前调用。
  */
 function hideAllViews() {
     if (!rightColumn) return;
@@ -43,38 +52,44 @@ function hideAllViews() {
 }
 
 /**
- * Toggles the visibility of the "About" card.
+ * @description 切换“关于”卡片的可见性。
  */
 export function toggleAboutCard() {
     if (!aboutCard) return;
     const isHidden = aboutCard.classList.contains('hidden');
 
     if (isHidden) {
+        // --- 显示 "关于" 卡片 ---
         hideAllViews();
         aboutCard.classList.remove('hidden');
 
+        // 首次显示时播放入场动画
         if (!aboutCardHasAnimated) {
             aboutCard.classList.add('bounce-in');
             aboutCardHasAnimated = true;
         }
 
+        // --- 懒加载内容 ---
+        // 首次显示时初始化滚动条插件
         const commitsContainer = document.getElementById('recent-commits-container');
         if (commitsContainer && !SimpleBar.instances.get(commitsContainer)) {
             const simplebarInstance = new SimpleBar(commitsContainer);
             simplebarInstance.getScrollElement().addEventListener('scroll', updateCommitMask);
         }
 
+        // 首次显示时获取GitHub提交记录
         if (!commitsFetched) {
             fetchAndRenderCommits();
             commitsFetched = true;
         }
     } else {
+        // --- 隐藏 "关于" 卡片，返回主栏 ---
         showRightColumn();
     }
 }
 
 /**
- * Toggles the visibility of the "Time Capsule" card.
+ * @description 切换“时间胶囊”卡片的可见性。
  */
 function toggleTimeCapsuleCard() {
     if (!timeCapsuleCard) return;
@@ -84,15 +99,16 @@ function toggleTimeCapsuleCard() {
         hideAllViews();
         timeCapsuleCard.classList.remove('hidden');
         timeCapsuleCard.classList.add('bounce-in');
-        updateTimeCapsule();
+        updateTimeCapsule(); // 每次显示时都更新时间进度
     } else {
         showRightColumn();
     }
 }
 
 /**
- * Checks if a card is open and closes it.
- * @returns {boolean} - True if a card was closed, false otherwise.
+ * @description 检查是否有任何覆盖型卡片是打开的，如果有则关闭它。
+ * 这个函数主要被全局事件（如按下Esc键）调用。
+ * @returns {boolean} - 如果成功关闭了一个卡片则返回true，否则返回false。
  */
 export function closeOpenCard() {
     if (aboutCard && !aboutCard.classList.contains('hidden')) {
@@ -111,10 +127,10 @@ export function closeOpenCard() {
 }
 
 /**
- * Initializes all event listeners related to card management.
+ * @description 初始化所有与卡片管理相关的事件监听器。
  */
 export function initializeCardManager() {
-    // Cache DOM elements for performance and convenience
+    // 缓存DOM元素以提高性能和便利性
     rightColumn = document.getElementById('right-column');
     timeCapsuleCard = document.getElementById('time-capsule-card');
     holidayListCard = document.getElementById('holiday-list-card');
@@ -125,11 +141,11 @@ export function initializeCardManager() {
     refreshCommitsBtn = document.getElementById('refresh-commits-btn');
     closeTimeCapsuleBtn = document.getElementById('close-time-capsule');
 
-    // --- Event Listener Setup ---
+    // --- 事件监听器设置 ---
 
     if (profileCard) {
         profileCard.addEventListener('click', (e) => {
-            // Prevent toggling if a link inside the card was clicked
+            // 如果点击的是卡片内的链接，则不触发卡片切换
             if (e.target.closest('a')) {
                 return;
             }
@@ -139,7 +155,7 @@ export function initializeCardManager() {
 
     if (closeTimeCapsuleBtn) {
         closeTimeCapsuleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // 阻止事件冒泡到父元素(profileCard)
             showRightColumn();
         });
     }
@@ -151,13 +167,13 @@ export function initializeCardManager() {
     if (closeAboutCardBtn) {
         closeAboutCardBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            toggleAboutCard(); // Calling toggle will hide it if it's visible
+            toggleAboutCard(); // 再次调用toggle会隐藏卡片
         });
     }
 
     if (refreshCommitsBtn) {
         refreshCommitsBtn.addEventListener('click', () => {
-            fetchAndRenderCommits();
+            fetchAndRenderCommits(); // 手动刷新提交记录
         });
     }
 }

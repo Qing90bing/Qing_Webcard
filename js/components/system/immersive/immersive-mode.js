@@ -1,23 +1,32 @@
+/**
+ * @file immersive-mode.js
+ * @description
+ * 本文件负责管理与“沉浸模式”相关的特定功能。
+ * 目前，它主要处理沉浸模式下时钟冒号是否闪烁这一项设置。
+ *
+ * @module components/system/immersive/immersive-mode
+ */
 import { appSettings, saveSettings } from '../../../core/settings.js';
 
 /**
- * Applies the blinking effect to the clock's colon based on user settings.
+ * @description 根据用户的设置，应用或移除时钟冒号的闪烁效果。
+ * 实现方式是通过在 `<body>` 元素上切换一个CSS类。具体的动画效果在CSS文件中定义。
  */
 function applyBlinkingEffect() {
     document.body.classList.toggle('immersive-blink-enabled', appSettings.immersiveBlinkingColon);
 }
 
 /**
- * Initializes the immersive mode features, including the event listener for the blinking colon toggle.
- * It also applies the initial state on page load.
+ * @description 初始化沉浸模式的功能。
+ * 主要工作是为设置面板中的“冒号闪烁”开关绑定事件监听器，并在页面加载时应用初始设置。
  */
 export function initializeImmersiveMode() {
     const immersiveBlinkToggle = document.getElementById('immersive-blink-toggle');
     if (immersiveBlinkToggle) {
-        // Set the initial state of the toggle based on loaded settings.
+        // 1. 根据已加载的设置，设置开关的初始状态
         immersiveBlinkToggle.checked = appSettings.immersiveBlinkingColon;
 
-        // Add a listener to handle changes to the toggle.
+        // 2. 添加监听器，当用户点击开关时，更新设置、保存并应用效果
         immersiveBlinkToggle.addEventListener('change', () => {
             appSettings.immersiveBlinkingColon = immersiveBlinkToggle.checked;
             saveSettings();
@@ -25,6 +34,6 @@ export function initializeImmersiveMode() {
         });
     }
 
-    // Apply the effect on initial page load to ensure the correct state is displayed.
+    // 3. 在页面初次加载时，应用一次效果，以确保显示正确的状态
     applyBlinkingEffect();
 }

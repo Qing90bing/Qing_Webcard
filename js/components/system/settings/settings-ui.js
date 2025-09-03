@@ -1,7 +1,21 @@
+/**
+ * @file settings-ui.js
+ * @description
+ * 本文件负责动态生成设置面板中各个区域的HTML结构。
+ * 它的核心职责是将UI的结构定义与交互逻辑分离。
+ * 通过在JS中构建HTML字符串，可以更灵活地管理复杂的UI元素，例如动态生成的列表。
+ *
+ * @module components/system/settings/settings-ui
+ */
 import { DEFAULT_BG_IMAGES } from '../../styling/background/background.js';
 
+/**
+ * @description 构建并插入设置面板的所有UI元素。
+ * 这个函数在应用启动时被调用一次，以填充各个设置区域的HTML内容。
+ */
 export function setupSettingsUI() {
-    // --- 1. Background Settings ---
+    // --- 1. 背景设置 ---
+    // 此部分负责构建背景设置选项的全部HTML，包括单选按钮、自定义URL输入框、缩略图和预览区域。
     const bgSettingsContainer = document.getElementById('background-settings-content');
     if (bgSettingsContainer) {
         const bgOptions = [
@@ -9,9 +23,10 @@ export function setupSettingsUI() {
             { value: 'bing', label: '每日一Bing', description: '展示 Bing 搜索的每日壁纸' },
             { value: 'anime', label: '随机动漫', description: '从公共动漫图库随机加载一张高清壁纸' },
             { value: 'random', label: '随机图片', description: '从公共图库中随机加载一张风景图' },
-            { value: 'custom', label: '自定义来源', description: '使用单个图片链接或公共图库API' } // 测试使用 https://www.loliapi.com/acg/
+            { value: 'custom', label: '自定义来源', description: '使用单个图片链接或公共图库API' }
         ];
 
+        // 新年主题的开关，默认隐藏，由新年主题模块控制其可见性
         const newYearToggleHTML = `
             <div id="new-year-bg-toggle-section" class="hidden">
                 <div class="flex justify-between items-center p-2">
@@ -28,9 +43,11 @@ export function setupSettingsUI() {
             </div>
         `;
 
+        // 主背景设置区域的容器，包含一个覆盖层，用于在新年模式下禁用此区域
         let mainBgSettingsHTML = `<div id="main-background-settings-wrapper" class="relative">`;
         mainBgSettingsHTML += `<div id="main-background-settings-content">`;
 
+        // 生成背景来源的单选按钮
         let radioOptionsHTML = '';
         bgOptions.forEach(option => {
             radioOptionsHTML += `
@@ -47,6 +64,7 @@ export function setupSettingsUI() {
             `;
         });
 
+        // 自定义背景的输入框和按钮
         const customBgInputHTML = `
             <div id="custom-bg-input-wrapper" class="pl-2 pr-2" style="max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;">
                 <div class="relative flex items-center">
@@ -67,6 +85,7 @@ export function setupSettingsUI() {
             </div>
         `;
 
+        // 默认背景的缩略图列表
         let defaultOptionsHTML = `
             <div id="default-bg-options">
                 <div class="thumb-container">
@@ -83,6 +102,7 @@ export function setupSettingsUI() {
         });
         defaultOptionsHTML += `</div></div>`;
 
+        // 背景预览区域
         const previewHTML = `
             <div id="background-preview-container">
                 <div id="bg-preview-wrapper" class="relative w-full aspect-[16/9] rounded-lg overflow-hidden bg-white/5 transition-all duration-300 ease-in-out">
@@ -105,8 +125,9 @@ export function setupSettingsUI() {
         `;
 
         mainBgSettingsHTML += radioOptionsHTML + customBgInputHTML + defaultOptionsHTML + previewHTML;
-        mainBgSettingsHTML += `</div>`; // closes main-background-settings-content
+        mainBgSettingsHTML += `</div>`; // 关闭 main-background-settings-content
 
+        // 用于禁用背景设置的覆盖层
         mainBgSettingsHTML += `
             <div id="background-settings-overlay" class="absolute inset-0 bg-[var(--card-bg-color)] bg-opacity-80 rounded-lg flex items-center justify-center text-sm font-bold cursor-not-allowed p-4 text-center">
                 <i class="fas fa-lock mr-2"></i>
@@ -114,12 +135,13 @@ export function setupSettingsUI() {
             </div>
         `;
 
-        mainBgSettingsHTML += `</div>`; // closes main-background-settings-wrapper
+        mainBgSettingsHTML += `</div>`; // 关闭 main-background-settings-wrapper
 
         bgSettingsContainer.innerHTML = newYearToggleHTML + mainBgSettingsHTML;
     }
 
-    // --- 2. Theme Mode Settings ---
+    // --- 2. 主题模式设置 ---
+    // 此部分构建主题选择器（浅色/深色/跟随系统）的UI。
     const themeSettingsContainer = document.getElementById('theme-settings-content').parentElement;
     if (themeSettingsContainer) {
         const container = themeSettingsContainer.querySelector('#theme-settings-content');
@@ -134,7 +156,8 @@ export function setupSettingsUI() {
         `;
     }
 
-    // --- NEW: Time Format Settings ---
+    // --- 3. 时间格式设置 ---
+    // 此部分构建时间显示格式（12/24小时制）和沉浸模式下冒号闪烁的设置UI。
     const timeFormatContainer = document.getElementById('time-format-settings-content');
     if (timeFormatContainer) {
         timeFormatContainer.innerHTML = `
@@ -173,7 +196,8 @@ export function setupSettingsUI() {
         `;
     }
 
-    // --- 3. View Toggle Settings ---
+    // --- 4. 视图切换设置 ---
+    // 此部分构建主视图（GitHub贡献图 vs 天气信息）的切换选项。
     const viewToggleContainer = document.getElementById('view-toggle-content');
     if (viewToggleContainer) {
         viewToggleContainer.innerHTML = `
@@ -224,7 +248,8 @@ export function setupSettingsUI() {
         `;
     }
 
-    // --- 4. Hitokoto Settings ---
+    // --- 5. 一言设置 ---
+    // 此部分构建“一言”功能的设置UI，包括模式切换和分类选择。
     const hitokotoContainer = document.getElementById('hitokoto-settings-content');
     if (hitokotoContainer) {
         const categories = [
@@ -234,6 +259,7 @@ export function setupSettingsUI() {
             { id: 'j', name: '网易云' }, { id: 'k', name: '哲学' }, { id: 'l', name: '抖机灵' }
         ];
 
+        // 动态生成一言分类的复选框
         let checkboxesHTML = categories.map(cat => `
             <div>
                 <input type="checkbox" id="hitokoto-cat-${cat.id}" name="hitokoto-category" value="${cat.id}" class="setting-radio-input hitokoto-checkbox-input">

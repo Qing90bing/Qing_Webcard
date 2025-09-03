@@ -1,7 +1,31 @@
+/**
+ * @file weather.js
+ * @description
+ * 本文件是天气功能的核心逻辑中枢。它负责：
+ * 1.  通过IP或用户输入获取地理位置。
+ * 2.  依次尝试多个天气API（wttr.in, Open-Meteo）以提高可用性。
+ * 3.  将不同API返回的数据标准化为统一的内部格式。
+ * 4.  根据天气数据和时间，从一个大型文案库中生成一句贴心提示。
+ * 5.  根据天气数据决定使用哪个天气图标。
+ * 6.  构建并渲染最终的天气信息UI。
+ *
+ * @module components/features/weather/weather
+ */
+
 import { appSettings, saveSettings } from '../../../core/settings.js';
 
+/**
+ * @description 防抖标志，用于防止在一次天气信息请求完成前，重复发起新的请求。
+ * @type {boolean}
+ */
 let isFetchingWeather = false;
 
+/**
+ * @description
+ * 一个大型的静态文案数据库，用于根据季节、时段和天气状况生成人性化的提示。
+ * 结构: 季节 -> 时段 -> 天气状况 -> 提示文案数组
+ * 设计了多层级的回退（fallback）机制，确保总能找到一条合适的提示。
+ */
 const WEATHER_TIPS = {
     spring: {
         morning: {
@@ -134,25 +158,30 @@ const WEATHER_TIPS = {
     }
 };
 
+/**
+ * @description 根据天气数据、季节和时段，智能地选择一条合适的提示文案。
+ * @param {object} weatherData - 标准化后的天气数据对象。
+ * @returns {string} 一条随机选择的提示文案。
+ */
 function getWeatherTip(weatherData) {
     const now = new Date();
     const month = now.getMonth() + 1;
     const hour = now.getHours();
 
-    // 1. Determine Season
+    // 1. 确定季节
     let season = 'default';
     if (month >= 3 && month <= 5) season = 'spring';
     else if (month >= 6 && month <= 8) season = 'summer';
     else if (month >= 9 && month <= 11) season = 'autumn';
     else season = 'winter';
 
-    // 2. Determine Time of Day
+    // 2. 确定时段
     let timeOfDay = 'night';
     if (hour >= 5 && hour < 12) timeOfDay = 'morning';
     else if (hour >= 12 && hour < 18) timeOfDay = 'afternoon';
     else if (hour >= 18 && hour < 22) timeOfDay = 'evening';
 
-    // 3. Determine Weather Condition
+    // 3. 确定天气状况
     let condition = 'default';
     const tempC = parseInt(weatherData.tempC, 10);
     const weatherDesc = weatherData.weatherDesc.toLowerCase();
@@ -169,27 +198,30 @@ function getWeatherTip(weatherData) {
     else if (weatherDesc.includes('cloudy')) condition = 'cloudy';
     else if (weatherDesc.includes('clear') || weatherDesc.includes('sunny')) condition = 'clear';
 
-    // 4. Retrieve Tip with Fallbacks
+    // 4. 带有多层回退机制的提示检索
     let tips = WEATHER_TIPS[season]?.[timeOfDay]?.[condition];
 
     if (!tips || tips.length === 0) {
+        // 如果具体天气状况没有匹配，则回退到该时段的默认提示
         tips = WEATHER_TIPS[season]?.[timeOfDay]?.default;
     }
     if (!tips || tips.length === 0) {
-        // Fallback to season-level default if time-of-day default is missing
+        // 如果时段也没有匹配，则回退到该季节的默认提示
         tips = WEATHER_TIPS[season]?.default?.default;
     }
     if (!tips || tips.length === 0) {
-        // Ultimate fallback
+        // 如果连季节都找不到，则使用最终的全局默认提示
         tips = WEATHER_TIPS.default.default;
     }
     
-    // 5. Return a random tip from the selected array
+    // 5. 从选定的文案数组中随机返回一条
     return tips[Math.floor(Math.random() * tips.length)];
 }
 
-// --- [NEW] Weather API Fallback Logic ---
-
+/**
+ * @description 控制天气刷新按钮图标的旋转动画。
+ * @param {boolean} isSpinning - true为开始旋转，false为停止。
+ */
 export function setWeatherSpinner(isSpinning) {
     const refreshBtn = document.getElementById('weather-refresh-btn');
     if (refreshBtn) {
@@ -200,12 +232,18 @@ export function setWeatherSpinner(isSpinning) {
     }
 }
 
+/**
+ * @description 根据天气数据决定并返回对应的天气图标URL。
+ * @param {object} weatherData - 标准化后的天气数据对象。
+ * @returns {string} 天气图标的完整URL。
+ */
 function getWeatherIconName(weatherData) {
     const { weatherDesc: desc, windSpeedKmph: wind, isDay, weatherCode } = weatherData;
     const weatherDesc = desc.toLowerCase();
     const iconPrefix = 'https://basmilius.github.io/weather-icons/production/fill/all/';
     let iconName = 'not-available.svg';
 
+    // 优先基于天气描述文本匹配
     if (weatherDesc.includes('thunder') && weatherDesc.includes('snow')) {
         iconName = isDay ? 'thunderstorms-day-snow.svg' : 'thunderstorms-night-snow.svg';
     } else if (weatherDesc.includes('thunder') && weatherDesc.includes('rain')) {
@@ -240,14 +278,14 @@ function getWeatherIconName(weatherData) {
     } else if (weatherDesc.includes('clear') || weatherDesc.includes('sunny')) {
         iconName = isDay ? 'clear-day.svg' : 'clear-night.svg';
     } else {
-        // Fallback to code if description is not specific enough
+        // 如果描述不够具体，则回退到使用天气代码进行匹配
         const codeStr = String(weatherCode);
         switch (codeStr) {
             case '113': iconName = isDay ? 'clear-day.svg' : 'clear-night.svg'; break;
             case '116': iconName = isDay ? 'partly-cloudy-day.svg' : 'partly-cloudy-night.svg'; break;
             case '119': iconName = 'cloudy.svg'; break;
             case '122': iconName = 'overcast.svg'; break;
-            case '143': iconName = 'fog.svg'; break; // Generic fog
+            case '143': iconName = 'fog.svg'; break;
             case '176': case '263': case '266': case '293': case '296': case '353':
                 iconName = isDay ? 'partly-cloudy-day-rain.svg' : 'partly-cloudy-night-rain.svg'; break;
             case '179': case '323': case '326': case '368':
@@ -269,21 +307,27 @@ function getWeatherIconName(weatherData) {
     return iconPrefix + iconName;
 }
 
+/**
+ * @description 根据标准化的天气数据生成用于UI展示的完整HTML字符串。
+ * @param {object} weatherData - 标准化后的天气数据对象。
+ * @returns {string} 包含天气信息的HTML字符串。
+ */
 function getWeatherDataHtml(weatherData) {
     const iconUrl = getWeatherIconName(weatherData);
     
+    // 根据用户设置，格式化日出日落时间为12小时或24小时制
     const sunriseTime = appSettings.timeFormat === '24h' ? convert12hto24h(weatherData.sunrise) : weatherData.sunrise.replace(' ', '');
     const sunsetTime = appSettings.timeFormat === '24h' ? convert12hto24h(weatherData.sunset) : weatherData.sunset.replace(' ', '');
 
     return `
         <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-8 items-center md:items-stretch w-full">
-            <!-- Column 1: 图标和主温度 (固定宽度, 居中) -->
+            <!-- 第1列: 图标和主温度 -->
             <div class="flex-shrink-0 flex flex-row md:flex-col items-center justify-center w-full md:w-32 gap-x-4">
                 <img id="weather-icon-img" src="${iconUrl}" alt="${weatherData.weatherDesc}" class="w-16 h-16 weather-icon-initial">
                 <p class="font-bold text-3xl" style="color: var(--text-color-primary);">${weatherData.tempC}°</p>
             </div>
 
-            <!-- Column 2: Location, Condition, Tip (Flexible, Center-aligned on mobile) -->
+            <!-- 第2列: 地点, 状况, 提示 -->
             <div class="flex-1 flex flex-col text-center md:text-left justify-between space-y-1">
                 <p class="font-bold text-xl truncate" style="color: var(--text-color-primary);" title="${weatherData.location}">${weatherData.location}</p>
                 <p class="text-base font-medium" style="color: var(--text-color-secondary);">${weatherData.weatherDesc}</p>
@@ -291,7 +335,7 @@ function getWeatherDataHtml(weatherData) {
                 <p class="text-sm" style="color: var(--text-color-tertiary);">${weatherData.tip}</p>
             </div>
 
-            <!-- Column 3: 详细信息 (固定宽度, 左对齐) -->
+            <!-- 第3列: 详细信息 -->
             <div class="flex-shrink-0 flex flex-col text-sm space-y-2 w-56">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center w-20">
@@ -326,6 +370,11 @@ function getWeatherDataHtml(weatherData) {
     `;
 }
 
+/**
+ * @description 将新的HTML内容渲染到天气卡片中，并处理加载动画和状态。
+ * @param {string} newHtml - 要插入的HTML字符串。
+ * @param {boolean} [isError=false] - 标记此次渲染是否为错误状态。
+ */
 function renderWeatherData(newHtml, isError = false) {
     const weatherLoader = document.getElementById('weather-loader');
     const dataContainer = document.getElementById('weather-data-container');
@@ -333,19 +382,19 @@ function renderWeatherData(newHtml, isError = false) {
     
     if (!dataContainer || !wrapper) return;
 
-    // 1. Fade out current content
+    // 1. 淡出当前内容
     dataContainer.style.opacity = 0;
 
-    // 2. After fade-out, update content and fade back in
+    // 2. 淡出动画结束后，更新内容并淡入
     setTimeout(() => {
-        setWeatherSpinner(false); // Stop spinner on success or error
-        isFetchingWeather = false; // Release the lock
+        setWeatherSpinner(false); // 停止刷新按钮的旋转动画
+        isFetchingWeather = false; // 释放请求锁
         dataContainer.innerHTML = newHtml;
         if (weatherLoader) {
             weatherLoader.classList.remove('visible');
         }
 
-        // Handle icon fade-in after image load
+        // 处理天气图标加载后的淡入动画
         const iconImg = document.getElementById('weather-icon-img');
         if (iconImg) {
             const fadeInIcon = () => {
@@ -359,16 +408,21 @@ function renderWeatherData(newHtml, isError = false) {
             }
         }
 
-        dataContainer.style.opacity = 1; // Fade in new content
+        dataContainer.style.opacity = 1; // 淡入新内容
 
-        // This was in the old render function, so keep it for error cases
+        // 如果是错误状态，更新UI中的城市名称为“加载失败”
         if (isError) {
             appSettings.weather.lastFetchedCity = '加载失败';
             updateSettingsUI();
         }
-    }, 300); // Match CSS transition duration
+    }, 300); // 延迟时间与CSS过渡动画时间匹配
 }
 
+/**
+ * @description 将12小时制时间字符串（如 "6:04 AM"）转换为24小时制（如 "06:04"）。
+ * @param {string} time12h - 12小时制的时间字符串。
+ * @returns {string} 24小时制的时间字符串。
+ */
 function convert12hto24h(time12h) {
     const [time, modifier] = time12h.split(' ');
     let [hours, minutes] = time.split(':');
@@ -384,11 +438,16 @@ function convert12hto24h(time12h) {
     return `${String(hours).padStart(2, '0')}:${minutes}`;
 }
 
-// API Handler for wttr.in
+/**
+ * @description wttr.in 天气API的处理程序。
+ * 负责获取数据并将其转换为标准格式。
+ * @param {string} locationQuery - 用于API查询的地点字符串。
+ * @returns {Promise<object>} 标准化后的天气数据对象。
+ */
 async function handleWttrIn(locationQuery, locationName) {
     const response = await fetch(`https://wttr.in/${encodeURIComponent(locationQuery)}?format=j1`);
     if (!response.ok) {
-        throw new Error(`wttr.in API returned status ${response.status}`);
+        throw new Error(`wttr.in API返回状态 ${response.status}`);
     }
     const data = await response.json();
 
@@ -397,7 +456,6 @@ async function handleWttrIn(locationQuery, locationName) {
     const nearestArea = data.nearest_area[0];
     const astronomy = forecast.astronomy[0];
 
-    // Helper to convert 12h AM/PM time to a comparable number
     const timeToMinutes = (timeStr) => {
         const [time, modifier] = timeStr.split(' ');
         let [hours, minutes] = time.split(':').map(Number);
@@ -427,13 +485,12 @@ async function handleWttrIn(locationQuery, locationName) {
         minTempC: forecast.mintempC,
         windSpeedKmph: current.windspeedKmph,
         humidity: current.humidity,
-        sunrise: astronomy.sunrise, // Pass raw 12h string e.g. "6:04 AM"
-        sunset: astronomy.sunset,   // Pass raw 12h string e.g. "7:12 PM"
+        sunrise: astronomy.sunrise,
+        sunset: astronomy.sunset,
         isDay: isDay,
-        tip: "" // Tip will be generated after the object is created
+        tip: ""
     };
     
-    // Generate tip after all data is available
     standardizedData.tip = getWeatherTip(standardizedData);
 
     appSettings.weather.lastFetchedCity = `${standardizedData.location}, ${standardizedData.country}`;
@@ -441,45 +498,50 @@ async function handleWttrIn(locationQuery, locationName) {
     return standardizedData;
 }
 
-// API Handler for Open-Meteo
+/**
+ * @description Open-Meteo 天气API的处理程序。
+ * 负责地理编码、获取天气数据并将其转换为标准格式。
+ * @param {string} locationQuery - 用于API查询的地点字符串。
+ * @returns {Promise<object>} 标准化后的天气数据对象。
+ */
 async function handleOpenMeteo(locationQuery, locationName) {
-    // 1. Geocoding step
+    // 1. 地理编码步骤
     const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationQuery)}&count=1&language=en&format=json`);
     if (!geoResponse.ok) {
-        throw new Error(`Open-Meteo Geocoding API failed with status ${geoResponse.status}`);
+        throw new Error(`Open-Meteo地理编码API失败，状态码 ${geoResponse.status}`);
     }
     const geoData = await geoResponse.json();
     if (!geoData.results || geoData.results.length === 0) {
-        throw new Error(`Open-Meteo could not find location for "${locationQuery}"`);
+        throw new Error(`Open-Meteo找不到地点: "${locationQuery}"`);
     }
     const { latitude, longitude, name: foundName, country } = geoData.results[0];
 
-    // 2. Forecast step
+    // 2. 天气预报步骤
     const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&wind_speed_unit=kmh&timezone=auto`;
     const forecastResponse = await fetch(forecastUrl);
     if (!forecastResponse.ok) {
-        throw new Error(`Open-Meteo Forecast API failed with status ${forecastResponse.status}`);
+        throw new Error(`Open-Meteo预报API失败，状态码 ${forecastResponse.status}`);
     }
     const forecastData = await forecastResponse.json();
 
-    // 3. Parsing and Standardization step
+    // 3. 解析与标准化步骤
     const WMO_CODES = {
-        0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
-        45: 'Fog', 48: 'Depositing rime fog',
-        51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
-        61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
-        66: 'Light freezing rain', 67: 'Heavy freezing rain',
-        71: 'Slight snow fall', 73: 'Moderate snow fall', 75: 'Heavy snow fall',
-        77: 'Snow grains',
-        80: 'Slight rain showers', 81: 'Moderate rain showers', 82: 'Violent rain showers',
-        85: 'Slight snow showers', 86: 'Heavy snow showers',
-        95: 'Thunderstorm',
-        96: 'Thunderstorm with slight hail', 99: 'Thunderstorm with heavy hail',
+        0: '晴朗', 1: '基本晴朗', 2: '部分多云', 3: '阴天',
+        45: '雾', 48: '沉积雾凇',
+        51: '小毛毛雨', 53: '中等毛毛雨', 55: '大毛毛雨',
+        61: '小雨', 63: '中雨', 65: '大雨',
+        66: '小冻雨', 67: '大冻雨',
+        71: '小雪', 73: '中雪', 75: '大雪',
+        77: '雪粒',
+        80: '小阵雨', 81: '中等阵雨', 82: '猛烈阵雨',
+        85: '小阵雪', 86: '大阵雪',
+        95: '雷暴',
+        96: '带小冰雹的雷暴', 99: '带大冰雹的雷暴',
     };
 
     const current = forecastData.current;
     const daily = forecastData.daily;
-    const weatherDesc = WMO_CODES[current.weather_code] || 'Unknown';
+    const weatherDesc = WMO_CODES[current.weather_code] || '未知';
 
     const standardizedData = {
         location: foundName,
@@ -491,10 +553,9 @@ async function handleOpenMeteo(locationQuery, locationName) {
         minTempC: daily.temperature_2m_min[0],
         windSpeedKmph: current.wind_speed_10m,
         humidity: current.relative_humidity_2m,
-        tip: "" // Tip will be generated after the object is created
+        tip: ""
     };
 
-    // Generate tip after all data is available
     standardizedData.tip = getWeatherTip(standardizedData);
 
     appSettings.weather.lastFetchedCity = `${standardizedData.location}, ${standardizedData.country}`;
@@ -502,7 +563,12 @@ async function handleOpenMeteo(locationQuery, locationName) {
     return standardizedData;
 }
 
-// Controller that tries a list of API handlers in order.
+/**
+ * @description 天气API控制器，按顺序尝试多个API处理器直到成功为止。
+ * 这种设计提高了天气功能的健壮性和可用性。
+ * @param {string} locationQuery - 用于API查询的地点字符串。
+ * @param {string} locationName - 用于显示的地点名称。
+ */
 async function tryWeatherApis(locationQuery, locationName) {
     const apiHandlers = [
         handleWttrIn,
@@ -515,23 +581,26 @@ async function tryWeatherApis(locationQuery, locationName) {
             if (weatherData) {
                 const html = getWeatherDataHtml(weatherData);
                 renderWeatherData(html);
-                return; // Success, exit the loop.
+                return; // 成功，退出循环
             }
         } catch (error) {
-            console.warn(`API handler ${handler.name} failed:`, error);
-            // Log the error and continue to the next handler.
+            console.warn(`API处理器 ${handler.name} 失败:`, error);
+            // 记录错误并继续尝试下一个处理器
         }
     }
 
-    // If all handlers failed
+    // 如果所有处理器都失败了
     const errorHtml = `<div class="text-center"><p style="color: var(--accent-color);">天气信息当前不可用。</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请检查您的网络连接或稍后重试。</p></div>`;
     renderWeatherData(errorHtml, true);
 }
 
-// Main entry point for the weather feature.
+/**
+ * @description 天气功能的主入口点。
+ * 负责协调整个获取和显示流程。
+ */
 export async function fetchAndDisplayWeather() {
     if (isFetchingWeather) {
-        console.log("Weather fetch already in progress. Ignoring request.");
+        console.log("天气信息正在获取中，请勿重复请求。");
         return;
     }
     isFetchingWeather = true;
@@ -542,30 +611,30 @@ export async function fetchAndDisplayWeather() {
 
     if (!weatherLoader || !dataContainer || !wrapper) return;
 
-    // --- [FIX] Fade out old content before showing loader ---
+    // 先淡出旧内容，再显示加载动画
     dataContainer.style.opacity = 0;
 
     setTimeout(async () => {
-        // Show loader and set initial state after fade out
+        // 淡出后，显示加载动画和提示文本
         weatherLoader.classList.add('visible');
         dataContainer.innerHTML = `<p class="text-center" style="color: var(--text-color-secondary);">正在获取天气...</p>`;
-        dataContainer.style.opacity = 1; // Fade in the "Loading..." text
+        dataContainer.style.opacity = 1;
 
         let locationQuery = appSettings.weather.city;
         let locationName = locationQuery;
 
-        // This part remains the same: get the location first.
+        // 如果是自动模式且没有手动设置城市，则通过IP获取位置
         if (appSettings.weather.source === 'auto' && !locationQuery) {
             try {
                 const ipResponse = await fetch('https://cors.eu.org/http://ip-api.com/json');
-                if (!ipResponse.ok) throw new Error('IP API request failed');
+                if (!ipResponse.ok) throw new Error('IP API请求失败');
                 const ipData = await ipResponse.json();
                 locationQuery = ipData.city || 'auto:ip';
                 locationName = ipData.city;
             } catch (e) {
                 setWeatherSpinner(false);
-                isFetchingWeather = false; // Release the lock on early error
-                console.error("IP-based geolocation failed.", e);
+                isFetchingWeather = false; // 提早释放锁
+                console.error("基于IP的地理定位失败。", e);
                 const errorHtml = `<div class="text-center"><p style="color: var(--accent-color);">无法自动确定您的位置</p><p class="text-xs mt-2" style="color: var(--text-color-tertiary);">请在设置中手动输入城市。</p></div>`;
                 renderWeatherData(errorHtml, true);
                 return;
@@ -578,7 +647,7 @@ export async function fetchAndDisplayWeather() {
             return;
         }
         
-        // Hand off to the controller function.
+        // 将位置信息交给API控制器处理
         await tryWeatherApis(locationQuery, locationName || locationQuery);
-    }, 300); // Match CSS transition duration
+    }, 300);
 }
