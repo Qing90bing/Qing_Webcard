@@ -149,14 +149,17 @@ export async function fetchAndRenderCommits() {
     };
 
     const showLoaderAndFetch = () => {
-        contentEl.innerHTML = `
-            <div class="commit-loader-wrapper">
-                <div class="commit-spinner"></div>
-                <p style="color: var(--text-color-secondary);">正在加载提交记录...</p>
-            </div>
-        `;
-        container.style.opacity = '1';
-        executeFetch();
+        container.style.opacity = '0';
+        setTimeout(() => {
+            contentEl.innerHTML = `
+                <div class="commit-loader-wrapper">
+                    <div class="commit-spinner"></div>
+                    <p style="color: var(--text-color-secondary);">正在加载提交记录...</p>
+                </div>
+            `;
+            container.style.opacity = '1';
+            executeFetch();
+        }, 300);
     };
 
     // --- Manage Button and Loading State ---

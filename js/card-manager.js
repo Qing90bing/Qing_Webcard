@@ -3,6 +3,7 @@ import { fetchAndRenderCommits, updateCommitMask } from './commit-history.js';
 
 // --- Module-level state and element cache ---
 let aboutCardHasAnimated = false;
+let commitsFetched = false;
 let rightColumn, timeCapsuleCard, holidayListCard, aboutCard, profileCard, aboutCardTrigger, closeAboutCardBtn, refreshCommitsBtn, closeTimeCapsuleBtn;
 
 /**
@@ -63,7 +64,10 @@ export function toggleAboutCard() {
             simplebarInstance.getScrollElement().addEventListener('scroll', updateCommitMask);
         }
 
-        fetchAndRenderCommits();
+        if (!commitsFetched) {
+            fetchAndRenderCommits();
+            commitsFetched = true;
+        }
     } else {
         showRightColumn();
     }
