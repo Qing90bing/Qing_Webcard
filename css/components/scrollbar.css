@@ -4,21 +4,32 @@
  */
 
 /* --- SimpleBar 插件滚动条样式 --- */
+/**
+ * @description 这些规则覆盖了 SimpleBar 插件的默认样式，使其与我们的主题保持一致。
+ */
 
-/* 滚动条滑块 */
+/**
+ * @selector .simplebar-scrollbar:before
+ * @description SimpleBar 插件的滚动条滑块（thumb）是通过伪元素 `:before` 实现的。
+ *              我们在这里改变它的背景色和圆角。
+ */
 .simplebar-scrollbar:before {
     background-color: var(--accent-color); /* 使用主题强调色 */
     border-radius: 4px;
 }
 
-/* 垂直滚动条轨道 */
+/**
+ * @selector .simplebar-track.simplebar-vertical
+ * @description 设置垂直滚动条轨道的宽度。
+ */
 .simplebar-track.simplebar-vertical {
     width: 8px;
 }
 
-/* 
- * [修复] 禁止 SimpleBar 滚动区域在聚焦时显示浏览器默认的轮廓线。
- * 这通常在可滚动的 div 上发生。
+/**
+ * @selector [data-simplebar]:focus
+ * @description 修复：禁止 SimpleBar 滚动区域在通过键盘导航聚焦时显示浏览器默认的轮廓线（outline），
+ *              以保持视觉上的一致性，因为我们已经有了自定义的 `:focus-visible` 样式。
  */
 [data-simplebar]:focus {
     outline: none;
@@ -27,17 +38,34 @@
 
 /* --- 原生 Webkit 浏览器滚动条样式 (用于提交历史记录) --- */
 
-/* 
- * 这些伪元素选择器仅在 Webkit 内核的浏览器（如 Chrome, Safari）中生效。
+/**
+ * @description 这一系列伪元素选择器仅在 Webkit 内核的浏览器（如 Chrome, Safari, Edge）中生效，
+ *              用于对特定元素 `#recent-commits-container` 的原生滚动条进行美化。
+ */
+
+/**
+ * @selector ::-webkit-scrollbar
+ * @description 设置整个滚动条的宽度。
  */
 #recent-commits-container::-webkit-scrollbar {
     width: 8px; /* 滚动条宽度 */
 }
 
+/**
+ * @selector ::-webkit-scrollbar-track
+ * @description 设置滚动条的轨道样式。此处设为透明，使其不可见。
+ */
 #recent-commits-container::-webkit-scrollbar-track {
     background: transparent; /* 轨道背景透明 */
 }
 
+/**
+ * @selector ::-webkit-scrollbar-thumb
+ * @description 设置滚动条滑块（thumb）的样式。
+ * @property {background-clip} - 这是一个关键技巧。通过设置为 `content-box`，
+ *                             背景色将只填充 `content` 区域。结合透明的 `border`，
+ *                             可以创建出滑块周围有“内边距”的视觉效果，使滑块看起来更细、更精致。
+ */
 #recent-commits-container::-webkit-scrollbar-thumb {
     background-color: var(--accent-color); /* 滑块颜色 */
     border-radius: 4px; /* 滑块圆角 */
@@ -45,6 +73,10 @@
     background-clip: content-box; /* 背景色只填充 content-box 区域 */
 }
 
+/**
+ * @selector ::-webkit-scrollbar-thumb:hover
+ * @description 鼠标悬停在滑块上时，改变其颜色以提供交互反馈。
+ */
 #recent-commits-container::-webkit-scrollbar-thumb:hover {
     background-color: var(--accent-color-highlight); /* 悬停时使用高亮颜色 */
 }

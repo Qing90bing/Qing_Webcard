@@ -5,51 +5,99 @@
  */
 
 body.theme-light {
-    /* --- 颜色变量定义 --- */
+    /** @property --immersive-bg-color: 沉浸式模式下的背景颜色。*/
+    --immersive-bg-color: #f9fafb; /* gray-50 */
 
-    --immersive-bg-color: #f9fafb; /* 沉浸式视图背景色 */
-    --solid-card-bg-color: #f1f5f9; /* 实心卡片背景色 (slate-100) */
-    --icon-hover-bg: rgba(0, 0, 0, 0.08); /* 图标悬停背景色 */
-    --bg-color: #0d1a26; /* 全局背景色 (slate-100) - 更正：原代码为#0d1a26，对于亮色主题应为浅色 */
-    --card-bg-color: rgba(255, 255, 255, 0.75); /* 卡片背景色 (带透明度) */
-    --card-border-color: rgba(0, 0, 0, 0.08); /* 卡片边框颜色 */
-    --card-hover-bg-color: rgba(255, 255, 255, 0.80); /* 卡片悬停背景色 */
-    --card-hover-border-color: rgba(0, 0, 0, 0.12); /* 卡片悬停边框颜色 */
-    --text-color-primary: #1e293b; /* 主要文本颜色 (slate-800) */
-    --text-color-secondary: #475569; /* 次要文本颜色 (slate-600) */
-    --text-color-tertiary: #64748b; /* 第三级文本颜色 (slate-500) */
-    --accent-color: #3b82f6; /* 强调色 (blue-500) */
-    --selection-bg-color: rgba(59, 130, 246, 0.7); /* 文本选中背景色 */
-    --accent-color-highlight: rgba(59, 130, 246, 0.1); /* 强调色高亮 (用于悬停等效果) */
-    --progress-bar-bg: rgba(0, 0, 0, 0.08); /* 进度条背景色 */
-    --link-color: #1e293b; /* 链接颜色 */
-    --link-hover-color: #000; /* 链接悬停颜色 */
-    --separator-color: rgba(0, 0, 0, 0.1); /* 分隔线颜色 */
-    --status-past: #64748b; /* 日历状态：过去 (slate-500) */
-    --status-yesterday: #ca8a04; /* 日历状态：昨天 (yellow-600) */
-    --status-today: #16a34a; /* 日历状态：今天 (green-600) */
-    --status-tomorrow: #2563eb; /* 日历状态：明天 (blue-600) */
+    /** @property --solid-card-bg-color: 当“毛玻璃效果”被禁用时，卡片所使用的实心背景色。*/
+    --solid-card-bg-color: #1e293b; /* slate-100 */
 
-    /* --- 亮色主题下的特定样式调整 --- */
+    /** @property --icon-hover-bg: 通用图标在鼠标悬停时的背景色。*/
+    --icon-hover-bg: rgba(0, 0, 0, 0.08);
 
-    /* 进度条内的文本阴影，在亮色背景下使用浅色阴影以保证可读性 */
-    .progress-bar-text {
-        text-shadow: 0 0 4px rgba(255,255,255,0.5);
-    }
+    /** @property --bg-color: 全局页面的主要背景色。注意：此处的深色值为特意设计。*/
+    --bg-color: #0d1a26;
 
-    /* 主题切换开关的滑块颜色 */
-    .swatch-color {
-        border-color: rgba(0, 0, 0, 0.2);
-    }
+    /** @property --card-bg-color: 卡片在启用“毛玻璃效果”时的背景色，通常带有透明度。*/
+    --card-bg-color: rgba(255, 255, 255, 0.75);
 
-    /* 链接滑块分页点的颜色 */
-    .dot {
-        background-color: rgba(0, 0, 0, 0.3);
-    }
-    .dot:hover {
-        background-color: rgba(0, 0, 0, 0.6);
-    }
-    .dot.active {
-        background-color: rgba(0, 0, 0, 1);
-    }
+    /** @property --card-border-color: 卡片的边框颜色。*/
+    --card-border-color: rgba(0, 0, 0, 0.08);
+
+    /** @property --card-hover-bg-color: 鼠标悬停在卡片上时的背景色。*/
+    --card-hover-bg-color: rgba(255, 255, 255, 0.80);
+
+    /** @property --card-hover-border-color: 鼠标悬停在卡片上时的边框颜色。*/
+    --card-hover-border-color: rgba(0, 0, 0, 0.12);
+
+    /** @property --text-color-primary: 主要文本颜色，用于标题和重要信息。*/
+    --text-color-primary: #1e293b; /* slate-800 */
+
+    /** @property --text-color-secondary: 次要文本颜色，用于描述和辅助信息。*/
+    --text-color-secondary: #475569; /* slate-600 */
+
+    /** @property --text-color-tertiary: 第三级文本颜色，用于最不重要的信息，如禁用状态的文本。*/
+    --text-color-tertiary: #64748b; /* slate-500 */
+
+    /** @property --accent-color: 主题强调色，用于高亮、链接、按钮和各种活动状态。*/
+    --accent-color: #3b82f6; /* blue-500 */
+
+    /** @property --selection-bg-color: 用户选中文本时的背景颜色。*/
+    --selection-bg-color: rgba(59, 130, 246, 0.7);
+
+    /** @property --accent-color-highlight: 强调色的高亮版本，通常用于鼠标悬停时的辉光或背景效果。*/
+    --accent-color-highlight: rgba(59, 130, 246, 0.1);
+
+    /** @property --progress-bar-bg: 进度条和滑块的轨道背景色。*/
+    --progress-bar-bg: rgba(0, 0, 0, 0.08);
+
+    /** @property --link-color: 超链接的默认颜色。*/
+    --link-color: #1e293b;
+
+    /** @property --link-hover-color: 鼠标悬停在超链接上时的颜色。*/
+    --link-hover-color: #000;
+
+    /** @property --separator-color: 分隔线的颜色。*/
+    --separator-color: rgba(0, 0, 0, 0.1);
+
+    /** @property --status-past: 日历中“过去”日期的颜色。*/
+    --status-past: #64748b; /* slate-500 */
+
+    /** @property --status-yesterday: 日历中“昨天”的颜色。*/
+    --status-yesterday: #ca8a04; /* yellow-600 */
+
+    /** @property --status-today: 日历中“今天”的颜色。*/
+    --status-today: #16a34a; /* green-600 */
+
+    /** @property --status-tomorrow: 日历中“明天”的颜色。*/
+    --status-tomorrow: #2563eb; /* blue-600 */
+}
+
+/* --- 亮色主题下的特定样式调整 --- */
+
+/**
+ * @description 进度条内的文本阴影，在亮色背景下使用浅色阴影以保证可读性。
+ */
+body.theme-light .progress-bar-text {
+    text-shadow: 0 0 4px rgba(255,255,255,0.5);
+}
+
+/**
+ * @description 主题切换开关的圆形颜色样本，在亮色主题下需要一个更明显的边框。
+ */
+body.theme-light .swatch-color {
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+/**
+ * @description 链接滑块分页点的颜色。
+ *              注意：这些颜色是硬编码的，不通过主题变量控制。
+ */
+body.theme-light .dot {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+body.theme-light .dot:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+body.theme-light .dot.active {
+    background-color: rgba(0, 0, 0, 1);
 }

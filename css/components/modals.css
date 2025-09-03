@@ -1,19 +1,48 @@
 /*
  * @file: modals.css
  * @description: 定义所有模态框（对话框）组件的样式。
- *              包括设置、开发者设置、重置确认等模态框的容器、遮罩层和显示/隐藏状态。
+ *              通过在 <body> 上添加特定类（如 .settings-open）来控制模态框的显示和隐藏，
+ *              并管理背景遮罩层和页面内容的交互状态。
  */
+
+/* --- 通用模态框状态 --- */
+/**
+ * @description 当任何一个模态框打开时，主内容区（#main-wrapper）应淡出并禁止交互，
+ *              同时背景（#bg-wrapper）应被模糊化处理，以突出模态框。
+ */
+body.settings-open #main-wrapper,
+body.developer-settings-open #main-wrapper {
+    opacity: 0;
+    pointer-events: none; /* 禁止与主内容区交互 */
+}
+
+body.settings-open #bg-wrapper,
+body.developer-settings-open #bg-wrapper {
+    transform: scale(1); /* 确保背景在某些视图（如沉浸模式）下恢复正常大小 */
+    filter: blur(16px); /* 模糊背景，突出前景模态框 */
+}
+
 
 /* --- 设置模态框 --- */
 
-/* 遮罩层 */
+/**
+ * @id #settings-overlay
+ * @description 设置模态框的背景遮罩层。
+ * @property {transition} - opacity 用于淡入淡出效果。visibility 用于在动画结束后彻底隐藏元素，
+ *                         其过渡被延迟（0s linear 0.2s），以确保淡出动画（0.2s）完全结束后再隐藏。
+ */
 #settings-overlay {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s; /* 隐藏时延迟 visibility 的变化 */
 }
 
-/* 模态框窗口 */
+/**
+ * @id #settings-window
+ * @description 设置模态框的窗口本身。
+ * @property {transition} - transform 和 opacity 结合使用，创造出带回弹效果的缩放进入动画。
+ * @property {height}, {max-height} - 设置固定高度以保持布局一致性，并使用 max-height 适配较小的视口。
+ */
 #settings-window {
     transform: scale(0.95);
     opacity: 0;
@@ -22,15 +51,10 @@
     max-height: 85vh; /* [新增] 为小视口添加响应式最大高度 */
 }
 
-/* 当设置模态框打开时 (body.settings-open) */
-body.settings-open #main-wrapper {
-    opacity: 0;
-    pointer-events: none; /* 禁止与主内容区交互 */
-}
-body.settings-open #bg-wrapper {
-    transform: scale(1); /* 背景恢复正常大小 */
-    filter: blur(16px); /* 模糊背景 */
-}
+/**
+ * @selector body.settings-open ...
+ * @description 当 <body> 标签拥有 .settings-open 类时，显示设置模态框。
+ */
 body.settings-open #settings-overlay {
     opacity: 1;
     visibility: visible;
@@ -42,16 +66,14 @@ body.settings-open #settings-window {
 }
 
 
-/* --- 开发者设置模态框 --- */
+/* --- 开发者设置模态框 (与设置模态框逻辑相同) --- */
 
-/* 遮罩层 */
 #developer-settings-overlay {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s;
 }
 
-/* 模态框窗口 */
 #developer-settings-window {
     transform: scale(0.95);
     opacity: 0;
@@ -60,15 +82,6 @@ body.settings-open #settings-window {
     max-height: 85vh;
 }
 
-/* 当开发者设置模态框打开时 (body.developer-settings-open) */
-body.developer-settings-open #main-wrapper {
-    opacity: 0;
-    pointer-events: none;
-}
-body.developer-settings-open #bg-wrapper {
-    transform: scale(1);
-    filter: blur(16px);
-}
 body.developer-settings-open #developer-settings-overlay {
     opacity: 1;
     visibility: visible;
@@ -82,7 +95,11 @@ body.developer-settings-open #developer-settings-window {
 
 /* --- 重置确认模态框 --- */
 
-/* 当重置确认模态框打开时 (body.reset-confirm-open) */
+/**
+ * @selector body.reset-confirm-open #settings-window
+ * @description 当重置确认模态框打开时，它位于设置模态框之上。
+ *              此规则将底层的设置窗口轻微模糊和缩小，以在视觉上将其“推后”。
+ */
 body.reset-confirm-open #settings-window {
     /* 保持设置窗口可见，但轻微模糊和缩小 */
     filter: blur(4px);
@@ -95,7 +112,10 @@ body.reset-confirm-open #reset-confirm-overlay {
     transition-delay: 0s;
 }
 
-/* 模态框窗口 */
+/**
+ * @id #reset-confirm-window
+ * @description 重置确认模态框的窗口本身。
+ */
 #reset-confirm-window {
     transform: scale(0.95);
     opacity: 0;
@@ -110,31 +130,45 @@ body.reset-confirm-open #reset-confirm-overlay {
                 opacity 0.15s ease-in-out;
 }
 
+/**
+ * @id #reset-confirm-state, #reset-success-state
+ * @description 模态框内部的两个状态视图（确认视图和成功视图）的通用过渡效果。
+ */
 #reset-confirm-state, #reset-success-state {
     transition: opacity 0.2s ease-in-out;
 }
 
+/**
+ * @selector body.reset-confirm-open #reset-confirm-window
+ * @description 当 <body> 标签拥有 .reset-confirm-open 类时，显示重置确认模态框。
+ */
 body.reset-confirm-open #reset-confirm-window {
     transform: scale(1);
     opacity: 1;
 }
 
-/* 如果基础类应用了 bounce-in 动画，我们用 transition 替代它 */
+/* 如果基础类应用了 bounce-in 动画，我们用 transition 替代它以避免冲突 */
 #reset-confirm-window.bounce-in {
     animation: none;
 }
 
 /* --- 移动端响应式：全屏模态框 --- */
+/**
+ * @media (max-width: 1023px)
+ * @description 在小屏幕设备（如手机）上，模态框将变为全屏显示，以提供更好的用户体验。
+ */
 @media (max-width: 1023px) {
+    /* 移除遮罩层的内边距，让窗口可以占满全屏 */
     #settings-overlay, #developer-settings-overlay {
-        padding: 0; /* 移除内边距 */
+        padding: 0;
     }
 
+    /* 使模态框窗口占满整个视口 */
     #settings-window, #developer-settings-window {
         width: 100%;
         height: 100%;
         max-width: 100%;
         max-height: 100%;
-        border-radius: 0; /* 移除圆角 */
+        border-radius: 0; /* 移除圆角，使其与屏幕边缘贴合 */
     }
 }

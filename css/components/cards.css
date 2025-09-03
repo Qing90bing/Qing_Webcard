@@ -5,6 +5,15 @@
  */
 
 /* --- 基础卡片样式 (毛玻璃效果) --- */
+/**
+ * @class .glass-card
+ * @description 卡片组件的核心样式，默认实现毛玻璃效果。
+ * @property {background-color} - 半透明背景色。
+ * @property {backdrop-filter} - 应用背景模糊效果，这是毛玻璃的核心。
+ * @property {border-radius} - 定义卡片的圆角。
+ * @property {border} - 定义卡片的边框。
+ * @property {transition} - 为颜色、边框、变换等属性添加平滑过渡，优化用户体验。
+ */
 .glass-card {
     /* 背景色和模糊效果 */
     background-color: var(--card-bg-color);
@@ -16,14 +25,17 @@
     border: 1px solid var(--card-border-color);
 
     /* 平滑过渡效果 */
-    transition: background-color 0.3s ease, 
-                border-color 0.3s ease, 
-                transform 0.2s ease, 
-                backdrop-filter 0.3s ease, 
+    transition: background-color 0.3s ease,
+                border-color 0.3s ease,
+                transform 0.2s ease,
+                backdrop-filter 0.3s ease,
                 border-radius 0.3s ease;
 }
 
-/* 悬停效果 */
+/**
+ * @selector .glass-card:hover
+ * @description 为卡片提供一个微妙的悬停效果，通过改变背景和边框颜色来响应用户交互。
+ */
 .glass-card:hover {
     background-color: var(--card-hover-bg-color);
     border: 1px solid var(--card-hover-border-color);
@@ -31,14 +43,21 @@
 
 
 /* --- 禁用毛玻璃效果时的回退样式 --- */
-/* 当 body 具有 .glass-effect-disabled 类时，卡片变为实心背景 */
+/**
+ * @selector body.glass-effect-disabled .glass-card
+ * @description 当用户在设置中禁用毛玻璃效果时，为卡片提供一个实心背景的回退样式。
+ *              这个类被添加到 body 标签上，以全局禁用效果。
+ */
 body.glass-effect-disabled .glass-card {
     background-color: var(--solid-card-bg-color);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
 
-/* 禁用毛玻璃时，悬停效果不再改变背景色，只改变边框色 */
+/**
+ * @selector body.glass-effect-disabled .glass-card:hover
+ * @description 在禁用毛玻璃效果时，悬停效果仅改变边框颜色，背景色保持不变。
+ */
 body.glass-effect-disabled .glass-card:hover {
     background-color: var(--solid-card-bg-color);
     border-color: var(--card-hover-border-color);
@@ -46,9 +65,10 @@ body.glass-effect-disabled .glass-card:hover {
 
 /* --- 特殊卡片的样式覆盖 --- */
 
-/* 
- * 设置窗口和开发者设置窗口在禁用毛玻璃效果时，
- * 即使悬停也不改变样式，保持一致性。
+/**
+ * @selector body.glass-effect-disabled #settings-window.glass-card:hover, ...
+ * @description 特殊规则：在禁用毛玻璃效果时，设置窗口和开发者窗口即使在悬停时也完全不改变样式。
+ *              这可以防止在这些包含复杂内容的窗口中滚动或交互时产生不必要的视觉干扰。
  */
 body.glass-effect-disabled #settings-window.glass-card:hover,
 body.glass-effect-disabled #developer-settings-window.glass-card:hover {
@@ -56,9 +76,10 @@ body.glass-effect-disabled #developer-settings-window.glass-card:hover {
     border: 1px solid var(--card-border-color);
 }
 
-/* 
- * 默认情况下，设置窗口和开发者设置窗口不应有悬停效果，
- * 以防止在内部滚动或交互时意外改变背景。
+/**
+ * @selector #settings-window.glass-card:hover, ...
+ * @description 特殊规则：默认情况下（即毛玻璃效果启用时），设置窗口和开发者窗口也不应有悬停效果。
+ *              这确保了无论是否启用毛玻璃效果，这些特定卡片的行为都是一致的。
  */
 #settings-window.glass-card:hover,
 #developer-settings-window.glass-card:hover {

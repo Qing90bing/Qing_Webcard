@@ -5,6 +5,14 @@
  */
 
 /* --- 背景图片容器 --- */
+/**
+ * @id #bg-wrapper
+ * @description 包裹背景图片的容器。
+ * @property {position} - 使用 `fixed` 定位，使其始终铺满整个视口，不受滚动影响。
+ * @property {z-index} - 设置为-1，以确保背景始终位于所有其他内容的下方。
+ * @property {transition} - 为 `transform` 和 `filter` 添加过渡，
+ *                        用于在打开模态框等场景下实现平滑的缩放和模糊效果。
+ */
 #bg-wrapper {
     position: fixed;
     top: 0;
@@ -15,7 +23,12 @@
     transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
 }
 
-/* 背景图层，用于实现平滑的背景切换效果 */
+/**
+ * @class .bg-layer
+ * @description 用于实现平滑背景切换效果的图层。
+ *              通常会有两个 .bg-layer 元素，一个显示当前背景，另一个预加载下一个背景。
+ *              通过切换 .active 类来控制它们的透明度，实现淡入淡出切换。
+ */
 .bg-layer {
     position: absolute;
     top: 0;
@@ -29,25 +42,34 @@
     transition: opacity 0.5s ease-in-out;
 }
 .bg-layer.active {
-    opacity: 1; /* 当前显示的图层 */
+    opacity: 1; /* 当前活动/显示的图层 */
 }
 
 
 /* --- 主内容包装器 --- */
+/**
+ * @id #main-wrapper
+ * @description 包裹页面所有主要内容（除背景外）的容器。
+ *              在打开模态框时，会对这个容器应用 `opacity`、`filter` 等效果。
+ */
 #main-wrapper {
-    height: 100vh; /* 占满整个视口高度 */
+    height: 100vh; /* 默认占满整个视口高度 */
     transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
 
 /* --- 响应式布局调整 --- */
+/**
+ * @media (max-width: 1023px)
+ * @description 在小屏幕设备（如平板和手机）上应用的布局调整。
+ */
 @media (max-width: 1023px) {
-    /* 在移动端，主内容包装器高度自适应 */
+    /* 在移动端，主内容包装器的高度由内容撑开，而不是固定为视口高度，以允许页面滚动。 */
     #main-wrapper {
         height: auto;
     }
 
-    /* 节日列表卡片在移动端的高度 */
+    /* 节日列表卡片在移动端需要一个明确的高度，以确保其内部可以正常滚动。 */
     #holiday-list-card {
         height: 70vh;
     }

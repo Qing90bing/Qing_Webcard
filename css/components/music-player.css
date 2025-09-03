@@ -1,9 +1,15 @@
 /*
  * @file: music-player.css
  * @description: 定义新年主题中黑胶唱片机音乐播放器的样式。
+ *              这是一个独立的、高度定制化的组件。
  */
 
-/* --- 音乐播放器按钮容器 --- */
+/* --- 音乐播放器容器/按钮 --- */
+/**
+ * @id #new-year-music-btn
+ * @description 整个音乐播放器组件的容器，同时也是一个可点击的按钮。
+ * @property {transition} - 为显示/隐藏动画提供平滑的过渡效果。
+ */
 #new-year-music-btn {
     background: none;
     border: none;
@@ -16,10 +22,13 @@
     transform: scale(0.9);
     transition: opacity 0.3s ease, visibility 0s linear 0.3s, transform 0.3s ease;
     
-    /* `position: fixed` 由 Tailwind 的 'fixed' class 提供 */
+    /* `position: fixed` 由 Tailwind 的 'fixed' class 在 HTML 中提供 */
 }
 
-/* 可见状态 */
+/**
+ * @class .visible
+ * @description 当播放器需要显示时，由JS添加此类。
+ */
 #new-year-music-btn.visible {
     opacity: 1;
     visibility: visible;
@@ -27,7 +36,10 @@
     transition-delay: 0s; /* 立即显示 */
 }
 
-/* 交互动画 */
+/**
+ * @selector #new-year-music-btn:hover, #new-year-music-btn:active
+ * @description 提供交互时的视觉反馈，通过缩放变换实现。
+ */
 #new-year-music-btn:hover {
     transform: scale(1.1);
 }
@@ -37,7 +49,13 @@
 }
 
 
-/* --- 黑胶唱片本身 --- */
+/* --- 黑胶唱片 --- */
+/**
+ * @class .music-player-vinyl
+ * @description 黑胶唱片本身，是组件的核心视觉元素。
+ * @property {background-image} - 使用 repeating-radial-gradient 巧妙地模拟出唱片上一圈圈的纹理。
+ * @property {animation} - 应用 'spin' 动画，并通过 animation-play-state 控制其播放/暂停。
+ */
 .music-player-vinyl {
     position: relative;
     width: 100%;
@@ -54,10 +72,13 @@
     
     /* [修复] 直接应用动画，并将其初始播放状态设为暂停 */
     animation: spin 4s linear infinite;
-    animation-play-state: paused;
+    animation-play-state: paused; /* 初始状态为暂停 */
 }
 
-/* 唱片的高光效果 */
+/**
+ * @selector .music-player-vinyl::after
+ * @description 使用伪元素为唱片添加一个径向渐变的高光效果，增加其质感和立体感。
+ */
 .music-player-vinyl::after {
     content: '';
     position: absolute;
@@ -67,16 +88,23 @@
     height: 120%;
     background: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%);
     transform: rotate(-30deg);
-    pointer-events: none; /* 不响应鼠标事件 */
+    pointer-events: none; /* 确保高光层不干扰鼠标事件 */
 }
 
-/* [修复] 使用 animation-play-state 来控制旋转，而不是添加/移除整个动画类 */
+/**
+ * @selector #new-year-music-btn.is-playing .music-player-vinyl
+ * @description 当播放器处于播放状态时（由 .is-playing 类标识），启动旋转动画。
+ */
 #new-year-music-btn.is-playing .music-player-vinyl {
     animation-play-state: running; /* 播放时旋转 */
 }
 
 
 /* --- 专辑封面 --- */
+/**
+ * @class .album-art
+ * @description 位于唱片中心的专辑封面图片。
+ */
 .album-art {
     width: 60%; /* 调整尺寸 */
     height: 60%; /* 调整尺寸 */
@@ -87,6 +115,11 @@
 
 
 /* --- 播放/暂停图标遮罩层 --- */
+/**
+ * @class .vinyl-overlay
+ * @description 覆盖在唱片上的半透明遮罩层，用于承载播放/暂停图标。
+ *              默认透明，仅在特定状态下（悬停或暂停）显示。
+ */
 .vinyl-overlay {
     position: absolute;
     top: 0;
@@ -102,16 +135,22 @@
     font-size: 1.25rem; /* 20px, 缩小图标以获得更精致的外观 */
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
-    pointer-events: none; /* 让点击事件穿透到下方的按钮 */
+    pointer-events: none; /* 让点击事件能够穿透到下方的按钮上 */
 }
 
-/* 悬停或暂停时显示遮罩层 */
+/**
+ * @selector #new-year-music-btn:hover .vinyl-overlay, ...
+ * @description 控制遮罩层的显示时机：当鼠标悬停在播放器上，或播放器处于暂停状态时。
+ */
 #new-year-music-btn:hover .vinyl-overlay,
 #new-year-music-btn.is-paused .vinyl-overlay {
     opacity: 1;
 }
 
-/* 播放/暂停图标的样式和过渡 */
+/**
+ * @class .icon-play, .icon-pause
+ * @description 播放和暂停图标的通用样式。默认都是透明和缩小的。
+ */
 .vinyl-overlay .icon-play,
 .vinyl-overlay .icon-pause {
     position: absolute;
@@ -120,6 +159,9 @@
     transform: scale(0.8);
 }
 
+/**
+ * @description 根据 .is-paused 和 .is-playing 类来精确控制哪个图标应该显示。
+ */
 /* 暂停时显示播放图标 */
 #new-year-music-btn.is-paused .icon-play {
     opacity: 1;

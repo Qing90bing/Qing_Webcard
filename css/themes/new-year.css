@@ -2,10 +2,13 @@
  * @file: new-year.css
  * @description: 定义新年主题下的颜色变量和特定样式。
  *              当 <body> 元素同时拥有 'new-year-active' 和对应的主题类（'theme-dark' 或 'theme-light'）时，
- *              这些样式将被应用。
+ *              此文件中的变量会覆盖默认主题的变量。
  */
 
 /* --- 暗色模式下的新年主题 --- */
+/**
+ * @description 这些变量仅在新年主题激活且基础主题为暗色时生效。
+ */
 body.new-year-active.theme-dark {
     --card-bg-color: rgba(80, 20, 20, 0.65);         /* 卡片背景色：深红色 */
     --card-border-color: rgba(220, 38, 38, 0.3);     /* 卡片边框颜色：猩红色边框 */
@@ -19,6 +22,9 @@ body.new-year-active.theme-dark {
 }
 
 /* --- 亮色模式下的新年主题 --- */
+/**
+ * @description 这些变量仅在新年主题激活且基础主题为亮色时生效。
+ */
 body.new-year-active.theme-light {
     --card-bg-color: rgba(255, 247, 247, 0.8);       /* 卡片背景色：极浅的奶油红 */
     --card-border-color: rgba(190, 30, 30, 0.25);    /* 卡片边框颜色 */
@@ -32,6 +38,10 @@ body.new-year-active.theme-light {
 }
 
 /* --- 新年主题下的通用组件样式调整 --- */
+/**
+ * @description 这些是针对新年主题的特殊样式覆盖，以确保所有组件都符合主题的视觉风格。
+ *              它们直接修改组件样式，而不是通过变量。
+ */
 
 /* [修复] 开发者图标在新年主题下的颜色 */
 body.new-year-active #developer-icon {

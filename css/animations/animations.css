@@ -121,36 +121,71 @@
 
 /* --- 动画应用类 --- */
 
+/**
+ * @class .bounce-in
+ * @description 将 bounce-in 动画应用到元素。
+ * @property {animation} - 使用自定义的 cubic-bezier 缓动函数，创造更生动的回弹效果。
+ *                         `forwards` 确保动画结束后元素保持在最后一帧的状态。
+ */
 .bounce-in {
     animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
+/**
+ * @class .logo-click-bounce-anim
+ * @description 将 logo-click-bounce 动画应用到元素。
+ */
 .logo-click-bounce-anim {
     transform-origin: center;
     animation: logo-click-bounce 0.3s ease-out;
 }
 
+/**
+ * @class .animate-fade-in
+ * @description 应用 fade-in-anim 淡入动画。
+ */
 .animate-fade-in {
     animation: fade-in-anim 0.1s ease-out forwards;
 }
 
+/**
+ * @class .animate-fade-out
+ * @description 应用 fade-out-anim 淡出动画。
+ */
 .animate-fade-out {
     animation: fade-out-anim 0.1s ease-in forwards;
 }
 
+/**
+ * @class .luck-shake, .shake-anim
+ * @description 应用 shake-anim 晃动动画。
+ *              .shake-anim 是一个更通用的类名，建议优先使用。
+ */
 .luck-shake,
 .shake-anim { /* .shake-anim 是一个更通用的类名 */
     animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
 
+/**
+ * @class .luck-pop-anim
+ * @description 应用 luck-pop 弹出动画。
+ */
 .luck-pop-anim {
     animation: luck-pop 0.2s ease-in-out;
 }
 
+/**
+ * @class .fade-out-opacity-only
+ * @description 应用仅改变透明度的淡出动画。
+ */
 .fade-out-opacity-only {
     animation: fade-out-opacity-only-anim 0.3s ease-out forwards;
 }
 
+/**
+ * @class .breathing-effect
+ * @description 应用 breathing 呼吸动画，实现无限循环的平滑呼吸效果。
+ */
 .breathing-effect {
     animation: breathing 2s ease-in-out infinite;
 }

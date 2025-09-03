@@ -5,6 +5,12 @@
  */
 
 /* --- 滑块容器 --- */
+/**
+ * @id #link-slider-container
+ * @description 链接滑块的根容器。
+ * @property {margin} - 使用负外边距来抵消轨道包装器的内边距，
+ *                     使得卡片在视觉上能与容器的外部边缘对齐。
+ */
 #link-slider-container {
     position: relative;
     /* 预留空间给绝对定位的分页点 */
@@ -14,23 +20,44 @@
 }
 
 /* --- 滑块轨道包装器 --- */
+/**
+ * @class .slider-wrapper
+ * @description 包裹轨道的容器，主要作用是隐藏溢出的内容。
+ * @property {overflow} - 隐藏轨道上超出容器宽度的卡片。
+ * @property {cursor} - 提供“可抓取”的鼠标指针，以提示用户可以拖动。
+ */
 .slider-wrapper {
     overflow: hidden; /* 隐藏超出容器的卡片 */
     cursor: grab; /* 鼠标样式：可拖动 */
     padding: 0.5rem;
 }
+/**
+ * @class .grabbing
+ * @description 当用户按住鼠标拖动滑块时，由JS添加此类，改变鼠标指针为“抓取中”状态。
+ */
 .slider-wrapper.grabbing {
     cursor: grabbing; /* 鼠标样式：正在拖动 */
 }
 
 /* --- 滑块轨道 --- */
+/**
+ * @class .slider-track
+ * @description 真正包含所有卡片的弹性容器。
+ *              它的宽度会远超 `slider-wrapper`，通过改变其 `transform: translateX` 来实现滚动。
+ */
 .slider-track {
     display: flex;
     gap: 1rem; /* 卡片之间的间距 */
-    /* `transition` 将由 JavaScript 控制，以实现吸附效果 */
+    /* `transition` 将由 JavaScript 在拖动结束后添加，以实现平滑的吸附效果 */
 }
 
 /* --- 单个卡片幻灯片 --- */
+/**
+ * @class .card-slide
+ * @description 滑块中的单个卡片项。
+ * @property {width} - 动态计算卡片宽度。默认每页显示3张卡片。
+ * @property {z-index} - 在悬停时提升层级，确保其在视觉上位于相邻卡片之上。
+ */
 .card-slide {
     flex-shrink: 0; /* 防止卡片在 flex 布局中被压缩 */
     /* 默认显示3张卡片，`2 * 1rem` 是两个卡片间距的总和 */
@@ -44,6 +71,10 @@
 
 
 /* --- 分页指示点 --- */
+/**
+ * @class .slider-dots
+ * @description 分页指示点（小圆点）的容器。
+ */
 .slider-dots {
     position: absolute;
     bottom: -0.6rem; /* 定位在滑块下方 */
@@ -54,6 +85,12 @@
     gap: 0.5rem; /* 8px */
 }
 
+/**
+ * @class .dot
+ * @description 单个分页指示点。
+ *              注意：这里的颜色是为默认的暗色主题硬编码的。
+ *              亮色主题的颜色在 `themes/light.css` 中被直接覆盖。
+ */
 .dot {
     width: 8px;
     height: 8px;

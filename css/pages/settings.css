@@ -4,6 +4,11 @@
  */
 
 /* --- 设置窗口内的滚动区域 --- */
+/**
+ * @id #settings-window
+ * @description 为设置窗口内的 SimpleBar 滚动容器添加顶部和底部的渐变遮罩，
+ *              以在内容滚动时产生平滑的淡出效果。
+ */
 #settings-window [data-simplebar] {
     /* 顶部和底部的渐变遮罩，以产生内容淡出效果 */
     --fade-top-size: 24px;
@@ -19,7 +24,11 @@
     overflow: hidden;
     /* [改进] 过渡效果将在 body.settings-open 下方定义，以避免不必要的动画 */
 }
-/* 仅在设置面板打开时应用过渡，防止页面加载时触发动画 */
+/**
+ * @selector body.settings-open #background-preview-container.visible
+ * @description 仅在设置面板打开时应用过渡效果，这样可以避免在页面初始加载时，
+ *              如果预览容器默认可见，会触发不必要的进入动画。
+ */
 body.settings-open #background-preview-container.visible {
     transition: max-height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-in-out, margin-top 0.3s ease;
     max-height: 400px;
@@ -31,6 +40,7 @@ body.settings-open #background-preview-container.visible {
 }
 #bg-preview-img {
     transition: opacity 0.3s ease-in-out;
+    /* 使用 --progress-bar-bg 作为图片加载前的占位背景色，改善加载体验 */
     background-color: var(--progress-bar-bg); /* [修复] 添加占位背景色，改善加载体验 */
 }
 #preview-loader {
@@ -58,6 +68,7 @@ body.settings-open #background-preview-container.visible {
     transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s, background-color 0.2s ease-in-out, backdrop-filter 0.2s ease-in-out;
 }
 #bg-preview-error p:first-child {
+    /* 错误提示中的图标颜色使用主题强调色 */
     color: var(--accent-color);
 }
 #bg-preview-error p:last-child {
@@ -74,6 +85,11 @@ body.settings-open #background-preview-container.visible {
 }
 
 /* --- 设置项分区 --- */
+/**
+ * @class .setting-section
+ * @description 设置面板中的每个设置区域块。
+ * @property {border-top} - 使用 `--separator-color` 作为分区之间的分割线。
+ */
 .setting-section {
     border-top: 1px solid var(--separator-color);
     padding-top: 1.5rem;
@@ -88,6 +104,7 @@ body.settings-open #background-preview-container.visible {
     line-height: 1.3;
     transition: color 0.2s ease-in-out;
 }
+/* 当单选按钮被选中时，其对应的描述文本颜色变亮，以提供更强的视觉反馈 */
 .setting-radio-input:checked + .setting-radio-label .setting-description {
     color: var(--text-color-primary); /* 选中项的描述文本颜色更亮 */
 }
@@ -118,6 +135,11 @@ body.settings-open #background-preview-container.visible {
     gap: 0.75rem;
     justify-content: center;
 }
+/**
+ * @class .thumb-item
+ * @description 背景图的缩略图项。
+ * @property {border-color} - 选中的缩略图边框颜色由 `--accent-color` 控制。
+ */
 .thumb-item {
     aspect-ratio: 16 / 9;
     border-radius: 0.5rem;
@@ -156,6 +178,11 @@ body.settings-open #background-preview-container.visible {
 
 
 /* --- 主题颜色选择器 --- */
+/**
+ * @class .theme-swatch
+ * @description 主题颜色选择器中的圆形颜色样本。
+ * @property {border-color} - 激活的颜色样本边框由 `--accent-color` 控制。
+ */
 .theme-swatch {
     width: 2.5rem;
     height: 2.5rem;
@@ -181,11 +208,21 @@ body.settings-open #background-preview-container.visible {
 
 
 /* --- 设置按钮组 (带滑块效果) --- */
+/**
+ * @class .setting-btn-group
+ * @description 一个带有滑动背景的按钮组，用于切换设置选项。
+ * @property {background-color} - 按钮组的轨道背景色由 `--progress-bar-bg` 控制。
+ */
 .setting-btn-group {
     display: flex;
     border-radius: 0.8rem;
     background-color: var(--progress-bar-bg);
 }
+/**
+ * @class .theme-slider
+ * @description 按钮组中滑动的背景元素。
+ * @property {background-color} - 滑块的颜色由 `--accent-color` 控制。
+ */
 .theme-slider {
     background-color: var(--accent-color);
     border-radius: 0.8rem; /* 匹配父容器 */
@@ -249,41 +286,27 @@ body.settings-open #background-preview-container.visible {
 
 
 /* --- 设置项禁用状态 --- */
-/* 外观设置 - 模糊度滑块 */
-#blur-setting-content-wrapper {
-    transition: filter 0.3s ease-in-out;
-}
-#blur-setting-container.disabled #blur-setting-content-wrapper {
+/**
+ * @description 当某个设置项被禁用时（例如，当“毛玻璃效果”关闭时，其模糊度滑块应被禁用），
+ *              通过 filter: blur(4px) 和 pointer-events: none 创造出不可用的视觉效果，
+ *              并显示一个遮罩层来承载提示信息。
+ */
+#blur-setting-container.disabled #blur-setting-content-wrapper,
+#main-background-settings-wrapper.disabled #main-background-settings-content {
     filter: blur(4px);
     pointer-events: none; /* 禁止交互 */
 }
-#blur-slider-overlay {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
-    pointer-events: none;
-}
-body.settings-open #blur-setting-container.disabled #blur-slider-overlay {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto; /* 允许交互（例如显示提示） */
-    transition-delay: 0s;
-}
-
-/* 背景设置 */
-#main-background-settings-wrapper.disabled #main-background-settings-content {
-    filter: blur(4px);
-    pointer-events: none;
-}
+#blur-slider-overlay,
 #background-settings-overlay {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
     pointer-events: none;
 }
+body.settings-open #blur-setting-container.disabled #blur-slider-overlay,
 body.settings-open #main-background-settings-wrapper.disabled #background-settings-overlay {
     opacity: 1;
     visibility: visible;
-    pointer-events: auto;
+    pointer-events: auto; /* 允许交互（例如显示提示） */
     transition-delay: 0s;
 }

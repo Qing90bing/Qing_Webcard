@@ -3,9 +3,14 @@
  * @description: 定义项目中所有表单元素的样式，包括输入框、开关、滑块、单选/复选框等。
  */
 
-/* --- 输入框通用样式 --- */
+/* --- 通用表单样式 --- */
+/**
+ * @class .invalid
+ * @description 为无效输入的表单元素（如输入框）添加统一的错误提示样式。
+ * @property {border-color} - 使用醒目的红色边框提示错误。!important确保覆盖其他状态。
+ * @property {animation} - 应用晃动动画，吸引用户注意。
+ */
 .invalid {
-    /* 为无效输入的元素（如输入框）添加统一的错误提示样式 */
     border-color: #ef4444 !important; /* 红色边框，!important确保覆盖其他样式 */
     animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both; /* 晃动动画 */
 }
@@ -13,11 +18,17 @@
 
 /* --- 年份输入框 (节日列表) --- */
 #year-input.invalid {
-    /* 样式已由 .invalid 类提供 */
+    /* 样式已由 .invalid 类提供，此处为空规则用于结构清晰 */
 }
 
 
 /* --- 天气城市输入框 --- */
+/**
+ * @id #weather-city-input
+ * @description 天气设置中的城市输入框。
+ * @property {padding-right} - 为右侧的确认图标留出空间。
+ * @property {appearance} - 移除移动端浏览器（特别是iOS Safari）默认的输入框内阴影等样式。
+ */
 #weather-city-input {
     transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     appearance: none;
@@ -35,13 +46,17 @@
 
 
 /* --- 自定义背景图片URL输入框 --- */
+/**
+ * @id #custom-bg-input
+ * @description 自定义背景图片URL的输入框。
+ */
+#custom-bg-input {
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
 #custom-bg-input:focus {
     outline: none;
     border-color: var(--accent-color);
     box-shadow: 0 0 0 2px var(--accent-color-highlight);
-}
-#custom-bg-input {
-    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 #custom-bg-input::placeholder {
     transition: color 0.3s ease-in-out;
@@ -53,12 +68,21 @@
 
 
 /* --- 输入错误信息提示 --- */
+/**
+ * @id #city-input-error, #custom-bg-input-error
+ * @description 用于显示输入框下方验证错误信息的文本元素。
+ *              默认通过 transform 和 opacity 隐藏。
+ */
 #city-input-error,
 #custom-bg-input-error {
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
     transform: translateY(-4px);
     opacity: 0;
 }
+/**
+ * @class .visible
+ * @description 添加到错误信息元素上以显示它，带有平滑的动画效果。
+ */
 #city-input-error.visible,
 #custom-bg-input-error.visible {
     transform: translateY(0);
@@ -67,6 +91,10 @@
 
 
 /* --- 开关 (Toggle Switch) --- */
+/**
+ * @class .toggle-switch
+ * @description 开关组件的容器，包裹了隐藏的input和可见的滑块。
+ */
 .toggle-switch {
     position: relative;
     display: inline-block;
@@ -78,6 +106,10 @@
     width: 0;
     height: 0;
 }
+/**
+ * @class .toggle-slider
+ * @description 开关组件的可见部分，即滑轨。
+ */
 .toggle-slider {
     position: absolute;
     cursor: pointer;
@@ -92,6 +124,11 @@
 .toggle-switch:hover .toggle-slider {
     box-shadow: 0 0 0 4px var(--accent-color-highlight); /* 悬停时的光环效果 */
 }
+/**
+ * @selector .toggle-slider:before
+ * @description 使用伪元素创建开关的圆形滑块。
+ * @property {transition} - 使用带回弹效果的 cubic-bezier 函数，使滑动动画更生动。
+ */
 .toggle-slider:before {
     position: absolute;
     content: "";
@@ -103,18 +140,32 @@
     transition: .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 带回弹效果的过渡 */
     border-radius: 50%;
 }
+/**
+ * @selector input:checked + .toggle-slider
+ * @description 当隐藏的 input 被选中时，改变滑轨的背景色。
+ */
 input:checked + .toggle-slider {
     background-color: var(--accent-color); /* 打开状态的背景色 */
 }
 input:focus + .toggle-slider {
     box-shadow: 0 0 1px var(--accent-color);
 }
+/**
+ * @selector input:checked + .toggle-slider:before
+ * @description 当隐藏的 input 被选中时，移动圆形滑块到另一侧。
+ */
 input:checked + .toggle-slider:before {
     transform: translateX(24px); /* 滑块移动 */
 }
 
 
 /* --- 滑块 (Slider) --- */
+/**
+ * @class .setting-slider
+ * @description 自定义滑块（范围输入框）。
+ * @property {background-image} - 使用线性渐变模拟进度条的填充效果。
+ * @property {background-size} - 进度通过JS控制 --slider-progress 变量来更新。
+ */
 .setting-slider {
     -webkit-appearance: none; /* 移除默认样式 */
     appearance: none;
@@ -132,6 +183,10 @@ input:checked + .toggle-slider:before {
 .setting-slider:hover {
     opacity: 1;
 }
+/**
+ * @selector .setting-slider::-webkit-slider-thumb
+ * @description 自定义滑块的拖动按钮（thumb）。
+ */
 .setting-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -172,6 +227,10 @@ input:checked + .toggle-slider:before {
 
 
 /* --- 自定义单选按钮 (Radio Button) --- */
+/**
+ * @class .setting-radio-label
+ * @description 自定义单选按钮的标签，作为可点击区域。
+ */
 .setting-radio-label {
     display: flex;
     align-items: center;
@@ -188,10 +247,18 @@ input:checked + .toggle-slider:before {
 .setting-radio-input {
     display: none; /* 隐藏原生单选按钮 */
 }
+/**
+ * @selector .setting-radio-input:checked + .setting-radio-label
+ * @description 当单选按钮被选中时，为其标签添加高亮样式。
+ */
 .setting-radio-input:checked + .setting-radio-label {
     background-color: var(--accent-color-highlight);
     border-color: var(--accent-color);
 }
+/**
+ * @class .custom-radio-button
+ * @description 可见的、自定义的单选按钮外观（圆圈）。
+ */
 .custom-radio-button {
     width: 1.25em;
     height: 1.25em;
@@ -206,6 +273,11 @@ input:checked + .toggle-slider:before {
 .setting-radio-input:checked + .setting-radio-label .custom-radio-button {
     border-color: var(--accent-color);
 }
+/**
+ * @selector .custom-radio-button::after
+ * @description 使用伪元素创建单选按钮中心的实心圆点。
+ *              默认缩放为0，选中时再放大，实现动画效果。
+ */
 .custom-radio-button::after {
     content: '';
     width: 0.75em;
@@ -221,6 +293,10 @@ input:checked + .toggle-slider:before {
 
 
 /* --- 自定义复选框 (Checkbox for Hitokoto) --- */
+/**
+ * @class .hitokoto-checkbox-label
+ * @description “一言”类别选择的复选框标签。
+ */
 .hitokoto-checkbox-label {
     display: flex;
     align-items: center;
@@ -236,6 +312,10 @@ input:checked + .toggle-slider:before {
 .hitokoto-checkbox-label.invalid {
     animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
+/**
+ * @class .custom-checkbox
+ * @description 可见的、自定义的复选框外观（方框）。
+ */
 .custom-checkbox {
     width: 1.15em;
     height: 1.15em;
@@ -247,6 +327,11 @@ input:checked + .toggle-slider:before {
     flex-shrink: 0;
     transition: border-color 0.2s, background-color 0.2s;
 }
+/**
+ * @selector .custom-checkbox svg
+ * @description 复选框中的“勾”图标。
+ *              默认缩放为0，选中时再放大。
+ */
 .custom-checkbox svg {
     width: 0.8em;
     height: 0.8em;
@@ -254,6 +339,10 @@ input:checked + .toggle-slider:before {
     transform: scale(0);
     transition: transform 0.15s ease-in-out;
 }
+/**
+ * @selector .hitokoto-checkbox-input:checked + ...
+ * @description 当复选框被选中时，改变方框的背景和边框，并显示“勾”图标。
+ */
 .hitokoto-checkbox-input:checked + .hitokoto-checkbox-label .custom-checkbox {
     background-color: var(--accent-color);
     border-color: var(--accent-color);
@@ -262,7 +351,12 @@ input:checked + .toggle-slider:before {
     transform: scale(1);
 }
 
-/* 一言设置验证消息 */
+/* --- 一言设置相关样式 --- */
+/**
+ * @id #hitokoto-validation-msg
+ * @description “一言”设置中，用于提示“至少选择一个类别”的验证消息。
+ * @property {animation} - 使用 fade-in-out 动画，使消息出现后停留一段时间再自动消失。
+ */
 #hitokoto-validation-msg {
     color: #ef4444; /* red-500 */
     font-weight: 500;
@@ -272,7 +366,10 @@ input:checked + .toggle-slider:before {
 #hitokoto-validation-msg.visible {
     animation: fade-in-out 3s ease-in-out forwards; /* 淡入并停留一段时间后淡出 */
 }
-/* 一言设置保存按钮 */
+/**
+ * @id #hitokoto-save-btn
+ * @description “一言”设置中的保存按钮。
+ */
 #hitokoto-save-btn {
     color: var(--text-color-secondary);
     transition: color 0.2s, transform 0.2s;

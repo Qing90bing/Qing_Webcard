@@ -4,6 +4,19 @@
  */
 
 /* --- JS驱动的工具提示样式 --- */
+/**
+ * @class .js-tooltip
+ * @description 这是工具提示组件的样式。它由JavaScript创建并控制位置。
+ * @property {position} - 使用 `fixed` 定位，使其相对于浏览器视口定位，
+ *                        这样即使页面滚动，它也能保持在正确的位置。
+ * @property {background-color} - 使用主题强调色作为背景，使其醒目。
+ * @property {z-index} - 设置一个非常高的 `z-index`，以确保工具提示显示在所有其他内容的上方。
+ * @property {pointer-events} - 设置为 `none`，这样工具提示本身不会捕获鼠标事件，
+ *                             允许用户与工具提示下方的元素进行交互。
+ * @property {opacity}, {transform} - 定义其初始状态为不可见且轻微偏移和缩小，
+ *                                   为进入动画做准备。
+ * @property {transition} - 为 `opacity` 和 `transform` 添加过渡，实现平滑的淡入淡出和移动效果。
+ */
 .js-tooltip {
     position: fixed; /* 固定定位，相对于视口 */
     background-color: var(--accent-color); /* 使用主题强调色作为背景 */

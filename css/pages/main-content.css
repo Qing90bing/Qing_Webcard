@@ -5,7 +5,10 @@
  */
 
 /* --- 字体变体：等宽数字 --- */
-/* 确保数字等宽，防止在数字变化时产生宽度抖动 */
+/**
+ * @description 为包含动态数字的元素设置 `tabular-nums`，
+ *              确保数字等宽，防止在数字（如时间、倒计时）变化时产生宽度抖动，保持布局稳定。
+ */
 #time-display, 
 .runtime-number, 
 #countdown-display, 
@@ -15,6 +18,11 @@
 }
 
 /* --- 时间显示 --- */
+/**
+ * @id #time-display
+ * @description 主时钟的样式。
+ * @property {text-shadow} - 使用主题强调色 `--accent-color` 创建文本辉光效果。
+ */
 #time-display {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
@@ -22,6 +30,12 @@
 }
 
 /* --- 节日列表 --- */
+/**
+ * @class .highlight-holiday
+ * @description 高亮最近的节日的样式。
+ * @property {background-color} - 使用 `--accent-color-highlight` 作为高亮背景色。
+ * @property {border-left} - 使用 `--accent-color` 作为左侧的强调边框。
+ */
 .highlight-holiday {
     background-color: var(--accent-color-highlight);
     border-left: 3px solid var(--accent-color); /* 高亮最近的节日 */
@@ -35,7 +49,11 @@
 #holiday-list-year:hover {
     color: var(--accent-color);
 }
-/* 节日列表容器的顶部和底部渐变遮罩，以产生淡出效果 */
+/**
+ * @id #holiday-list-container-wrapper
+ * @description 通过 CSS `mask-image` 为节日列表的顶部和底部创建渐变遮罩，
+ *              以产生内容平滑淡入淡出的视觉效果，避免内容被硬性截断。
+ */
 #holiday-list-container-wrapper {
     --fade-top-size: 40px;
     --fade-bottom-size: 40px;
@@ -66,6 +84,11 @@
 
 
 /* --- 沉浸式时间视图 --- */
+/**
+ * @id #immersive-time-view
+ * @description 沉浸式全屏时钟视图的容器。
+ * @property {background-color} - 背景色由 `--immersive-bg-color` 控制。
+ */
 #immersive-time-view {
     position: fixed;
     inset: 0;
@@ -236,12 +259,19 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
 .commit-message-text {
     word-break: break-all; /* 确保长提交信息能正确换行 */
 }
-/* 时间线样式 */
+/**
+ * @class .timeline-item
+ * @description GitHub 提交历史记录的时间线项目。
+ */
 .timeline-item {
     display: flex;
     position: relative;
 }
-/* 时间线节点间的连接线 */
+/**
+ * @selector .timeline-item:not(:last-child) .timeline-node::after
+ * @description 使用伪元素创建时间线节点之间的连接线。
+ * @property {background-color} - 线的颜色由 `--separator-color` 控制。
+ */
 .timeline-item:not(:last-child) .timeline-node::after {
     content: '';
     position: absolute;
@@ -252,6 +282,7 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
     height: 100%;
     background-color: var(--separator-color);
 }
+
 /* 时间线上的圆点 */
 .timeline-node {
     position: relative;
@@ -261,6 +292,14 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
     justify-content: center;
     padding-top: 0.25rem; /* 对齐圆点和文本 */
 }
+
+/**
+ * @selector .timeline-node::before
+ * @description 使用伪元素创建时间线上的圆点。
+ * @property {background-color} - 圆点的颜色由 `--accent-color` 控制。
+ * @property {border} - 使用 `--card-bg-color` 作为边框色，
+ *                      可以制造出圆点“浮”在连接线之上的视觉效果。
+ */
 .timeline-node::before {
     content: '';
     position: absolute;
@@ -280,7 +319,6 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
     padding-bottom: 0;
     padding-top: 2px; /* 微调对齐 */
 }
-/* 提交者头像 */
 .commit-avatar {
     box-shadow: 0 0 0 1px var(--separator-color);
     opacity: 0;
@@ -289,7 +327,6 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
 .commit-avatar.loaded {
     opacity: 1;
 }
-/* 提交历史加载状态 */
 #recent-commits-container {
     transition: opacity 0.3s ease-in-out;
     /* 渐变遮罩，由JS控制 */

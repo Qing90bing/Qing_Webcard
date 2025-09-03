@@ -1,16 +1,28 @@
 /*
  * @file: buttons.css
  * @description: 定义项目中所有按钮组件的样式。
- *              包括图标按钮、返回今日按钮、抽奖按钮等。
+ *              包括通用图标按钮、特定功能按钮（如返回今日、刷新）等。
  */
 
-/* --- 图标按钮 --- */
+/* --- 通用图标按钮 --- */
+/**
+ * @class .icon-btn
+ * @description 通用图标按钮的基础样式。
+ *              提供了一个鼠标悬停时的背景色高亮效果。
+ */
 .icon-btn:hover {
     background-color: var(--accent-color-highlight);
     transition: all 0.3s ease;
 }
 
 /* --- 返回今日按钮 --- */
+/**
+ * @id #back-to-today-btn
+ * @description “返回今日”按钮，通常在日期切换后出现。
+ *              默认状态下，它是完全透明、缩小且不可见的。
+ * @property {transition} - 定义了多个属性的过渡效果，实现平滑的显隐动画。
+ *                         visibility 的过渡被延迟，以确保元素在淡出动画完成前都可点击。
+ */
 #back-to-today-btn {
     display: flex;
     border: 1px solid var(--card-border-color);
@@ -19,25 +31,40 @@
     transform: scale(0.9);
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.2s ease-in-out, 
-                transform 0.2s ease-in-out, 
-                visibility 0s linear 0.2s, 
+    transition: opacity 0.2s ease-in-out,
+                transform 0.2s ease-in-out,
+                visibility 0s linear 0.2s,
                 background-color 0.2s ease;
 }
 
+/**
+ * @selector #back-to-today-btn:hover
+ * @description 悬停时增加按钮的透明度，使其更亮。
+ *              使用 !important 是为了确保在 .visible 状态下悬停时，此规则能覆盖原有的透明度。
+ */
 #back-to-today-btn:hover {
     opacity: 0.85 !important; /* 使用 !important 确保覆盖 .visible 的透明度 */
 }
 
+/**
+ * @class .visible
+ * @description 当 #back-to-today-btn 需要显示时，添加此类。
+ *              使其变得可见、不透明，并恢复正常大小。
+ */
 #back-to-today-btn.visible {
     opacity: 0.7;
     transform: scale(1);
     visibility: visible;
     pointer-events: auto;
-    transition-delay: 0s; /* 取消隐藏时的延迟 */
+    transition-delay: 0s; /* 取消隐藏时的延迟，使其立即响应显示 */
 }
 
 /* --- 沉浸式视图退出按钮 --- */
+/**
+ * @id #exit-immersive-btn
+ * @description 在沉浸式模式下显示的退出按钮。
+ *              它是一个固定在右上角的圆形按钮，默认不可见。
+ */
 #exit-immersive-btn {
     position: absolute;
     top: 2rem;  /* 32px */
@@ -54,24 +81,36 @@
     border: none; /* 移除默认按钮边框 */
     opacity: 0;
     visibility: hidden;
-    transition: color 0.2s ease-in-out, 
-                background-color 0.2s ease-in-out, 
-                transform 0.2s ease-in-out, 
-                opacity 0.3s ease-in-out, 
+    transition: color 0.2s ease-in-out,
+                background-color 0.2s ease-in-out,
+                transform 0.2s ease-in-out,
+                opacity 0.3s ease-in-out,
                 visibility 0s linear 0.3s;
 }
 
+/**
+ * @class .visible
+ * @description 当 #exit-immersive-btn 需要显示时，添加此类。
+ */
 #exit-immersive-btn.visible {
     opacity: 1;
     visibility: visible;
     transition-delay: 0s;
 }
 
+/**
+ * @selector #exit-immersive-btn:hover
+ * @description 鼠标悬停时，改变文本颜色和背景色以提供反馈。
+ */
 #exit-immersive-btn:hover {
     color: var(--text-color-primary);
     background-color: var(--accent-color-highlight);
 }
 
+/**
+ * @selector #exit-immersive-btn:active
+ * @description 鼠标点击时，轻微缩小按钮以提供反馈。
+ */
 #exit-immersive-btn:active {
     transform: scale(0.95);
 }
@@ -82,11 +121,15 @@
 }
 
 /* --- “今日人品”盲盒按钮 --- */
+/**
+ * @id #luck-button
+ * @description “今日人品”抽奖功能的按钮。
+ */
 #luck-button {
     background-color: var(--accent-color);
     opacity: 0.9;
-    transition: transform 0.15s ease-out, 
-                opacity 0.2s ease-in-out, 
+    transition: transform 0.15s ease-out,
+                opacity 0.2s ease-in-out,
                 background-color 0.2s ease-in-out;
 }
 
@@ -95,12 +138,20 @@
 }
 
 /* --- 通用主题悬停背景 --- */
-/* 一个工具类，用于提供与当前主题强调色一致的悬停背景 */
+/**
+ * @class .themed-hover-bg
+ * @description 一个工具类，用于为任何元素提供一个与当前主题强调色一致的悬停背景。
+ */
 .themed-hover-bg:hover {
     background-color: var(--accent-color-highlight);
 }
 
 /* --- 提交历史记录刷新按钮 --- */
+/**
+ * @id #refresh-commits-btn
+ * @description 刷新 GitHub 提交历史记录的按钮。
+ *              默认隐藏，仅在鼠标悬停在提交历史面板上时显示。
+ */
 #refresh-commits-btn {
     opacity: 0;
     visibility: hidden;
@@ -112,14 +163,20 @@
     background-color: var(--accent-color-highlight);
 }
 
-/* 当鼠标悬停在整个提交历史面板上时显示刷新按钮 */
+/**
+ * @selector #commit-history-panel:hover #refresh-commits-btn:not(:disabled)
+ * @description 当鼠标悬停在整个提交历史面板上时，显示刷新按钮。
+ */
 #commit-history-panel:hover #refresh-commits-btn:not(:disabled) {
     opacity: 1;
     visibility: visible;
     transform: scale(1);
 }
 
-/* 正在刷新时保持按钮可见 */
+/**
+ * @class .is-refreshing
+ * @description 当正在刷新时，为按钮添加此类以保持其可见。
+ */
 #refresh-commits-btn.is-refreshing {
     opacity: 1;
     visibility: visible;
@@ -135,6 +192,11 @@
 }
 
 /* --- 背景预览图上的下载和刷新按钮 --- */
+/**
+ * @id #bg-preview-download-btn, #bg-preview-refresh-btn
+ * @description 在背景设置中，预览图上的下载和刷新按钮。
+ *              通过 .visible 类控制其显示和放大效果。
+ */
 #bg-preview-download-btn.visible,
 #bg-preview-refresh-btn.visible {
     transform: scale(1);
@@ -152,15 +214,21 @@
 }
 
 /* --- 天气信息刷新按钮 --- */
+/**
+ * @id #weather-refresh-btn
+ * @description 刷新天气信息的按钮。
+ *              默认隐藏，当鼠标悬停在天气信息区域时显示。
+ */
 .weather-hover-zone:hover + #weather-refresh-btn,
 #weather-refresh-btn:hover {
     opacity: 1;
     visibility: visible;
     transition-delay: 0s;
 }
+
 #weather-refresh-btn {
-    transition: opacity 0.2s ease-in-out, 
-                color 0.2s ease-in-out, 
-                background-color 0.2s ease-in-out, 
+    transition: opacity 0.2s ease-in-out,
+                color 0.2s ease-in-out,
+                background-color 0.2s ease-in-out,
                 visibility 0s linear 0.2s;
 }

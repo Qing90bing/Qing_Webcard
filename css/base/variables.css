@@ -2,23 +2,27 @@
  * @file: variables.css
  * @description: 定义全局CSS变量，用于统一管理整个应用的外观和感觉。
  *              这些变量不与特定主题（如暗色或亮色）绑定，而是作为所有主题可以共享的基础。
+ *              修改这些变量会影响到整个站点的所有相关元素。
  */
 
 :root {
     /* --- 外观变量 --- */
-    /* [新增] 定义卡片的通用外观属性 */
 
     /**
      * @property --card-border-radius
-     * @description 卡片元素的边框圆角大小。
+     * @description 控制所有卡片元素的边框圆角大小。
      * @value 16px
+     * @impact 影响所有使用 .glass-card 样式的元素，如天气、GitHub提交历史等卡片。
+     * @example 增大该值会使卡片更圆润，减小则更方正。
      */
     --card-border-radius: 16px;
 
     /**
      * @property --card-backdrop-blur
-     * @description 当启用毛玻璃效果时，应用于卡片背景的模糊滤镜强度。
-     * @value 16px
+     * @description 当启用“毛玻璃效果”时，应用于卡片背景的模糊滤镜强度。
+     * @value 24px
+     * @impact 影响所有使用 .glass-card 样式的元素。
+     * @example 增大该值会使背景更模糊，减小则更清晰。设为 0px 可完全禁用模糊。
      */
     --card-backdrop-blur: 24px;
 }

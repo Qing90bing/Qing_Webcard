@@ -5,21 +5,36 @@
 
 /* --- 进度条样式 --- */
 
-/* 进度条容器 */
+/**
+ * @class .progress-bar
+ * @description 进度条的外层容器。
+ * @property {background-color} - 定义进度条轨道的背景色。
+ * @property {border-radius} - 使用极大值将容器渲染为胶囊形状。
+ * @property {overflow} - 隐藏内部填充元素的溢出部分，确保填充条不会超出容器的圆角。
+ */
 .progress-bar {
     background-color: var(--progress-bar-bg); /* 使用变量定义背景色 */
     border-radius: 9999px; /* 圆角设为极大值以形成胶囊形状 */
     overflow: hidden; /* 隐藏内部溢出的部分 */
 }
 
-/* 进度条内部填充部分 */
+/**
+ * @class .progress-bar-inner
+ * @description 进度条的内部填充部分，其宽度由JavaScript动态设置，以表示进度。
+ * @property {background-color} - 使用主题强调色作为填充颜色。
+ * @property {transition} - 为 `width` 属性添加平滑的过渡效果，使进度变化更自然。
+ */
 .progress-bar-inner {
     background-color: var(--accent-color); /* 使用主题强调色作为填充色 */
     border-radius: 9999px; /* 同样设置为胶囊形状 */
     transition: width 0.5s ease-out; /* 为宽度的变化添加平滑过渡 */
 }
 
-/* 进度条上的文本 */
+/**
+ * @class .progress-bar-text
+ * @description 显示在进度条上的文本标签。
+ * @property {text-shadow} - 添加轻微的文本阴影，以确保文本在不同颜色的进度条背景上都清晰可读。
+ */
 .progress-bar-text {
     color: var(--text-color-primary);
     /* 文本阴影，使其在不同背景的进度条上都清晰可见 */
