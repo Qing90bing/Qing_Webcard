@@ -62,6 +62,11 @@
 }
 
 /* --- 开发者图标 --- */
+/**
+ * @id #developer-icon-container
+ * @description 开发者模式图标的容器，默认隐藏。
+ * @property {transition} - 为 height, opacity, margin-top 添加过渡，实现平滑的显隐动画。
+ */
 #developer-icon-container {
     height: 0;
     opacity: 0;
@@ -69,11 +74,19 @@
     margin-top: 0;
     transition: height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out;
 }
+/**
+ * @class .visible
+ * @description 当开发者模式开启时，为容器添加此类以显示图标。
+ */
 #developer-icon-container.visible {
     height: 2rem; /* h-8 */
     opacity: 1;
     margin-top: 0.5rem; /* mt-2 */
 }
+/**
+ * @id #developer-icon
+ * @description 开发者图标本身，提供一个颜色变化的悬停效果。
+ */
 #developer-icon {
     color: var(--text-color-secondary);
     transition: color 0.2s ease-in-out;
@@ -88,6 +101,8 @@
  * @id #immersive-time-view
  * @description 沉浸式全屏时钟视图的容器。
  * @property {background-color} - 背景色由 `--immersive-bg-color` 控制。
+ * @property {z-index} - 设置一个较高的层级，确保其覆盖在主内容之上。
+ * @property {transition} - 为 opacity 和 visibility 添加过渡，实现平滑的淡入淡出效果。
  */
 #immersive-time-view {
     position: fixed;
@@ -102,14 +117,23 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, background-color 0.3s ease;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s, background-color 0.3s ease;
 }
+/**
+ * @id #immersive-date-display
+ * @description 沉浸式视图中的日期显示。
+ */
 #immersive-date-display {
     font-size: 1.5rem; /* text-2xl */
     line-height: 2rem;
     color: var(--text-color-secondary);
     transition: color 0.3s ease;
 }
+/**
+ * @id #immersive-time-display
+ * @description 沉浸式视图中的时间显示，是视图的核心元素。
+ * @property {text-shadow} - 使用主题强调色创建辉光效果。
+ */
 #immersive-time-display {
     font-size: 4.5rem; /* 移动端 text-7xl */
     line-height: 1;
@@ -121,18 +145,30 @@
     text-shadow: 0 0 20px var(--accent-color);
     transition: color 0.3s ease, text-shadow 0.3s ease;
 }
+/**
+ * @media (min-width: 1024px)
+ * @description 在大屏幕上（桌面端）增大时间字体大小，使其更具冲击力。
+ */
 @media (min-width: 1024px) {
     #immersive-time-display {
         font-size: 8rem; /* 桌面端 text-9xl */
     }
 }
+/**
+ * @id #immersive-greeting
+ * @description 沉浸式视图中的问候语。
+ */
 #immersive-greeting {
     font-size: 1.25rem; /* text-xl */
     line-height: 1.75rem;
     color: var(--text-color-secondary);
     transition: color 0.3s ease;
 }
-/* 沉浸式视图激活时的状态 */
+/**
+ * @selector body.immersive-active ...
+ * @description 当沉浸式视图被激活时（通过在 body 上添加 .immersive-active 类），
+ *              隐藏主内容区，并显示沉浸式视图本身。
+ */
 body.immersive-active #main-wrapper {
     opacity: 0;
     filter: blur(4px);
@@ -145,7 +181,11 @@ body.immersive-active #immersive-time-view {
     visibility: visible;
     pointer-events: auto;
 }
-/* 沉浸式视图中闪烁的冒号 */
+/**
+ * @selector body.immersive-blink-enabled ...
+ * @description 当用户启用“冒号闪烁”设置时，为时间中的冒号应用闪烁动画。
+ * @property {position} - 使用相对定位和微调，防止冒号闪烁时（opacity 变为 0）导致的布局轻微移动。
+ */
 body.immersive-blink-enabled #immersive-time-view .time-colon {
     animation: instant-blink 1s steps(1, end) infinite;
     position: relative;
@@ -154,6 +194,14 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
 
 
 /* --- “今日人品”结果 --- */
+/**
+ * @id #luck-result
+ * @description “今日人品”抽奖结果的文本容器。
+ * @property {transition} - 为 max-width, opacity, margin, padding 添加过渡，
+ *                        实现一个从无到有、平滑展开的动画效果。
+ * @property {max-width} - 初始为0，通过切换 .visible 类来控制其展开。
+ * @property {overflow} - 隐藏在动画过程中可能溢出的内容。
+ */
 #luck-result {
     transition: max-width 0.5s ease-in-out, opacity 0.3s ease-in-out, margin-left 0.5s ease-in-out, padding 0.5s ease-in-out;
     max-width: 0;
@@ -172,9 +220,17 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
 
 
 /* --- GitHub 贡献图 --- */
+/**
+ * @id #gh-chart-container
+ * @description GitHub 贡献图卡片的容器，使用相对定位为其子元素（如加载指示器）提供定位上下文。
+ */
 #gh-chart-container {
     position: relative;
 }
+/**
+ * @id #gh-chart-spinner
+ * @description 在加载贡献图时显示的旋转加载指示器。
+ */
 #gh-chart-spinner {
     position: absolute;
     top: 0.75rem;
@@ -194,17 +250,35 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
     opacity: 1;
     visibility: visible;
 }
+/**
+ * @id #gh-chart-wrapper
+ * @description 包裹贡献图图片的容器。
+ * @property {aspect-ratio} - 保持图片的原始宽高比，防止图片在加载时导致布局跳动。
+ * @property {overflow} - 隐藏溢出的部分，确保图片能被 `border-radius` 裁剪。
+ */
 #gh-chart-wrapper {
     aspect-ratio: 892 / 140; /* 保持图片的宽高比 */
     border-radius: 0.375rem; /* 6px */
     overflow: hidden;
 }
+/**
+ * @selector #gh-chart-img.loaded
+ * @description 当图片加载完成后，通过添加 .loaded 类使其淡入显示。
+ */
 #gh-chart-img.loaded {
     opacity: 1;
 }
+/**
+ * @selector #gh-chart-link.visible
+ * @description 控制指向GitHub个人资料的链接的可见性。
+ */
 #gh-chart-link.visible {
     visibility: visible;
 }
+/**
+ * @id #gh-chart-error
+ * @description 在加载贡献图失败时显示的错误信息。
+ */
 #gh-chart-error {
     opacity: 0;
     visibility: hidden;
@@ -218,12 +292,21 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
 
 
 /* --- 天气信息 --- */
+/**
+ * @id #weather-content-wrapper
+ * @description 天气信息卡片内容的包装器。
+ * @property {transition} - 为 min-height 添加过渡，以平滑地适应内容变化（例如，从加载状态到显示数据）。
+ */
 #weather-content-wrapper {
     display: flex;
     flex-direction: column;
     justify-content: center;
     transition: min-height 0.3s ease-in-out;
 }
+/**
+ * @class .weather-icon-initial, .weather-icon-loaded
+ * @description 控制天气图标的加载动画，从不可见到可见的平滑淡入。
+ */
 .weather-icon-initial {
     opacity: 0;
 }
@@ -231,6 +314,10 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
 }
+/**
+ * @id #weather-loader
+ * @description 在加载天气数据时显示的旋转加载指示器。
+ */
 #weather-loader {
     position: absolute;
     top: 0.75rem;
@@ -250,6 +337,10 @@ body.immersive-blink-enabled #immersive-time-view .time-colon {
     opacity: 1;
     visibility: visible;
 }
+/**
+ * @id #weather-data-container
+ * @description 天气数据本身的容器，在数据加载完成后淡入显示。
+ */
 #weather-data-container {
     transition: opacity 0.3s ease-in-out;
 }

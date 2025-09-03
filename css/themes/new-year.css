@@ -43,7 +43,10 @@ body.new-year-active.theme-light {
  *              它们直接修改组件样式，而不是通过变量。
  */
 
-/* [修复] 开发者图标在新年主题下的颜色 */
+/**
+ * @selector body.new-year-active #developer-icon
+ * @description 修复开发者图标在新年主题下的颜色，使其更醒目。
+ */
 body.new-year-active #developer-icon {
     color: var(--accent-color);
 }
@@ -52,7 +55,10 @@ body.new-year-active #developer-icon:hover {
     color: var(--text-color-primary); 
 }
 
-/* [修复] 开关按钮在新年主题下的样式 */
+/**
+ * @selector body.new-year-active .toggle-slider
+ * @description 修复开关按钮在新年主题下的样式，使其关闭状态也带有主题色彩。
+ */
 body.new-year-active .toggle-slider {
     background-color: rgba(120, 50, 50, 0.5); /* “关闭”状态下的柔和红色 */
 }
@@ -60,7 +66,10 @@ body.new-year-active input:checked + .toggle-slider {
     background-color: var(--accent-color); /* “开启”状态下使用主题强调色 */
 }
 
-/* [新增] 确保设置中的高亮和按钮与新年主题的强调色一致 */
+/**
+ * @description 新增规则，确保设置面板中的各种高亮和交互元素（如按钮、单选框、复选框）
+ *              的颜色与新年主题的强调色 `--accent-color` 保持一致。
+ */
 body.new-year-active #luck-button {
     background-color: var(--accent-color);
 }

@@ -18,6 +18,11 @@
 }
 
 /* --- 背景预览 --- */
+/**
+ * @id #background-preview-container
+ * @description 背景图片预览区域的容器。
+ * @property {max-height}, {opacity}, {overflow} - 默认状态下折叠并隐藏，通过添加 .visible 类来展开。
+ */
 #background-preview-container {
     max-height: 0;
     opacity: 0;
@@ -35,14 +40,27 @@ body.settings-open #background-preview-container.visible {
     opacity: 1;
     margin-top: 0.75rem;
 }
+/**
+ * @id #bg-preview-wrapper
+ * @description 预览图片的外层包装器，提供边框。
+ */
 #bg-preview-wrapper {
     border: 1px solid var(--card-border-color);
 }
+/**
+ * @id #bg-preview-img
+ * @description 预览图片元素本身。
+ * @property {background-color} - 使用占位背景色，在图片加载完成前提供视觉反馈，改善用户体验。
+ */
 #bg-preview-img {
     transition: opacity 0.3s ease-in-out;
     /* 使用 --progress-bar-bg 作为图片加载前的占位背景色，改善加载体验 */
     background-color: var(--progress-bar-bg); /* [修复] 添加占位背景色，改善加载体验 */
 }
+/**
+ * @id #preview-loader
+ * @description 在加载预览图片时显示的旋转加载指示器。
+ */
 #preview-loader {
     position: absolute;
     top: 0.75rem;
@@ -62,6 +80,10 @@ body.settings-open #background-preview-container.visible {
     opacity: 1;
     visibility: visible;
 }
+/**
+ * @id #bg-preview-error
+ * @description 在预览图片加载失败时显示的错误信息覆盖层。
+ */
 #bg-preview-error {
     opacity: 0;
     visibility: hidden;
@@ -74,6 +96,10 @@ body.settings-open #background-preview-container.visible {
 #bg-preview-error p:last-child {
     color: var(--text-color-primary);
 }
+/**
+ * @selector #bg-preview-error:hover
+ * @description 鼠标悬停在错误信息上时，应用背景和模糊效果，使其更易于阅读。
+ */
 #bg-preview-error:hover {
     background-color: rgba(0,0,0,0.45);
     backdrop-filter: blur(8px);
@@ -115,6 +141,11 @@ body.settings-open #background-preview-container.visible {
 
 
 /* --- 默认背景图选项 --- */
+/**
+ * @id #default-bg-options
+ * @description 包含预设背景图缩略图的可折叠区域。
+ * @property {transition} - 为 max-height, opacity 等属性添加过渡，实现平滑的展开和折叠动画。
+ */
 #default-bg-options {
     max-height: 0;
     overflow: hidden;
@@ -123,12 +154,21 @@ body.settings-open #background-preview-container.visible {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
 }
+/**
+ * @class .open
+ * @description 当此区域需要展开时，由JS添加此类。
+ */
 #default-bg-options.open {
     max-height: 300px; /* 展开时的高度 */
     opacity: 1;
     padding-top: 0.75rem;
     padding-bottom: 0.5rem; /* 为悬停放大效果留出空间 */
 }
+/**
+ * @class .thumb-container
+ * @description 缩略图的网格容器。
+ * @property {grid-template-columns} - 使用 `repeat(auto-fill, minmax())` 创建一个响应式的、自动填充的网格布局。
+ */
 .thumb-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* 响应式网格布局 */
@@ -264,6 +304,10 @@ body.settings-open #background-preview-container.visible {
 
 
 /* --- 一言自定义选项 --- */
+/**
+ * @id #hitokoto-custom-options
+ * @description “一言”自定义类别选项的可折叠区域，其行为与 #default-bg-options 类似。
+ */
 #hitokoto-custom-options {
     max-height: 0;
     overflow: hidden;
@@ -272,12 +316,20 @@ body.settings-open #background-preview-container.visible {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
 }
+/**
+ * @class .open
+ * @description 当此区域需要展开时，由JS添加此类。
+ */
 #hitokoto-custom-options.open {
     max-height: 500px;
     opacity: 1;
     padding-top: 0.75rem;
     margin-top: 0.5rem;
 }
+/**
+ * @class .hitokoto-checkbox-container
+ * @description “一言”类别复选框的响应式网格容器。
+ */
 .hitokoto-checkbox-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -287,15 +339,20 @@ body.settings-open #background-preview-container.visible {
 
 /* --- 设置项禁用状态 --- */
 /**
- * @description 当某个设置项被禁用时（例如，当“毛玻璃效果”关闭时，其模糊度滑块应被禁用），
- *              通过 filter: blur(4px) 和 pointer-events: none 创造出不可用的视觉效果，
- *              并显示一个遮罩层来承载提示信息。
+ * @selector #blur-setting-container.disabled ..., #main-background-settings-wrapper.disabled ...
+ * @description 当某个设置项被禁用时（例如，当“毛玻璃效果”关闭时，其下方的模糊度滑块应被禁用），
+ *              通过 `filter: blur(4px)` 和 `pointer-events: none` 为其内容创造出一种“不可用”的视觉效果。
  */
 #blur-setting-container.disabled #blur-setting-content-wrapper,
 #main-background-settings-wrapper.disabled #main-background-settings-content {
     filter: blur(4px);
     pointer-events: none; /* 禁止交互 */
 }
+/**
+ * @id #blur-slider-overlay, #background-settings-overlay
+ * @description 在被禁用的设置项上显示的半透明遮罩层，通常用于承载提示信息（如“该选项已禁用”）。
+ *              默认隐藏。
+ */
 #blur-slider-overlay,
 #background-settings-overlay {
     opacity: 0;
@@ -303,6 +360,10 @@ body.settings-open #background-preview-container.visible {
     transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
     pointer-events: none;
 }
+/**
+ * @selector body.settings-open #blur-setting-container.disabled ..., body.settings-open #main-background-settings-wrapper.disabled ...
+ * @description 当设置面板打开且某个设置项被禁用时，显示对应的遮罩层。
+ */
 body.settings-open #blur-setting-container.disabled #blur-slider-overlay,
 body.settings-open #main-background-settings-wrapper.disabled #background-settings-overlay {
     opacity: 1;
