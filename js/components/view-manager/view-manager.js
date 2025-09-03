@@ -1,6 +1,6 @@
-import { appSettings, saveSettings } from './settings.js';
-import { setupGitHubChartLoader } from './github-chart.js';
-import { fetchAndDisplayWeather } from './weather.js';
+import { appSettings, saveSettings } from '../../settings.js';
+import { setupGitHubChartLoader } from '../github/github-chart.js';
+import { fetchAndDisplayWeather } from '../weather/weather.js';
 
 function applyCurrentView() {
     const githubView = document.getElementById('github-view');

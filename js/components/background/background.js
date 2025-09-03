@@ -1,5 +1,5 @@
-import { appSettings, saveSettings } from './settings.js';
-import { isNewYearPeriod } from './utils.js';
+import { appSettings, saveSettings } from '../../settings.js';
+import { isNewYearPeriod } from '../../utils.js';
 
 // This will be initialized from main.js
 let backgroundFader;

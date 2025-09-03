@@ -1,4 +1,4 @@
-import { resetLuckGame } from './luck-game.js';
+import { resetLuckGame } from '../luck-game/luck-game.js';
 
 export function initializeResetSettings() {
     const resetSettingsBtn = document.getElementById('reset-settings-btn');

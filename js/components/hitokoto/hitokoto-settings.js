@@ -1,4 +1,4 @@
-import { appSettings, saveSettings } from './settings.js';
+import { appSettings, saveSettings } from '../../settings.js';
 
 /**
  * 初始化“一言”功能的设置交互。

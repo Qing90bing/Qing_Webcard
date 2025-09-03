@@ -1,6 +1,6 @@
-import { appSettings, saveSettings } from './settings.js';
-import { isNewYearPeriod } from './utils.js';
-import { applyCurrentBackground } from './background.js';
+import { appSettings, saveSettings } from '../../settings.js';
+import { isNewYearPeriod } from '../../utils.js';
+import { applyCurrentBackground } from '../background/background.js';
 
 let newYearMusicIntroPlayed = false;
 const NY_MUSIC_LOOP_START = 85.16; // 01:25:16

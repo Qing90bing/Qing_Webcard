@@ -1,5 +1,5 @@
-import { closeSettings } from './settings-modal.js';
-import { closeOpenCard } from './card-manager.js';
+import { closeSettings } from '../settings/settings-modal.js';
+import { closeOpenCard } from '../card/card-manager.js';
 
 /**
  * Initializes the global 'keydown' event listener for the Escape key.

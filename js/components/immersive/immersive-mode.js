@@ -1,4 +1,4 @@
-import { appSettings, saveSettings } from './settings.js';
+import { appSettings, saveSettings } from '../../settings.js';
 
 /**
  * Applies the blinking effect to the clock's colon based on user settings.

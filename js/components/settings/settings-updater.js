@@ -1,8 +1,8 @@
-import { appSettings } from './settings.js';
-import { isNewYearPeriod } from './utils.js';
-import { updateBgSettingsUI } from './background.js';
-import { updateAppearanceSettingsUI } from './appearance.js';
-import { updateViewToggleUI } from './view-manager.js';
+import { appSettings } from '../../settings.js';
+import { isNewYearPeriod } from '../../utils.js';
+import { updateBgSettingsUI } from '../background/background.js';
+import { updateAppearanceSettingsUI } from '../appearance/appearance.js';
+import { updateViewToggleUI } from '../view-manager/view-manager.js';
 
 function updateTimeFormatUI() {
     const selectedFormat = appSettings.timeFormat;

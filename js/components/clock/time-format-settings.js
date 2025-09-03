@@ -1,5 +1,5 @@
-import { appSettings, saveSettings } from './settings.js';
-import { applyCurrentView } from './view-manager.js';
+import { appSettings, saveSettings } from '../../settings.js';
+import { applyCurrentView } from '../view-manager/view-manager.js';
 
 /**
  * Initializes the event listeners for the time format setting (12h/24h).
