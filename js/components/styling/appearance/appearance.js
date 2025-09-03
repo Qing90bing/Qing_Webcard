@@ -1,4 +1,4 @@
-import { appSettings, saveSettings } from '../../settings.js';
+import { appSettings, saveSettings } from '../../../core/settings.js';
 
 // --- Helper Functions ---
 

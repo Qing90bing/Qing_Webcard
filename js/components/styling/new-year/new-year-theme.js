@@ -1,5 +1,5 @@
-import { appSettings, saveSettings } from '../../settings.js';
-import { isNewYearPeriod } from '../../utils.js';
+import { appSettings, saveSettings } from '../../../core/settings.js';
+import { isNewYearPeriod } from '../../ui/holiday/calendar.js';
 import { applyCurrentBackground } from '../background/background.js';
 
 let newYearMusicIntroPlayed = false;

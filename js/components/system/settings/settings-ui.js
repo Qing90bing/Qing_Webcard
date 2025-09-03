@@ -1,4 +1,4 @@
-import { DEFAULT_BG_IMAGES } from '../background/background.js';
+import { DEFAULT_BG_IMAGES } from '../../styling/background/background.js';
 
 export function setupSettingsUI() {
     // --- 1. Background Settings ---

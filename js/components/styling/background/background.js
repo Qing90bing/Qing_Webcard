@@ -1,5 +1,5 @@
-import { appSettings, saveSettings } from '../../settings.js';
-import { isNewYearPeriod } from '../../utils.js';
+import { appSettings, saveSettings } from '../../../core/settings.js';
+import { isNewYearPeriod } from '../../ui/holiday/calendar.js';
 
 // This will be initialized from main.js
 let backgroundFader;
@@ -530,4 +530,48 @@ export function initializeBackgroundSettings() {
         saveSettings();
         customBgInput.focus();
     });
+}
+
+export function createCrossfader(layers) {
+    let activeIndex = 0;
+
+    // Return an update function that handles the cross-fade
+    const update = (newUrl, isBackgroundImage = false) => {
+        return new Promise((resolve, reject) => {
+            const nextIndex = (activeIndex + 1) % 2;
+            const activeLayer = layers[activeIndex];
+            const nextLayer = layers[nextIndex];
+
+            if (!nextLayer || !activeLayer) {
+                return reject('Cross-fade layers not found.');
+            }
+
+            const preloader = new Image();
+            preloader.src = newUrl;
+
+            preloader.onload = () => {
+                // Apply the new image to the hidden layer
+                if (isBackgroundImage) {
+                    nextLayer.style.backgroundImage = `url('${newUrl}')`;
+                } else {
+                    nextLayer.src = newUrl;
+                }
+
+                // Trigger the cross-fade
+                activeLayer.classList.remove('active');
+                nextLayer.classList.add('active');
+
+                // Update the active index for the next cycle
+                activeIndex = nextIndex;
+                resolve(); // Transition has started
+            };
+
+            preloader.onerror = () => {
+                console.error(`Crossfader failed to load image: ${newUrl}`);
+                reject('Image load error');
+            };
+        });
+    };
+
+    return { update };
 }

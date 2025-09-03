@@ -2,7 +2,7 @@
 // Contains all logic related to theme management, including applying themes,
 // updating UI elements in the settings panel, and handling user interactions.
 
-import { appSettings, saveSettings } from '../../settings.js';
+import { appSettings, saveSettings } from '../../../core/settings.js';
 
 export function initializeTheme() {
     // --- Theme Settings Listeners ---

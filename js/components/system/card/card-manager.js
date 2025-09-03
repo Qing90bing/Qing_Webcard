@@ -1,5 +1,5 @@
-import { updateTimeCapsule } from '../time-capsule/time-capsule.js';
-import { fetchAndRenderCommits, updateCommitMask } from '../github/commit-history.js';
+import { updateTimeCapsule } from '../../features/time-capsule/time-capsule.js';
+import { fetchAndRenderCommits, updateCommitMask } from '../../features/github/commit-history.js';
 
 // --- Module-level state and element cache ---
 let aboutCardHasAnimated = false;

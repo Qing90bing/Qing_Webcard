@@ -1,7 +1,7 @@
-import { appSettings } from '../../settings.js';
-import { isNewYearPeriod } from '../../utils.js';
-import { updateBgSettingsUI } from '../background/background.js';
-import { updateAppearanceSettingsUI } from '../appearance/appearance.js';
+import { appSettings } from '../../../core/settings.js';
+import { isNewYearPeriod } from '../../ui/holiday/calendar.js';
+import { updateBgSettingsUI } from '../../styling/background/background.js';
+import { updateAppearanceSettingsUI } from '../../styling/appearance/appearance.js';
 import { updateViewToggleUI } from '../view-manager/view-manager.js';
 
 function updateTimeFormatUI() {

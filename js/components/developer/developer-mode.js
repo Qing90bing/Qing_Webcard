@@ -1,6 +1,6 @@
-import { appSettings, saveSettings } from '../../settings.js';
-import { applyNewYearMode } from '../new-year/new-year-theme.js';
-import { updateDeveloperSettingsUI } from '../settings/settings-updater.js';
+import { appSettings, saveSettings } from '../../core/settings.js';
+import { applyNewYearMode } from '../styling/new-year/new-year-theme.js';
+import { updateDeveloperSettingsUI } from '../system/settings/settings-updater.js';
 
 // This function will be called from main.js to set up all developer mode features.
 export function initializeDeveloperMode() {

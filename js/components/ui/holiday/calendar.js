@@ -157,3 +157,23 @@ export function getAllHolidaysForYear(year) {
     // 排序并返回
     return allEvents.sort((a, b) => a.date - b.date);
 }
+
+export function isNewYearPeriod() {
+    const today = new Date();
+    const lunarDate = new Dianaday(today);
+
+    // Case 1: It's the first lunar month, from day 1 to day 10.
+    if (lunarDate.month === 1 && lunarDate.day >= 1 && lunarDate.day <= 10) {
+        return true;
+    }
+
+    // Case 2: It's the last day of the 12th lunar month (New Year's Eve).
+    if (lunarDate.month === 12) {
+        const daysInLastMonth = monthDays(lunarDate.year, 12);
+        if (lunarDate.day === daysInLastMonth) {
+            return true;
+        }
+    }
+
+    return false;
+}
