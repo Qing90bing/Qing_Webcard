@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!-- 元数据和头部链接 -->
     <meta charset="UTF-8">
+    <!-- 解决主题闪烁问题的关键脚本，必须置于<head>最顶部 -->
+    <script src="js/core/theme-flash-fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qing90bing的主页</title>
     <!-- 网站图标 -->
@@ -21,6 +22,11 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- 预加载页面 -->
+    <div id="preloader">
+        <img id="preloader-icon" src="assets/icons/favicon.svg" alt="Loading...">
+    </div>
+
     <!-- 背景层包装器 -->
     <div id="bg-wrapper">
         <div class="bg-layer"></div>

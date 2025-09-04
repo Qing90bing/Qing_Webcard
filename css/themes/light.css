@@ -4,7 +4,7 @@
  *              当 <body> 元素拥有 'theme-light' 类时，这些变量将被应用。
  */
 
-body.theme-light {
+html.theme-light {
     /** @property --immersive-bg-color: 沉浸式模式下的背景颜色。*/
     --immersive-bg-color: #f9fafb; /* gray-50 */
 
@@ -18,13 +18,13 @@ body.theme-light {
     --bg-color: #0d1a26;
 
     /** @property --card-bg-color: 卡片在启用“毛玻璃效果”时的背景色，通常带有透明度。*/
-    --card-bg-color: rgba(255, 255, 255, 0.75);
+    --card-bg-color: rgba(255, 255, 255, 0.80);
 
     /** @property --card-border-color: 卡片的边框颜色。*/
     --card-border-color: rgba(0, 0, 0, 0.08);
 
     /** @property --card-hover-bg-color: 鼠标悬停在卡片上时的背景色。*/
-    --card-hover-bg-color: rgba(255, 255, 255, 0.80);
+    --card-hover-bg-color: rgba(255, 255, 255, 0.85);
 
     /** @property --card-hover-border-color: 鼠标悬停在卡片上时的边框颜色。*/
     --card-hover-border-color: rgba(0, 0, 0, 0.12);
@@ -77,14 +77,14 @@ body.theme-light {
 /**
  * @description 进度条内的文本阴影，在亮色背景下使用浅色阴影以保证可读性。
  */
-body.theme-light .progress-bar-text {
+html.theme-light .progress-bar-text {
     text-shadow: 0 0 4px rgba(255,255,255,0.5);
 }
 
 /**
  * @description 主题切换开关的圆形颜色样本，在亮色主题下需要一个更明显的边框。
  */
-body.theme-light .swatch-color {
+html.theme-light .swatch-color {
     border-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -92,12 +92,12 @@ body.theme-light .swatch-color {
  * @description 链接滑块分页点的颜色。
  *              注意：这些颜色是硬编码的，不通过主题变量控制。
  */
-body.theme-light .dot {
+html.theme-light .dot {
     background-color: rgba(0, 0, 0, 0.3);
 }
-body.theme-light .dot:hover {
+html.theme-light .dot:hover {
     background-color: rgba(0, 0, 0, 0.6);
 }
-body.theme-light .dot.active {
+html.theme-light .dot.active {
     background-color: rgba(0, 0, 0, 1);
 }

@@ -4,7 +4,7 @@
  *              当 <body> 元素拥有 'theme-dark' 类时，这些变量将被应用。
  */
 
-body.theme-dark {
+html.theme-dark {
     /** @property --immersive-bg-color: 沉浸式模式下的背景颜色。*/
     --immersive-bg-color: #111827;
 
@@ -18,13 +18,13 @@ body.theme-dark {
     --bg-color: #0d1a26;
 
     /** @property --card-bg-color: 卡片在启用“毛玻璃效果”时的背景色，通常带有透明度。*/
-    --card-bg-color: rgba(30, 41, 59, 0.75);
+    --card-bg-color: rgba(30, 41, 59, 0.80);
 
     /** @property --card-border-color: 卡片的边框颜色。*/
     --card-border-color: rgba(255, 255, 255, 0.1);
 
     /** @property --card-hover-bg-color: 鼠标悬停在卡片上时的背景色。*/
-    --card-hover-bg-color: rgba(30, 41, 59, 0.80);
+    --card-hover-bg-color: rgba(30, 41, 59, 0.85);
 
     /** @property --card-hover-border-color: 鼠标悬停在卡片上时的边框颜色。*/
     --card-hover-border-color: rgba(255, 255, 255, 0.2);

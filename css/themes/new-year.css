@@ -9,10 +9,10 @@
 /**
  * @description 这些变量仅在新年主题激活且基础主题为暗色时生效。
  */
-body.new-year-active.theme-dark {
-    --card-bg-color: rgba(80, 20, 20, 0.65);         /* 卡片背景色：深红色 */
+html.new-year-active.theme-dark {
+    --card-bg-color: rgba(80, 20, 20, 0.75);         /* 卡片背景色：深红色 */
     --card-border-color: rgba(220, 38, 38, 0.3);     /* 卡片边框颜色：猩红色边框 */
-    --card-hover-bg-color: rgba(80, 20, 20, 0.75);   /* 卡片悬停背景色 */
+    --card-hover-bg-color: rgba(80, 20, 20, 0.80);   /* 卡片悬停背景色 */
     --card-hover-border-color: rgba(220, 38, 38, 0.5);/* 卡片悬停边框颜色 */
     --text-color-primary: #fff7e6;                  /* 主要文本颜色：奶油白 */
     --text-color-secondary: #ffdab9;                /* 次要文本颜色：桃色 */
@@ -25,7 +25,7 @@ body.new-year-active.theme-dark {
 /**
  * @description 这些变量仅在新年主题激活且基础主题为亮色时生效。
  */
-body.new-year-active.theme-light {
+html.new-year-active.theme-light {
     --card-bg-color: rgba(255, 247, 247, 0.8);       /* 卡片背景色：极浅的奶油红 */
     --card-border-color: rgba(190, 30, 30, 0.25);    /* 卡片边框颜色 */
     --card-hover-bg-color: rgba(255, 247, 247, 0.9);  /* 卡片悬停背景色 */
@@ -44,25 +44,25 @@ body.new-year-active.theme-light {
  */
 
 /**
- * @selector body.new-year-active #developer-icon
+ * @selector html.new-year-active #developer-icon
  * @description 修复开发者图标在新年主题下的颜色，使其更醒目。
  */
-body.new-year-active #developer-icon {
+html.new-year-active #developer-icon {
     color: var(--accent-color);
 }
-body.new-year-active #developer-icon:hover {
+html.new-year-active #developer-icon:hover {
     /* 在新年主题中，主要文本是浅奶油色，提供了良好的悬停效果 */
     color: var(--text-color-primary); 
 }
 
 /**
- * @selector body.new-year-active .toggle-slider
+ * @selector html.new-year-active .toggle-slider
  * @description 修复开关按钮在新年主题下的样式，使其关闭状态也带有主题色彩。
  */
-body.new-year-active .toggle-slider {
+html.new-year-active .toggle-slider {
     background-color: rgba(120, 50, 50, 0.5); /* “关闭”状态下的柔和红色 */
 }
-body.new-year-active input:checked + .toggle-slider {
+html.new-year-active input:checked + .toggle-slider {
     background-color: var(--accent-color); /* “开启”状态下使用主题强调色 */
 }
 
@@ -70,20 +70,20 @@ body.new-year-active input:checked + .toggle-slider {
  * @description 新增规则，确保设置面板中的各种高亮和交互元素（如按钮、单选框、复选框）
  *              的颜色与新年主题的强调色 `--accent-color` 保持一致。
  */
-body.new-year-active #luck-button {
+html.new-year-active #luck-button {
     background-color: var(--accent-color);
 }
-body.new-year-active .setting-radio-input:checked + .setting-radio-label {
+html.new-year-active .setting-radio-input:checked + .setting-radio-label {
     background-color: var(--accent-color-highlight);
     border-color: var(--accent-color);
 }
-body.new-year-active .setting-radio-input:checked + .setting-radio-label .custom-radio-button {
+html.new-year-active .setting-radio-input:checked + .setting-radio-label .custom-radio-button {
     border-color: var(--accent-color);
 }
-body.new-year-active .setting-radio-input:checked + .setting-radio-label .custom-radio-button::after {
+html.new-year-active .setting-radio-input:checked + .setting-radio-label .custom-radio-button::after {
     background-color: var(--accent-color);
 }
-body.new-year-active .hitokoto-checkbox-input:checked + .hitokoto-checkbox-label .custom-checkbox {
+html.new-year-active .hitokoto-checkbox-input:checked + .hitokoto-checkbox-label .custom-checkbox {
     background-color: var(--accent-color);
     border-color: var(--accent-color);
 }

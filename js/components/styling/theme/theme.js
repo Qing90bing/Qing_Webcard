@@ -34,14 +34,14 @@ export function initializeTheme() {
 }
 
 /**
- * @description 根据 `appSettings` 中的当前主题设置，为 `<body>` 元素应用相应的CSS类。
+ * @description 根据 `appSettings` 中的当前主题设置，为 `<html>` 元素应用相应的CSS类。
  */
 export function applyCurrentTheme() {
-    const body = document.body;
+    const html = document.documentElement;
     // 在应用新主题前，先移除所有旧的 `theme-*` 类，防止冲突
-    body.classList.forEach(className => {
+    html.classList.forEach(className => {
         if (className.startsWith('theme-')) {
-            body.classList.remove(className);
+            html.classList.remove(className);
         }
     });
 
@@ -54,7 +54,7 @@ export function applyCurrentTheme() {
         // 否则，直接使用指定的主题
         themeToApply = `theme-${appSettings.theme}`;
     }
-    body.classList.add(themeToApply);
+    html.classList.add(themeToApply);
 }
 
 /**

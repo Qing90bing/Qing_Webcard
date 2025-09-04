@@ -1,0 +1,54 @@
+/*
+ * @file: preloader.css
+ * @description: 预加载页面的样式。
+ */
+
+/* 预加载容器 */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9fafb; /* 默认日间模式背景 */
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none; /* 允许事件穿透 */
+}
+
+/* 夜间模式下的背景颜色 */
+html.theme-dark #preloader {
+    background-color: #111827;
+}
+
+/* 预加载图标 */
+#preloader-icon {
+    width: 80px;
+    height: 80px;
+    animation: breathing 2s ease-in-out infinite;
+}
+
+/* "呼吸"动画 */
+@keyframes breathing {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* 当预加载结束时，隐藏预加载页面 */
+#preloader.preloader-hidden {
+    opacity: 0;
+}
+
+/* 初始状态下，主内容是不可见的 */
+#main-wrapper.preloader-active {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}

@@ -39,6 +39,7 @@ import { initializeSettingsModal } from '../components/system/settings/settings-
 import { initializeImmersiveMode } from '../components/system/immersive/immersive-mode.js';
 import { initializeCardManager } from '../components/system/card/card-manager.js';
 import { initializeNewYearTheme } from '../components/styling/new-year/new-year-theme.js';
+import { initializePreloader } from '../components/system/preloader.js';
 
 // 导入通用工具模块
 import { setupTooltips } from '../components/common/tooltip.js';
@@ -53,11 +54,15 @@ let closeDeveloperSettings; // 存储关闭开发者设置页面的函数
 // --- 应用主初始化流程 ---
 // 监听DOM内容加载完成事件，确保所有HTML元素都已准备就绪。
 document.addEventListener('DOMContentLoaded', () => {
-    // 步骤 1: 优先加载设置
+    // 步骤 1: 初始化预加载器
+    // 这是最早执行的步骤之一，以确保预加载屏幕能够立即显示。
+    const { loadComplete } = initializePreloader();
+
+    // 步骤 2: 优先加载设置
     // 这是整个应用启动的第一步，因为后续绝大多数模块的初始化都依赖于用户的配置。
     loadSettings();
     
-    // 步骤 2: 初始化核心UI和无依赖的工具模块
+    // 步骤 3: 初始化核心UI和无依赖的工具模块
     // 这些模块通常不依赖于其他模块的状态，可以先一步设置。
     const bgLayers = document.querySelectorAll('#bg-wrapper .bg-layer');
     const backgroundFader = createCrossfader(Array.from(bgLayers)); // 创建背景交叉渐变效果器
@@ -125,4 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAndDisplayWeather(); // 每30分钟获取一次天气信息
         }
     }, 30 * 60 * 1000);
+
+    // 步骤 11: 通知预加载器加载完成
+    // 这是所有同步初始化完成后的最后一步。
+    // 调用此函数将触发预加载屏幕的淡出和主内容的淡入。
+    loadComplete();
 });

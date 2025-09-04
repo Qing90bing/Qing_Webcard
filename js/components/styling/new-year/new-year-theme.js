@@ -32,7 +32,7 @@ function stopNewYearMusic() {
  * 这是本模块的核心状态机，根据日期和用户设置决定是否激活主题。
  */
 export function applyNewYearMode() {
-    const body = document.body;
+    const rootEl = document.documentElement;
     const musicBtn = document.getElementById('new-year-music-btn');
 
     // 条件1：当前是否在新年期间，或者开发者是否强制开启
@@ -42,7 +42,7 @@ export function applyNewYearMode() {
     // 最终决定：只有两个条件都满足时，主题才应该被激活
     const shouldBeActive = isThemeAvailable && isThemeEnabledByUser;
 
-    const isCurrentlyActive = body.classList.contains('new-year-active');
+    const isCurrentlyActive = rootEl.classList.contains('new-year-active');
 
     // 当新年主题激活时，禁用常规的背景设置选项
     const bgSettingsWrapper = document.getElementById('main-background-settings-wrapper');
@@ -56,7 +56,7 @@ export function applyNewYearMode() {
         musicBtn.classList.add('is-paused'); // 默认是暂停状态
         if (!isCurrentlyActive) {
             // 如果当前未激活，则执行激活操作
-            body.classList.add('new-year-active');
+            rootEl.classList.add('new-year-active');
             if (backgroundFaderInstance) {
                 // 使用背景渐变器应用新年专属背景
                 backgroundFaderInstance.update('assets/images/new_year_bg.svg', true);
@@ -69,7 +69,7 @@ export function applyNewYearMode() {
         stopNewYearMusic(); // 停止音乐
         if (isCurrentlyActive) {
             // 如果当前是激活的，则执行停用操作
-            body.classList.remove('new-year-active');
+            rootEl.classList.remove('new-year-active');
             // 恢复用户之前设置的常规背景
             applyCurrentBackground();
         }

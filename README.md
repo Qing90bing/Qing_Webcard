@@ -29,6 +29,7 @@
     - **视图切换**: 在 GitHub 视图和天气视图之间自由切换。
 - **沉浸模式**: 一个极简的全屏时钟界面。
 - **新年主题**: 在春节期间自动启用，带来节日氛围。
+- **智能预加载**: 加载时显示优雅的动画，并适配日夜间模式，优化初次加载体验。
 
 ## ⚙️ 个性化配置
 
@@ -79,13 +80,13 @@
 ├── css/            # 存放所有CSS样式文件
 │   ├── animations/ # 动画效果
 │   ├── base/       # 基础样式和变量
-│   ├── components/ # 各个UI组件的样式
+│   ├── components/ # 各个UI组件的样式 (e.g., cards.css, preloader.css)
 │   ├── layout/     # 布局样式
 │   ├── pages/      # 页面级样式
 │   ├── themes/     # 主题样式 (浅色, 深色, 新年)
 │   └── style.css   # 主样式入口文件
 ├── js/             # 存放所有JavaScript脚本
-│   ├── components/ # 存放所有功能和UI组件的逻辑
+│   ├── components/ # 存放所有功能和UI组件的逻辑 (e.g., clock.js, preloader.js)
 │   ├── core/       # 核心逻辑 (主入口, 设置管理)
 │   └── ...
 ├── index.html      # 主页面HTML文件
