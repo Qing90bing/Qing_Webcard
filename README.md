@@ -92,6 +92,23 @@
 └── README.md       # 项目说明文件
 ```
 
+## 🙏 致谢
+
+这个项目的实现离不开以下优秀的技术和资源：
+
+- **AI 协助**: 项目的部分代码和文档是在 **Jules** 的帮助下完成的。
+- **框架与库**:
+  - [TailwindCSS](https://tailwindcss.com/) - 一个功能类优先的 CSS 框架。
+  - [SimpleBar.js](https://github.com/Grsmto/simplebar) - 用于实现优雅的自定义滚动条。
+- **图标**:
+  - [Font Awesome](https://fontawesome.com/) - 提供了丰富的图标集。
+- **字体**:
+  - [Google Fonts](https://fonts.google.com/) - 使用了 `Inter` 和 `Noto Sans SC` 字体。
+
+## 📄 许可证
+
+本项目基于 MIT 许可证 - 查看 `LICENSE` 文件了解详情。
+
 ---
 
 希望您喜欢这个项目！欢迎提出建议或贡献代码！
