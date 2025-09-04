@@ -26,9 +26,9 @@ html.new-year-active.theme-dark {
  * @description 这些变量仅在新年主题激活且基础主题为亮色时生效。
  */
 html.new-year-active.theme-light {
-    --card-bg-color: rgba(255, 247, 247, 0.8);       /* 卡片背景色：极浅的奶油红 */
+    --card-bg-color: rgba(255, 247, 247, 0.7);       /* 卡片背景色：极浅的奶油红 */
     --card-border-color: rgba(190, 30, 30, 0.25);    /* 卡片边框颜色 */
-    --card-hover-bg-color: rgba(255, 247, 247, 0.9);  /* 卡片悬停背景色 */
+    --card-hover-bg-color: rgba(255, 247, 247, 0.75);  /* 卡片悬停背景色 */
     --card-hover-border-color: rgba(190, 30, 30, 0.4); /* 卡片悬停边框颜色 */
     --text-color-primary: #9b2c2c;                  /* 主要文本颜色：深褐红色 */
     --text-color-secondary: #c53030;                /* 次要文本颜色：强烈的红色 */
