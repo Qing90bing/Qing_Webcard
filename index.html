@@ -1,38 +1,53 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <!-- 元数据和头部链接 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qing90bing的主页</title>
+    <!-- 网站图标 -->
     <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <!-- 外部CSS和JS库 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.css" />
     <script src="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js"></script>
+    <!-- 谷歌字体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=block" rel="stylesheet">
+    <!-- Font Awesome 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- 自定义样式表 -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- 背景层包装器 -->
     <div id="bg-wrapper">
         <div class="bg-layer"></div>
         <div class="bg-layer"></div>
     </div>
+
+    <!-- 主内容包装器 -->
     <div id="main-wrapper">
+        <!-- 页面居中布局容器 -->
         <div class="flex items-center justify-center min-h-screen px-8 sm:px-16 lg:px-24">
+            <!-- 主网格布局 -->
             <main class="grid grid-cols-1 lg:grid-cols-4 gap-5 w-full max-w-6xl">
 
+                <!-- 左侧列 -->
                 <div class="lg:col-span-1 space-y-5 flex flex-col">
+                    <!-- 个人信息卡片触发器 (点击打开关于卡片) -->
                     <div id="about-card-trigger" class="glass-card flex items-center justify-center p-5 gap-4 cursor-pointer">
                         <h1 class="text-3xl font-bold" style="color: var(--text-color-primary);">Qing90bing</h1>
                     </div>
 
+                    <!-- 日历倒计时卡片 -->
                     <div id="countdown-card" class="glass-card p-5 cursor-pointer flex flex-col h-48">
                         <h2 class="text-xl font-semibold mb-3 text-center flex-shrink-0" style="color: var(--text-color-primary);">日历倒计时</h2>
                         <div id="countdown-display" class="text-center text-lg leading-relaxed flex-col justify-center items-center" style="color: var(--accent-color);">正在计算...</div>
                     </div>
                     
+                    <!-- 个人简介与联系方式卡片 -->
                     <div id="profile-card" class="glass-card p-5 flex flex-col justify-between flex-grow cursor-pointer">
                         <div class="relative px-4 py-2">
                             <span class="absolute top-0 left-0 text-6xl font-serif -translate-y-4 -translate-x-2 select-none" style="color: var(--separator-color);">“</span>
@@ -54,22 +69,28 @@
                     </div>
                 </div>
 
+                <!-- 右侧列 -->
                 <div id="right-column" class="lg:col-span-3 space-y-5">
+                    <!-- 时间与一言卡片行 -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- 时间卡片 -->
                         <div id="time-card" class="glass-card p-5 flex flex-col justify-center items-center cursor-pointer">
                             <div id="date-display" class="text-lg" style="color: var(--text-color-secondary);"></div>
                             <div id="time-display" class="text-5xl lg:text-6xl my-1" style="color: var(--text-color-primary);"></div>
                             <div id="greeting" class="text-sm" style="color: var(--text-color-secondary);"></div>
                         </div>
+                        <!-- 一言卡片 -->
                         <div id="hitokoto-card" class="glass-card p-5 flex flex-col justify-center cursor-pointer min-h-[120px] md:min-h-full">
                             <p id="hitokoto-text" class="text-center transition-opacity duration-500 ease-in-out" style="color: var(--text-color-primary);">正在加载一言...</p>
                             <p id="hitokoto-from" class="text-right text-sm mt-2 transition-opacity duration-500 ease-in-out" style="color: var(--text-color-secondary);"></p>
                         </div>
                     </div>
                     
+                    <!-- 主卡片容器 -->
                     <div class="glass-card p-5">
+                        <!-- 主卡片视图切换区域 -->
                         <div id="main-card-view-wrapper">
-                            <!-- GitHub View -->
+                            <!-- GitHub 视图 -->
                             <div id="github-view">
                                 <h2 class="text-xl font-semibold mb-3" style="color: var(--text-color-primary);">
                                    <svg class="inline-block w-6 h-6 mr-2 -mt-1" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
@@ -91,52 +112,54 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Weather View -->
+                            <!-- 天气视图 -->
                             <div id="weather-view" class="hidden">
-                                 <h2 class="text-xl font-semibold mb-3" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Pro v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2025 Fonticons, Inc.--><path d="M32 400C32 479.5 96.5 544 176 544L480 544C550.7 544 608 486.7 608 416C608 364.4 577.5 319.9 533.5 299.7C540.2 286.6 544 271.7 544 256C544 203 501 160 448 160C430.3 160 413.8 164.8 399.6 173.1C375.5 127.3 327.4 96 272 96C192.5 96 128 160.5 128 240C128 248 128.7 255.9 129.9 263.5C73 282.7 32 336.6 32 400z"/></svg>天气信息</h2>
+                                 <h2 class="text-xl font-semibold mb-3" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M32 400C32 479.5 96.5 544 176 544L480 544C550.7 544 608 486.7 608 416C608 364.4 577.5 319.9 533.5 299.7C540.2 286.6 544 271.7 544 256C544 203 501 160 448 160C430.3 160 413.8 164.8 399.6 173.1C375.5 127.3 327.4 96 272 96C192.5 96 128 160.5 128 240C128 248 128.7 255.9 129.9 263.5C73 282.7 32 336.6 32 400z"/></svg>天气信息</h2>
                                  <div id="weather-content-wrapper" class="w-full rounded-md p-4 relative min-h-[140px]" style="background-color: var(--progress-bar-bg);">
                                     <div class="weather-hover-zone absolute top-0 left-0 w-1/2 h-full z-10"></div>
                                     <button id="weather-refresh-btn" data-tooltip="手动刷新" class="tooltip-container absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-white/60 hover:text-white icon-btn transition-all duration-200 active:scale-90 z-20 opacity-0 invisible"><i class="fas fa-sync-alt"></i></button>
                                     <div id="weather-loader"></div>
                                     <div id="weather-data-container">
-                                        <!-- Weather content will be injected here -->
+                                        <!-- 天气内容将在此处注入 -->
                                         <p style="color: var(--text-color-secondary);">正在加载天气...</p>
                                     </div>
                                  </div>
                             </div>
                         </div>
+                    </div>
 
-                        <h2 class="text-xl font-semibold mb-1 mt-4" style="color: var(--text-color-primary);">
-                            <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                            网站列表
-                        </h2>
-                        <div id="link-slider-container">
-                            <div class="slider-wrapper">
-                                <div class="slider-track">
-                                    <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
-                                        <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        <span class="font-medium">博客</span>
-                                    </a>
-                                    <a href="https://qing90bing.github.io/Qing_Music/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
-                                        <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
-                                        <span class="font-medium">音乐</span>
-                                    </a>
-                                    <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
-                                        <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                                        <span class="font-medium">起始页</span>
-                                    </a>
-                                    <a href="https://qing90bing.github.io/Qing_Lab/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
-                                        <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M96 24c0-13.3 10.7-24 24-24L328 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 169.6 120.7 211.2c4.8 8.4 7.3 17.9 7.3 27.6 0 30.7-24.9 55.6-55.6 55.6L55.6 512c-30.7 0-55.6-24.9-55.6-55.6 0-9.7 2.5-19.2 7.3-27.6L128 217.6 128 48 120 48c-13.3 0-24-10.7-24-24zm80 24l0 176c0 4.2-1.1 8.3-3.2 11.9l-38.9 68.1 180.1 0-38.9-68.1c-2.1-3.6-3.2-7.7-3.2-11.9l0-176-96 0zM106.5 352L49 452.6c-.7 1.1-1 2.4-1 3.8 0 4.2 3.4 7.6 7.6 7.6l336.8 0c4.2 0 7.6-3.4 7.6-7.6 0-1.3-.3-2.6-1-3.8l-57.5-100.6-235 0z"/></svg>
-                                        <span class="font-medium">实验项目</span>
-                                    </a>
-                                </div>
+                    <!-- 网站列表 -->
+                    <h2 class="text-xl font-semibold mb-1 mt-4" style="color: var(--text-color-primary);">
+                        <svg class="inline-block w-6 h-6 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        网站列表
+                    </h2>
+                    <!-- 网站链接滑块 -->
+                    <div id="link-slider-container">
+                        <div class="slider-wrapper">
+                            <div class="slider-track">
+                                <a href="https://qing90bing.github.io/QingNoteblog/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
+                                    <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span class="font-medium">博客</span>
+                                </a>
+                                <a href="https://qing90bing.github.io/Qing_Music/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
+                                    <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6l12-3"></path></svg>
+                                    <span class="font-medium">音乐</span>
+                                </a>
+                                <a href="https://qing90bing.github.io/Qing_Start/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
+                                    <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                    <span class="font-medium">起始页</span>
+                                </a>
+                                <a href="https://qing90bing.github.io/Qing_Lab/" target="_blank" class="glass-card p-4 flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transform-gpu card-slide" style="color: var(--text-color-primary);">
+                                    <svg class="w-8 h-8 mb-2" style="color: var(--accent-color);" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M96 24c0-13.3 10.7-24 24-24L328 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 169.6 120.7 211.2c4.8 8.4 7.3 17.9 7.3 27.6 0 30.7-24.9 55.6-55.6 55.6L55.6 512c-30.7 0-55.6-24.9-55.6-55.6 0-9.7 2.5-19.2 7.3-27.6L128 217.6 128 48 120 48c-13.3 0-24-10.7-24-24zm80 24l0 176c0 4.2-1.1 8.3-3.2 11.9l-38.9 68.1 180.1 0-38.9-68.1c-2.1-3.6-3.2-7.7-3.2-11.9l0-176-96 0zM106.5 352L49 452.6c-.7 1.1-1 2.4-1 3.8 0 4.2 3.4 7.6 7.6 7.6l336.8 0c4.2 0 7.6-3.4 7.6-7.6 0-1.3-.3-2.6-1-3.8l-57.5-100.6-235 0z"/></svg>
+                                    <span class="font-medium">实验项目</span>
+                                </a>
                             </div>
-                            <div class="slider-dots"></div>
                         </div>
+                        <div class="slider-dots"></div>
                     </div>
                 </div>
 
-                <!-- Holiday List Card -->
+                <!-- 节日列表卡片 (默认隐藏) -->
                 <div id="holiday-list-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
                     <div class="flex justify-between items-center">
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);"><svg fill="currentColor" class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm128 0v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H336zM64 400v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H208zm112 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H336c-8.8 0-16 7.2-16 16z"/></svg>节日倒数</h2>
@@ -147,8 +170,9 @@
                             </button>
                         </div>
                     </div>
+                    <!-- 年份选择器 -->
                     <div class="flex justify-center items-center h-8 relative">
-                        <!-- Display Mode -->
+                        <!-- 显示模式 -->
                         <div id="year-display-controls" class="flex items-center gap-4 text-lg">
                             <button id="prev-year" data-tooltip="上一年" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -158,7 +182,7 @@
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
                         </div>
-                        <!-- Edit Mode -->
+                        <!-- 编辑模式 -->
                         <div id="year-edit-controls" class="hidden flex items-center gap-2 text-lg">
                             <input type="text" id="year-input" class="font-bold w-20 text-center rounded-md border focus:ring-0 px-1 py-0.5 text-lg" style="background-color: var(--card-bg-color); color: var(--text-color-primary); border-color: var(--separator-color); outline: none;">
                             <button id="confirm-year-btn" data-tooltip="确认" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--status-today);">
@@ -168,21 +192,21 @@
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
-                        <!-- Error Message for input validation -->
+                        <!-- 年份输入错误信息 -->
                         <div id="year-input-error" class="hidden absolute -bottom-6 text-sm font-bold" style="color: #ef4444;"></div>
                     </div>
+                    <!-- 节日列表容器 -->
                     <div class="relative flex-1 min-h-0">
-                        <!-- Warning is now absolutely positioned inside this container -->
                         <div id="year-range-warning" class="absolute top-0 left-0 right-0 z-10 hidden flex items-center justify-center text-amber-400 text-sm font-semibold"></div>
                         <div id="holiday-list-container-wrapper" class="absolute inset-0">
                            <div id="holiday-list-container" class="space-y-4">
-                               <!-- Holiday list will be dynamically inserted here -->
+                               <!-- 节日列表将在此处动态插入 -->
                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Time Capsule Card -->
+                <!-- 时光胶囊卡片 (默认隐藏) -->
                 <div id="time-capsule-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);"><svg fill="currentColor" class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M0 32C0 14.3 14.3 0 32 0H64 320h32c17.7 0 32 14.3 32 32s-14.3 32-32 32V75c0 42.4-16.9 83.1-46.9 113.1L237.3 256l67.9 67.9c30 30 46.9 70.7 46.9 113.1v11c17.7 0 32 14.3 32 32s-14.3 32-32 32H320 64 32c-17.7 0-32-14.3-32-32s14.3-32 32-32V437c0-42.4 16.9-83.1 46.9-113.1L146.7 256 78.9 188.1C48.9 158.1 32 117.4 32 75V64C14.3 64 0 49.7 0 32zM96 64V75c0 25.5 10.1 49.9 28.1 67.9L192 210.7l67.9-67.9c18-18 28.1-42.4 28.1-67.9V64H96zm0 384H288V437c0-25.5-10.1-49.9-28.1-67.9L192 301.3l-67.9 67.9c-18 18-28.1 42.4-28.1 67.9v11z"/></svg>时光胶囊</h2>
@@ -195,7 +219,9 @@
                             </button>
                         </div>
                     </div>
+                    <!-- 时间进度条 -->
                     <div class="space-y-5">
+                        <!-- 日进度 -->
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm font-medium" style="color: var(--text-color-secondary);">
                                 <span>今日已过 <span id="day-passed">0</span> 小时</span>
@@ -206,6 +232,7 @@
                                 <span id="day-percent" class="relative z-10 text-xs font-bold progress-bar-text">0%</span>
                             </div>
                         </div>
+                        <!-- 周进度 -->
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm font-medium" style="color: var(--text-color-secondary);">
                                 <span>本周已过 <span id="week-passed">0</span> 天</span>
@@ -216,6 +243,7 @@
                                 <span id="week-percent" class="relative z-10 text-xs font-bold progress-bar-text">0%</span>
                             </div>
                         </div>
+                        <!-- 月进度 -->
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm font-medium" style="color: var(--text-color-secondary);">
                                 <span>本月已过 <span id="month-passed">0</span> 天</span>
@@ -226,6 +254,7 @@
                                 <span id="month-percent" class="relative z-10 text-xs font-bold progress-bar-text">0%</span>
                             </div>
                         </div>
+                        <!-- 年进度 -->
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm font-medium" style="color: var(--text-color-secondary);">
                                 <span>今年已过 <span id="year-passed">0</span> 天</span>
@@ -237,7 +266,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- [NEW] 今日人品 -->
+                    <!-- 今日人品模块 -->
                     <div class="border-t border-white/10 pt-5 mt-5">
                         <h2 class="text-xl font-semibold mb-2 flex items-center" style="color: var(--text-color-primary);">
                             <svg class="inline-block w-6 h-6 mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M224 224C224 171 267 128 320 128C373 128 416 171 416 224C416 266.7 388.1 302.9 349.5 315.4C321.1 324.6 288 350.7 288 392L288 416C288 433.7 302.3 448 320 448C337.7 448 352 433.7 352 416L352 392C352 390.3 352.6 387.9 355.5 384.7C358.5 381.4 363.4 378.2 369.2 376.3C433.5 355.6 480 295.3 480 224C480 135.6 408.4 64 320 64C231.6 64 160 135.6 160 224C160 241.7 174.3 256 192 256C209.7 256 224 241.7 224 224zM320 576C342.1 576 360 558.1 360 536C360 513.9 342.1 496 320 496C297.9 496 280 513.9 280 536C280 558.1 297.9 576 320 576z"/></svg>
@@ -248,21 +277,21 @@
                             <button id="luck-button" class="text-white font-bold py-2 px-6 rounded-full transform active:scale-90 whitespace-nowrap flex-shrink-0">
                                 开盲盒
                             </button>
-
                             <div id="luck-result" class="text-center text-lg" style="color: var(--text-color-primary); overflow: hidden;">
-                                <!-- Result will be injected here -->
+                                <!-- 抽奖结果将在此处注入 -->
                             </div>
                         </div>
                     </div>
 
+                    <!-- 网站运行时间 -->
                     <div class="mt-auto text-center" style="color: var(--text-color-secondary);">
                         <p id="site-runtime-display">正在计算...</p>
                     </div>
                 </div>
 
-                <!-- About Card -->
+                <!-- 关于卡片 (默认隐藏) -->
                 <div id="about-card" class="lg:col-span-3 glass-card p-5 hidden flex flex-col">
-                    <!-- Header with Title and Close Button -->
+                    <!-- 卡片头部 -->
                     <div class="flex justify-between items-center">
                         <h2 class="text-xl font-semibold" style="color: var(--text-color-primary);">
                             <i class="fas fa-info-circle inline-block w-6 h-6 mr-2 -mt-1"></i>关于
@@ -272,18 +301,16 @@
                         </button>
                     </div>
 
-                    <!-- Main Content Area -->
+                    <!-- 卡片主内容区域 -->
                     <div class="flex-1 flex flex-col sm:flex-row gap-8 sm:gap-4 mt-4 sm:mt-0">
-                        <!-- Left Column -->
+                        <!-- 左侧列: Logo和版本信息 -->
                         <div class="flex flex-col items-center justify-center w-full sm:w-1/3">
                             <img id="about-card-logo" src="assets/icons/favicon.svg" alt="Website Icon" class="w-24 h-24 cursor-pointer">
                             <p class="mt-4 font-semibold flex items-center justify-center" style="color: var(--text-color-primary);">V1.0.0<span class="ml-2 rounded-md bg-sky-500/90 px-2 py-0.5 text-xs font-bold text-white">Beta</span></p>
-                            
                             <p class="mt-2 text-sm text-center px-2" style="color: var(--text-color-secondary);">
                                 一个简约的个人主页项目🎈
                             </p>
-
-                            <!-- [NEW] Developer Icon Placeholder -->
+                            <!-- 开发者选项图标 -->
                             <div id="developer-icon-container">
                                 <div id="developer-icon" data-tooltip="开发者选项" class="tooltip-container w-8 h-8 mx-auto cursor-pointer">
                                     <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M64 160C64 124.7 92.7 96 128 96L512 96C547.3 96 576 124.7 576 160L576 400L512 400L512 160L128 160L128 400L64 400L64 160zM0 467.2C0 456.6 8.6 448 19.2 448L620.8 448C631.4 448 640 456.6 640 467.2C640 509.6 605.6 544 563.2 544L76.8 544C34.4 544 0 509.6 0 467.2zM281 273L250 304L281 335C290.4 344.4 290.4 359.6 281 368.9C271.6 378.2 256.4 378.3 247.1 368.9L199.1 320.9C189.7 311.5 189.7 296.3 199.1 287L247.1 239C256.5 229.6 271.7 229.6 281 239C290.3 248.4 290.4 263.6 281 272.9zM393 239L441 287C450.4 296.4 450.4 311.6 441 320.9L393 368.9C383.6 378.3 368.4 378.3 359.1 368.9C349.8 359.5 349.7 344.3 359.1 335L390.1 304L359.1 273C349.7 263.6 349.7 248.4 359.1 239.1C368.5 229.8 383.7 229.7 393 239.1z"/></svg>
@@ -291,7 +318,7 @@
                             </div>
                         </div>
 
-                        <!-- Right Column -->
+                        <!-- 右侧列: 更新日志 -->
                         <div id="commit-history-panel" class="relative flex-1">
                             <div class="flex items-center justify-between mb-2">
                                 <h3 class="text-lg font-semibold flex items-center" style="color: var(--text-color-primary);">
@@ -302,7 +329,7 @@
                                 </button>
                             </div>
                             <div id="recent-commits-container" class="space-y-4 pr-2 " style="overflow-y: auto; max-height: 27rem;">
-                                <!-- Commits will be loaded here. The initial p tag is removed as JS will handle the loading state. -->
+                                <!-- 提交记录将在此处加载。JS会处理加载状态。 -->
                             </div>
                         </div>
                     </div>
@@ -310,7 +337,7 @@
 
             </main>
         </div>
-        <!-- [NEW] New Year Theme Audio & Controls -->
+        <!-- 新年主题音频和控制按钮 -->
         <audio id="new-year-audio" preload="auto" src="assets/audio/Wishing_you_prosperity_Liu_Dehua.mp3"></audio>
         <button id="new-year-music-btn" data-tooltip="播放/暂停音乐" class="tooltip-container fixed bottom-4 right-4 w-16 h-16 z-50">
             <div class="music-player-vinyl">
@@ -323,52 +350,52 @@
         </button>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- 设置模态框 (默认隐藏) -->
     <div id="settings-overlay" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4" style="z-index: 50;">
         <div id="settings-window" class="glass-card w-full max-w-2xl p-5 flex flex-col">
-            <!-- Header -->
+            <!-- 模态框头部 -->
             <div class="flex justify-between items-center ">
                 <h2 class="text-xl font-semibold flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg>设置</h2>
                 <button id="close-settings-btn" data-tooltip="关闭" class="tooltip-container p-1 rounded-full icon-btn transition-all active:scale-95" style="color: var(--text-color-secondary);">
                     <i class="fas fa-times fa-lg w-6 h-6 flex items-center justify-center"></i>
                 </button>
             </div>
-            <!-- Content -->
+            <!-- 模态框内容 (可滚动) -->
             <div class="flex-grow flex-1 min-h-0" data-simplebar>
                 <div class="space-y-6 p-2 sm:p-3">
-                    <!-- 1. Background Settings -->
+                    <!-- 1. 背景设置 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z"/></svg>背景来源</h3>
                         <div id="background-settings-content">
-                            <!-- Background options will be dynamically inserted here -->
+                            <!-- 背景选项将在此处动态插入 -->
                         </div>
                     </div>
 
-                    <!-- 2. Theme Color Settings -->
+                    <!-- 2. 主题模式设置 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-2 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M512 256c0 .9 0 1.8 0 2.7c-.4 36.5-33.6 61.3-70.1 61.3H344c-26.5 0-48 21.5-48 48c0 3.4 .4 6.7 1 9.9c2.1 10.2 6.5 20 10.8 29.9c6.1 13.8 12.1 27.5 12.1 42c0 31.8-21.6 60.7-53.4 62c-3.5 .1-7 .2-10.6 .2C114.6 512 0 397.4 0 256S114.6 0 256 0S512 114.6 512 256zM128 288a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm0-96a32 32 0 1 0 0-64 32 32 0 1 0 0 64zM288 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm96 96a32 32 0 1 0 0-64 32 32 0 1 0 0 64z"/></svg>主题模式</h3>
                         <div id="theme-settings-content" class="flex flex-wrap">
-                            <!-- Theme color swatches will be dynamically inserted here -->
+                            <!-- 主题颜色样本将在此处动态插入 -->
                         </div>
                     </div>
 
-                    <!-- NEW: Time Format Settings -->
+                    <!-- 3. 时间格式设置 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm57.1 350.1L224.9 294c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h48c6.6 0 12 5.4 12 12v137.7l63.5 46.2c5.4 3.9 6.5 11.4 2.6 16.8l-28.2 38.8c-3.9 5.3-11.4 6.5-16.8 2.6z"/></svg>时间格式</h3>
                         <div id="time-format-settings-content">
-                            <!-- Time format options will be dynamically inserted here -->
+                            <!-- 时间格式选项将在此处动态插入 -->
                         </div>
                     </div>
 
-                    <!-- 3. GitHub/Weather Toggle -->
+                    <!-- 4. 主卡片视图切换 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm64 64l0 256 128 0 0-256-128 0zm320 0l-128 0 0 256 128 0 0-256z"/></svg>主卡片视图</h3>
                         <div id="view-toggle-content">
-                            <!-- The toggle switch for GitHub/Weather will be inserted here -->
+                            <!-- GitHub/天气视图的切换开关将在此处插入 -->
                         </div>
                     </div>
 
-                    <!-- [NEW] Appearance Settings -->
+                    <!-- 5. 外观设置 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);">
                             <svg class="inline-block w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor"><path d="M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM288 368c-61.9 0-112-50.1-112-112s50.1-112 112-112 112 50.1 112 112-50.1 112-112 112zm0-200c-48.6 0-88 39.4-88 88s39.4 88 88 88 88-39.4 88-88-39.4-88-88-88z"/></svg>
@@ -376,6 +403,7 @@
                         </h3>
                         <div id="appearance-settings-content">
                             <div class="space-y-2">
+                                <!-- 毛玻璃效果开关 -->
                                 <div class="flex items-center justify-between p-2">
                                     <div>
                                         <span class="font-medium">开启毛玻璃效果</span>
@@ -386,7 +414,7 @@
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </div>
-                                <!-- Card Border Radius Slider -->
+                                <!-- 卡片圆角滑块 -->
                                 <div class="p-2 space-y-2 pt-3">
                                     <div class="flex justify-between items-center">
                                         <label for="card-border-radius-slider" class="font-medium">卡片圆角</label>
@@ -394,7 +422,7 @@
                                     </div>
                                     <input type="range" id="card-border-radius-slider" min="0" max="32" value="16" class="w-full h-2 rounded-lg appearance-none cursor-pointer setting-slider">
                                 </div>
-                                <!-- Card Blur Amount Slider -->
+                                <!-- 背景模糊度滑块 -->
                                 <div class="relative" id="blur-setting-container">
                                     <div class="p-2 space-y-2" id="blur-setting-content-wrapper">
                                         <div class="flex justify-between items-center">
@@ -414,15 +442,15 @@
                         </div>
                     </div>
 
-                    <!-- 4. Hitokoto Settings -->
+                    <!-- 6. 一言设置 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><svg class="inline-block w-5 h-5 mr-2" width="1024pt" height="1024pt" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" opacity="1.00" d=" M 504.63 19.74 C 510.94 18.73 517.82 18.56 523.72 21.44 C 536.31 27.78 548.23 35.34 560.39 42.45 C 566.80 45.20 572.36 49.45 578.55 52.60 C 584.51 56.73 591.37 59.35 597.14 63.79 C 601.84 66.40 606.91 68.37 611.18 71.72 C 627.90 81.47 645.09 90.40 661.68 100.34 C 668.72 105.16 676.65 108.48 683.78 113.16 C 688.90 116.60 694.41 119.37 699.76 122.40 C 707.70 127.57 716.15 131.88 724.27 136.77 C 732.78 141.10 740.57 146.67 749.04 151.07 C 756.21 155.28 763.14 159.89 770.71 163.38 C 776.68 166.09 781.58 170.66 787.70 173.08 C 791.89 174.65 794.89 178.27 799.11 179.77 C 804.53 181.55 808.92 185.32 813.91 187.94 C 818.23 190.26 822.52 192.65 826.53 195.49 C 832.90 199.17 839.32 202.77 845.68 206.47 C 852.70 211.25 860.40 214.92 867.59 219.42 C 874.68 224.69 882.87 228.11 890.40 232.67 C 897.91 235.86 904.15 241.26 911.61 244.55 C 917.72 248.14 923.69 252.00 930.12 255.03 C 935.28 257.19 938.63 262.13 940.96 267.01 C 942.24 271.59 943.57 276.21 944.18 280.94 C 944.26 431.29 944.10 581.65 944.23 732.00 C 944.13 737.44 944.80 742.99 943.42 748.33 C 942.44 751.91 942.19 755.81 940.03 758.95 C 937.64 762.46 934.82 765.84 931.07 767.94 C 920.48 774.50 909.12 779.70 898.72 786.57 C 890.72 790.92 882.75 795.35 874.85 799.87 C 869.36 803.85 863.17 806.69 857.61 810.54 C 854.92 812.33 851.70 813.13 849.08 815.03 C 846.93 816.53 844.91 818.23 842.59 819.47 C 832.35 824.33 822.96 830.74 812.94 836.01 C 801.05 843.11 788.51 849.06 776.91 856.65 C 769.03 860.59 761.78 865.65 754.08 869.94 C 739.78 877.87 725.59 885.99 711.61 894.48 C 708.34 896.25 704.75 897.45 701.86 899.86 C 699.10 902.06 695.86 903.46 692.65 904.83 C 688.48 906.60 685.38 910.10 681.33 912.08 C 670.31 917.47 660.26 924.56 649.48 930.38 C 643.83 934.24 637.53 936.95 631.71 940.53 C 626.08 943.64 620.74 947.29 614.85 949.91 C 610.05 951.96 606.12 955.56 601.28 957.54 C 596.76 959.36 593.39 963.08 588.99 965.11 C 580.47 969.18 572.80 974.73 564.71 979.56 C 556.94 983.30 549.59 987.83 542.07 992.05 C 536.38 996.03 530.02 998.87 523.81 1001.94 C 518.07 1004.76 511.45 1004.98 505.25 1003.93 C 499.73 1002.72 495.39 998.87 490.20 996.86 C 486.33 995.41 483.33 992.49 479.74 990.55 C 468.16 985.03 457.90 977.20 446.53 971.30 C 441.06 967.24 434.36 965.26 429.12 960.88 C 425.09 957.54 419.86 956.29 415.61 953.32 C 412.16 950.89 408.09 949.60 404.52 947.40 C 397.04 942.71 389.18 938.67 381.43 934.45 C 369.93 927.19 357.86 920.89 346.39 913.58 C 339.98 910.56 334.46 905.99 328.01 903.05 C 325.14 901.73 322.60 899.85 319.94 898.17 C 308.01 891.87 296.51 884.75 284.71 878.20 C 278.94 874.10 272.26 871.55 266.58 867.34 C 252.94 859.73 239.24 852.21 225.88 844.13 C 218.87 840.98 212.55 836.57 205.69 833.13 C 197.13 829.06 190.03 822.53 181.33 818.72 C 174.65 814.12 167.13 811.08 160.44 806.52 C 143.76 796.83 126.98 787.32 110.23 777.77 C 104.25 773.91 97.89 770.67 91.67 767.24 C 87.36 764.18 83.44 759.98 81.91 754.82 C 81.24 751.22 80.03 747.71 79.77 744.05 C 79.65 590.03 79.87 436.00 79.67 281.97 C 79.68 277.75 80.96 273.69 81.93 269.62 C 82.99 264.88 86.37 261.06 89.99 258.01 C 97.18 252.74 105.30 248.93 112.81 244.15 C 119.81 241.38 125.54 236.33 132.38 233.26 C 136.79 231.25 140.47 227.97 144.93 226.08 C 152.89 222.78 159.44 217.05 166.99 213.00 C 171.95 210.42 176.75 207.55 181.46 204.54 C 195.78 197.08 209.09 187.85 223.45 180.48 C 227.28 178.96 230.60 176.51 234.08 174.37 C 247.28 167.79 259.72 159.87 272.39 152.36 C 290.80 142.16 308.90 131.43 327.19 121.06 C 332.12 118.93 336.40 115.67 341.08 113.10 C 349.62 108.55 357.67 103.17 365.81 97.96 C 377.22 92.30 387.72 84.98 399.14 79.34 C 405.93 75.36 413.08 72.06 419.71 67.79 C 426.37 65.18 431.45 59.92 438.00 57.09 C 454.35 46.85 471.63 38.18 487.98 27.94 C 493.46 25.08 498.64 21.52 504.63 19.74 M 339.46 301.66 C 339.21 305.49 339.82 309.28 340.27 313.07 C 340.71 323.05 341.67 332.99 342.32 342.95 C 342.36 442.30 342.29 541.65 342.36 641.00 C 342.11 654.95 344.63 669.22 351.25 681.62 C 354.62 687.98 359.64 693.29 365.00 698.04 C 376.73 707.89 391.54 713.33 406.47 715.99 C 417.29 717.76 428.04 720.23 439.04 720.46 C 444.07 720.49 449.04 721.43 454.07 721.48 C 459.09 721.49 463.92 723.24 468.95 723.25 C 483.53 723.19 498.12 723.80 512.69 723.26 C 522.15 721.83 531.73 722.96 541.23 722.24 C 553.79 720.76 566.49 722.17 579.05 720.65 C 589.61 720.27 600.18 719.64 610.69 718.47 C 626.03 717.55 641.33 716.22 656.65 715.11 C 666.15 713.71 675.81 713.85 685.27 712.12 C 685.77 703.76 685.32 695.37 685.46 687.00 C 685.33 674.84 685.76 662.66 685.31 650.51 C 678.79 650.46 672.54 652.62 666.13 653.50 C 645.86 657.50 625.33 659.82 604.82 662.17 C 589.15 662.95 573.58 665.20 557.89 665.73 C 546.61 666.92 535.23 665.88 523.98 667.41 C 506.99 667.57 489.99 667.61 473.00 667.33 C 464.46 666.41 455.85 666.51 447.37 665.06 C 433.64 663.59 418.97 661.90 407.61 653.30 C 400.44 647.99 398.88 638.34 398.39 630.02 C 398.34 592.92 398.25 555.83 398.40 518.74 C 403.72 515.84 409.85 515.14 415.58 513.40 C 433.87 508.37 452.11 503.16 470.40 498.12 C 531.66 480.08 592.55 460.35 651.31 435.19 C 658.43 432.13 665.83 429.59 672.57 425.71 C 667.79 412.38 661.56 399.62 656.42 386.42 C 654.40 381.52 652.55 376.43 649.08 372.34 C 641.43 376.06 634.28 380.70 626.63 384.43 C 617.13 388.86 608.07 394.20 598.31 398.08 C 585.88 403.01 573.61 408.40 560.89 412.59 C 512.03 430.12 462.40 445.43 412.30 458.96 C 407.47 460.19 402.75 461.94 397.78 462.48 C 397.41 428.66 397.71 394.83 397.60 361.00 C 397.75 352.98 397.19 344.91 398.32 336.94 C 398.99 325.17 400.06 313.44 401.43 301.74 C 393.63 301.24 385.80 301.63 377.99 301.51 C 365.15 301.62 352.30 301.32 339.46 301.66 Z" /></svg>一言</h3>
                         <div id="hitokoto-settings-content">
-                            <!-- Hitokoto settings will be dynamically inserted here -->
+                            <!-- 一言设置将在此处动态插入 -->
                         </div>
                     </div>
 
-                    <!-- [NEW] Reset Settings Section -->
+                    <!-- 7. 重置设置 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);"><i class="fas fa-undo fa-fw w-5 h-5 mr-2"></i>重置</h3>
                         <div class="p-2">
@@ -442,10 +470,10 @@
         </div>
     </div>
 
-    <!-- [NEW] Developer Settings Modal -->
+    <!-- 开发者设置模态框 (默认隐藏) -->
     <div id="developer-settings-overlay" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4" style="z-index: 60;">
         <div id="developer-settings-window" class="glass-card w-full max-w-2xl p-5 flex flex-col">
-            <!-- Header -->
+            <!-- 模态框头部 -->
             <div class="flex justify-between items-center ">
                 <h2 class="text-xl font-semibold flex items-center" style="color: var(--text-color-primary);">
                     <svg fill="currentColor" class="inline-block w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M64 160C64 124.7 92.7 96 128 96L512 96C547.3 96 576 124.7 576 160L576 400L512 400L512 160L128 160L128 400L64 400L64 160zM0 467.2C0 456.6 8.6 448 19.2 448L620.8 448C631.4 448 640 456.6 640 467.2C640 509.6 605.6 544 563.2 544L76.8 544C34.4 544 0 509.6 0 467.2zM281 273L250 304L281 335C290.4 344.4 290.4 359.6 281 368.9C271.6 378.2 256.4 378.3 247.1 368.9L199.1 320.9C189.7 311.5 189.7 296.3 199.1 287L247.1 239C256.5 229.6 271.7 229.6 281 239C290.3 248.4 290.4 263.6 281 272.9zM393 239L441 287C450.4 296.4 450.4 311.6 441 320.9L393 368.9C383.6 378.3 368.4 378.3 359.1 368.9C349.8 359.5 349.7 344.3 359.1 335L390.1 304L359.1 273C349.7 263.6 349.7 248.4 359.1 239.1C368.5 229.8 383.7 229.7 393 239.1z"/></svg>
@@ -455,9 +483,10 @@
                     <i class="fas fa-times fa-lg w-6 h-6 flex items-center justify-center"></i>
                 </button>
             </div>
-            <!-- Content -->
+            <!-- 模态框内容 -->
             <div class="flex-grow flex-1 min-h-0" data-simplebar>
                 <div class="space-y-6 p-2 sm:p-3">
+                    <!-- 总开关 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);">
                             <i class="fas fa-toggle-on fa-fw w-5 h-5 mr-2"></i>总开关
@@ -475,7 +504,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- [NEW] New Year Theme Toggle -->
+                    <!-- 强制新年主题开关 -->
                     <div class="setting-section">
                         <h3 class="text-lg font-semibold mb-3 flex items-center" style="color: var(--text-color-primary);">
                             <i class="fas fa-gifts fa-fw w-5 h-5 mr-2"></i>节日主题
@@ -493,16 +522,16 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Future developer options will go here -->
+                    <!-- 更多开发者选项可在此添加 -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- [NEW] Reset Confirmation Modal -->
+    <!-- 重置确认模态框 (默认隐藏) -->
     <div id="reset-confirm-overlay" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 hidden" style="z-index: 70;">
         <div id="reset-confirm-window" class="glass-card w-full max-w-md p-6 flex flex-col">
-            <!-- State 1: Confirmation -->
+            <!-- 状态1: 确认提示 -->
             <div id="reset-confirm-state">
                 <h2 class="text-xl font-semibold flex items-center" style="color: var(--text-color-primary);">
                     <i class="fas fa-exclamation-triangle fa-fw w-5 h-5 mr-2 text-amber-400"></i>确认重置？
@@ -515,7 +544,7 @@
                     <button id="confirm-reset-btn" class="px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-200 bg-red-600 hover:bg-red-700">确认重置</button>
                 </div>
             </div>
-            <!-- State 2: Success Message -->
+            <!-- 状态2: 成功信息 -->
             <div id="reset-success-state" class="hidden text-center">
                 <h2 class="text-xl font-semibold flex items-center justify-center" style="color: var(--text-color-primary);">
                     <i class="fas fa-check-circle fa-fw w-5 h-5 mr-2 text-green-400"></i>重置成功！
@@ -527,7 +556,7 @@
         </div>
     </div>
 
-    <!-- [NEW] Immersive Time View -->
+    <!-- 沉浸式时间视图 (默认隐藏) -->
     <div id="immersive-time-view">
         <button id="exit-immersive-btn">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
@@ -541,6 +570,7 @@
         </div>
     </div>
 
+    <!-- 主JavaScript模块入口 -->
     <script type="module" src="js/core/main.js"></script>
 </body>
 </html>
