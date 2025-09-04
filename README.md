@@ -97,11 +97,20 @@
 这个项目的实现离不开以下优秀的技术和资源：
 
 - **AI 协助**: 项目的部分代码和文档是在 **Jules** 的帮助下完成的。
+- **API 服务**:
+  - [GitHub API](https://docs.github.com/en/rest) - 用于获取项目最新的提交记录。
+  - [GitHub Chart API](https://ghchart.rshah.org/) - 用于生成漂亮的 GitHub 贡献图。
+  - [一言 (Hitokoto)](https://hitokoto.cn/) - 提供富有哲理或趣味的句子。
+  - [wttr.in](https://wttr.in/) - 一个功能强大的天气预报服务。
+  - [Open-Meteo](https://open-meteo.com/) - 提供高质量的开源天气预报 API。
+  - [ip-api.com](https://ip-api.com/) - 用于根据 IP 地址自动定位。
+  - [CORS.EU.ORG](https://cors.eu.org/) - 提供了便捷的 CORS 代理服务。
 - **框架与库**:
   - [TailwindCSS](https://tailwindcss.com/) - 一个功能类优先的 CSS 框架。
   - [SimpleBar.js](https://github.com/Grsmto/simplebar) - 用于实现优雅的自定义滚动条。
-- **图标**:
+- **图标与资源**:
   - [Font Awesome](https://fontawesome.com/) - 提供了丰富的图标集。
+  - [Bas Milius' Weather Icons](https://github.com/basmilius/weather-icons) - 一套精美的天气图标。
 - **字体**:
   - [Google Fonts](https://fonts.google.com/) - 使用了 `Inter` 和 `Noto Sans SC` 字体。
 
